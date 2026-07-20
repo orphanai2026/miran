@@ -245,7 +245,7 @@
     </div>
   </div>
 
-  <footer>مِران · نموذج اليوم الأول — يعمل بالكامل في المتصفح، صوتك يبقى على جهازك</footer>
+  <footer>مِران · اليوم ١ · <span style="font-family:'IBM Plex Mono',monospace">الإصدار d1.3-fix</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
 </div>
 
 <script>
@@ -598,7 +598,7 @@ function score(d){
 }
 
 /* ---- export a small report file the user can upload to Claude ---- */
-let sessionLog = { app:'miran', day:1, exercise:'long-tone qarar (دو/C)',
+let sessionLog = { app:'miran', version:'d1.3-fix', day:1, exercise:'long-tone qarar (دو/C)',
   concert_A4:CONCERT_A4, started:new Date().toISOString(), attempts:[] };
 function exportReport(){
   const cp = targetHz ? neyConcertPitch(targetHz) : null;
