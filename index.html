@@ -229,7 +229,7 @@
       </div>
       <canvas id="orbit" width="524" height="300"></canvas>
       <div class="sustain">
-        <div class="lbl"><span>ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span> ث</span></div>
+        <div class="lbl"><span id="sustainLabel">ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span> ث</span></div>
         <div class="bar"><i id="sustainBar"></i></div>
       </div>
       <div class="listen-row">
@@ -250,12 +250,12 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d2.2-orbit</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
+  <footer>مِران · <span class="v">الإصدار d2.3-transition</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d2.2-orbit';
+const APP_VERSION='d2.3-transition';
 
 /* ================= CURRICULUM (days as DATA) =================
    semis = semitones above the qarar (دو). playable long-tone days
@@ -265,7 +265,8 @@ const CURRICULUM=[
   {id:2, note:'ري', lat:'D',  semis:2, kind:'longtone', targetSec:7, tol:20, stabMax:20, need:3, title:'نغمة ري الطويلة', blurb:'أضف نغمة ري (الثقب الأول)، واثبت ٧ ثوانٍ.'},
   {id:3, note:'فا', lat:'F',  semis:5, kind:'longtone', targetSec:7, tol:20, stabMax:20, need:3, title:'نغمة فا الطويلة', blurb:'انتقل إلى فا، وثبّت النفَس ٧ ثوانٍ.'},
   {id:4, note:'صول',lat:'G',  semis:7, kind:'longtone', targetSec:8, tol:20, stabMax:22, need:3, title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ثبّتها ٨ ثوانٍ.'},
-  {id:5, note:'—', lat:'',   semis:0, kind:'soon', title:'خمس نغمات ببطء', blurb:'قريبًا — تربط النغمات الأربع في نفَس هادئ.'},
+  {id:5, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+    tol:25, need:3, title:'الانتقال: دو ← ري', blurb:'ابدأ ثابتًا على دو، وعند الإشارة انتقل بنظافة إلى ري.'},
   {id:6, note:'—', lat:'',   semis:0, kind:'soon', title:'التحكم في الثقوب', blurb:'قريبًا.'},
   {id:7, note:'—', lat:'',   semis:0, kind:'soon', title:'بداية النغمة ونهايتها', blurb:'قريبًا.'},
   {id:8, note:'—', lat:'',   semis:0, kind:'soon', title:'النفَس الطويل', blurb:'قريبًا.'},
@@ -427,7 +428,7 @@ $('btnCalib').addEventListener('click', async ()=>{
 });
 
 /* ================= SESSION ================= */
-let targetDayId=1, curDay=null, targetHz=null, TARGET_SEC=6, TOL=20, STAB_MAX=20, NEED=3;
+let targetDayId=1, curDay=null, targetHz=null, TARGET_SEC=6, TOL=20, STAB_MAX=20, NEED=3, TR=null;
 let attempts=0, recording=false, recData=null, sessionLog=null;
 const canvas=$('orbit'), cx=canvas.getContext('2d');
 let ORB={w:0,h:0,cx:0,cy:0,unit:0}; const ORB_RANGE=55;
@@ -445,13 +446,29 @@ function drawOrbitBg(){ const {w,h,cx:mx,cy}=ORB; cx.clearRect(0,0,w,h); cx.fill
 function startSession(id){
   curDay=CURRICULUM[id-1];
   if(curDay.kind==='soon') return;
-  targetHz=dayTarget(curDay); TARGET_SEC=curDay.targetSec; TOL=curDay.tol; STAB_MAX=curDay.stabMax; NEED=curDay.need;
-  attempts=0;
+  attempts=0; NEED=curDay.need; TOL=curDay.tol;
+  if(curDay.kind==='transition'){
+    TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
+        toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
+        span:(curDay.to.semis-curDay.from.semis)*100};
+    sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'transition', pair:curDay.lat,
+      concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
+      from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
+    $('sessEyebrow').textContent=`اليوم ${toAr(id)} · انتقال`;
+    $('sessGlyph').textContent=curDay.from.note+' → '+curDay.to.note; $('sessLat').textContent=curDay.lat;
+    $('targetHz').textContent=`${TR.fromHz.toFixed(0)} → ${TR.toHz.toFixed(0)} Hz`;
+    $('sustainLabel').textContent='تقدّم التمرين';
+    $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
+    renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawTransitionIdle();},40);
+    return;
+  }
+  targetHz=dayTarget(curDay); TARGET_SEC=curDay.targetSec; STAB_MAX=curDay.stabMax;
   sessionLog={app:'miran', version:APP_VERSION, day:id, note:curDay.lat, kind:curDay.kind,
     concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2), target_hz:+targetHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
   $('sessEyebrow').textContent=`اليوم ${toAr(id)} · نغمة طويلة`;
   $('sessGlyph').textContent=curDay.note; $('sessLat').textContent=curDay.lat;
   $('targetHz').textContent=targetHz.toFixed(1)+' Hz'; $('targetSec').textContent=TARGET_SEC.toFixed(1);
+  $('sustainLabel').textContent='ثبات النفَس على النغمة';
   $('resultZone').innerHTML='';
   $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
   renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawOrbitBg();drawIdleBall();},40);
@@ -509,7 +526,7 @@ function stopMetro(){ if(metroTimer){clearInterval(metroTimer);metroTimer=null;}
 
 $('btnRec').addEventListener('click', async ()=>{
   if(!audioCtx){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ setupCanvas();drawOrbitBg(); cx.fillStyle='#f0b98a';cx.font="500 14px 'IBM Plex Sans Arabic'";cx.textAlign='center';cx.fillText('تعذّر الميكروفون — اسمح بالإذن',ORB.cx,ORB.cy);cx.textAlign='start'; return;} }
-  recording? stopAttempt() : startAttempt();
+  recording? stopAttempt() : (curDay.kind==='transition'? startTransition() : startAttempt());
 });
 function startAttempt(){
   recording=true; $('btnRec').textContent='إنهاء المحاولة'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
@@ -531,8 +548,9 @@ function startAttempt(){
 function longestRun(v){ let best=0,cs=null,lo=null; for(const s of v){ if(s.on){if(cs==null)cs=s.t;lo=s.t;} else{if(cs!=null&&s.t-lo>0.15){best=Math.max(best,lo-cs);cs=null;}} } if(cs!=null)best=Math.max(best,(lo??cs)-cs); return best; }
 function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; stopMetro();
   $('btnRec').textContent='ابدأ العزف'; $('btnRec').classList.remove('recording');
-  setupCanvas(); drawOrbitBg(); drawIdleBall();
-  score(recData); }
+  setupCanvas();
+  if(curDay.kind==='transition'){ drawTransitionIdle(); scoreTransition(recData); }
+  else { drawOrbitBg(); drawIdleBall(); score(recData); } }
 
 function median(a){a=a.slice().sort((x,y)=>x-y);return a.length?a[Math.floor(a.length/2)]:0;}
 function std(a){if(a.length<2)return 0;const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/a.length);}
@@ -568,6 +586,98 @@ function finishDay(medC,stab,run){
     <div class="stat g"><div class="v">${run.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
     <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>`;
   show('done');
+}
+
+/* ================= TRANSITION EXERCISE ================= */
+const TR_HOLD_FROM=2.2, TR_MOVE=0.35, TR_HOLD_TO=2.6; // seconds
+const TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO;
+function yT(c){ const pad=34,h=ORB.h,min=-70,max=270; return pad+(1-(c-min)/(max-min))*(h-2*pad); }
+function activeTargetCents(now){ // gold ring travels from 0 (دو) to span (ري)
+  if(now<TR_HOLD_FROM) return 0;
+  if(now<TR_HOLD_FROM+TR_MOVE){ const k=(now-TR_HOLD_FROM)/TR_MOVE; return TR.span*(0.5-0.5*Math.cos(k*Math.PI)); }
+  return TR.span; }
+function drawTransitionBg(now){
+  const {w,h,cx:mx}=ORB; cx.clearRect(0,0,w,h); cx.fillStyle='#0d1526'; cx.fillRect(0,0,w,h);
+  const yF=yT(0), yTo=yT(TR.span), tolU=(TOL/ (270+70))*(h-68);
+  // two home rings (faint)
+  [[yF,curDay.from.note],[yTo,curDay.to.note]].forEach(([yy,label])=>{
+    cx.strokeStyle='rgba(154,163,190,.28)'; cx.lineWidth=1.5; cx.setLineDash([2,4]);
+    cx.beginPath(); cx.arc(mx,yy,tolU,0,7); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle='rgba(154,163,190,.6)'; cx.font="700 16px 'Aref Ruqaa',serif"; cx.textAlign='right';
+    cx.fillText(label, mx-tolU-10, yy+6); cx.textAlign='start';
+  });
+  // active gold target ring (travels)
+  const at=activeTargetCents(now), ay=yT(at);
+  cx.strokeStyle='rgba(233,183,94,.85)'; cx.lineWidth=2.5; cx.beginPath(); cx.arc(mx,ay,tolU,0,7); cx.stroke();
+  cx.fillStyle='rgba(233,183,94,.07)'; cx.beginPath(); cx.arc(mx,ay,tolU,0,7); cx.fill();
+  return {ay,tolU};
+}
+function drawTransitionIdle(){ drawTransitionBg(0); const {cx:mx}=ORB;
+  cx.fillStyle='rgba(154,163,190,.7)'; cx.font="500 13px 'IBM Plex Sans Arabic'"; cx.textAlign='center';
+  cx.fillText('اضغط «ابدأ» ثم ابدأ على دو', mx, ORB.h-16); cx.textAlign='start'; }
+function cueChime(){ if(!audioCtx)return; const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.frequency.value=880; g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination); o.start();
+  g.gain.exponentialRampToValueAtTime(0.14,audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.3); o.stop(audioCtx.currentTime+0.32); }
+
+function startTransition(){
+  recording=true; $('btnRec').textContent='إلغاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
+  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); _tail=[]; _rings=[]; _lastTs=0; recData._cued=false;
+  onFrame=(p)=>{
+    const now=(performance.now()-recData.t0)/1000, nowS=performance.now()/1000;
+    if(!recData._cued && now>=TR_HOLD_FROM){ recData._cued=true; cueChime(); }
+    const {ay,tolU}=drawTransitionBg(now);
+    const inTune=p.hz && p.clarity>=CLARITY; let c=null;
+    if(inTune){ c=centsBetween(p.hz,TR.fromHz); while(c-100>600)c-=1200; while(c-100<-600)c+=1200; recData.pts.push({t:now,c}); }
+    recData.voiced.push({t:now,on:inTune});
+    // ball + tail
+    const dt=Math.min(0.05,(nowS-_lastTs)||0.016); _lastTs=nowS;
+    if(inTune){ const py=yT(c); const at=activeTargetCents(now);
+      const nearActive=Math.abs(c-at)<=TOL; const offBoth=Math.abs(c-0)>TOL && Math.abs(c-TR.span)>TOL;
+      _tail.push({x:ORB.cx,y:py,ok:!offBoth}); if(_tail.length>60)_tail.shift();
+      for(let i=1;i<_tail.length;i++){const a=i/_tail.length,s=_tail[i];
+        cx.strokeStyle=(s.ok?'rgba(107,199,154,':'rgba(227,152,96,')+(a*.7).toFixed(3)+')'; cx.lineWidth=1+a*2.5;
+        cx.beginPath(); cx.moveTo(_tail[i-1].x,_tail[i-1].y); cx.lineTo(s.x,s.y); cx.stroke(); }
+      const col=nearActive?'#6BC79A':(offBoth?'#E39860':'#9AA3BE');
+      const g=cx.createRadialGradient(ORB.cx,py,1,ORB.cx,py,24); g.addColorStop(0,nearActive?'rgba(107,199,154,.5)':'rgba(227,152,96,.4)'); g.addColorStop(1,'rgba(0,0,0,0)');
+      cx.fillStyle=g; cx.beginPath(); cx.arc(ORB.cx,py,24,0,7); cx.fill();
+      cx.fillStyle=col; cx.beginPath(); cx.arc(ORB.cx,py,10,0,7); cx.fill();
+      cx.fillStyle='rgba(255,255,255,.85)'; cx.beginPath(); cx.arc(ORB.cx-3,py-3,3,0,7); cx.fill();
+    } else { cx.fillStyle='rgba(154,163,190,.5)'; cx.beginPath(); cx.arc(ORB.cx,ay,7,0,7); cx.fill(); }
+    // phase hint + progress
+    let hint = now<TR_HOLD_FROM ? 'اثبت على دو' : (now<TR_HOLD_FROM+TR_MOVE ? 'الآن → ري' : 'اثبت على ري');
+    cx.fillStyle='rgba(241,234,214,.85)'; cx.font="600 15px 'IBM Plex Sans Arabic'"; cx.textAlign='center';
+    cx.fillText(hint, ORB.cx, 24); cx.textAlign='start';
+    $('sustainNum').textContent=Math.min(now,TR_END).toFixed(1);
+    $('sustainBar').style.width=Math.min(100,(now/TR_END)*100)+'%';
+    if(now>=TR_END) stopAttempt();
+  };
+}
+function scoreTransition(d){
+  const P=t0=>d.pts.filter(p=>p.t>=t0[0]&&p.t<t0[1]).map(p=>p.c);
+  const fromSeg=P([0.6,TR_HOLD_FROM-0.1]), toSeg=P([TR_HOLD_FROM+TR_MOVE+0.5, TR_END]);
+  const fromM=fromSeg.length?median(fromSeg):null, toM=toSeg.length?median(toSeg):null;
+  const reachedFrom = fromM!=null && Math.abs(fromM-0)<=TOL;
+  const reachedTo   = toM!=null && Math.abs(toM-TR.span)<=TOL;
+  // transition gap: voiced time in the cue window where off BOTH notes
+  const winPts=d.voiced.filter(v=>v.t>=TR_HOLD_FROM-0.1 && v.t<=TR_HOLD_FROM+TR_MOVE+0.9);
+  let gap=0; d.pts.filter(p=>p.t>=TR_HOLD_FROM-0.1 && p.t<=TR_HOLD_FROM+TR_MOVE+0.9)
+    .forEach((p,i,arr)=>{ if(i>0 && Math.abs(p.c-0)>TOL && Math.abs(p.c-TR.span)>TOL) gap+=(p.t-arr[i-1].t); });
+  let ok=false,head='',body='',cls='retry';
+  if(!reachedFrom){ head='ابدأ ثابتًا على دو'; body='لم أسمع دو ثابتة في البداية. اعزف دو واثبت لحظة قبل الإشارة.'; }
+  else if(!reachedTo){
+    if(toM==null||toM<TR.span-TOL){ head='لم تصل إلى ري'; body='افتح الثقب الأول كاملًا ودعِ النغمة تصعد إلى ري وتثبت.'; }
+    else { head='تجاوزت ري'; body=`ارتفعت فوق ري بـ${(toM-TR.span).toFixed(0)} سنت. خفّف ضغط النفخ قليلًا عند الوصول.`; }
+  }
+  else if(gap>0.45){ head='انتقال غير نظيف'; body=`ظهرت نغمة عابرة ${Math.round(gap*1000)} مللي ثانية بين دو وري (وميض كهرماني في الذيل). انتقل أسرع: افتح الثقب دفعة واحدة.`; }
+  else { ok=true; cls='ok'; attempts++; head=`انتقال نظيف (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبتّ على دو، وقطعت المسافة إلى ري بنظافة (${Math.round(gap*1000)} مللي ثانية) ووصلت بدقة. ${attempts<NEED?'أعِد مرة أخرى.':''}`; }
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1,success:ok,from_cents:fromM!=null?+fromM.toFixed(1):null,to_cents:toM!=null?+toM.toFixed(1):null,gap_ms:Math.round(gap*1000),ts:new Date().toISOString()});
+  $('resultZone').innerHTML=`<div class="stats">
+      <div class="stat ${reachedFrom?'g':'w'}"><div class="v">${fromM!=null?(fromM>=0?'+':'')+fromM.toFixed(0):'—'}</div><div class="k">دو (سنت)</div></div>
+      <div class="stat ${reachedTo?'g':'w'}"><div class="v">${toM!=null?(toM-TR.span>=0?'+':'')+(toM-TR.span).toFixed(0):'—'}</div><div class="k">ري (انحراف)</div></div>
+      <div class="stat ${gap<=0.45?'g':'b'}"><div class="v">${Math.round(gap*1000)}</div><div class="k">فجوة الانتقال (م.ث)</div></div>
+    </div><div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
+  renderPips();
+  if(attempts>=NEED) setTimeout(()=>finishDay(toM!=null?toM-TR.span:0, gap*1000, TR_END),900);
 }
 
 /* ================= EXPORT PROGRESS ================= */
