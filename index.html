@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>مِران — اليوم ١ · نغمة القرار الطويلة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#0B111F; --bg1:#111A2E; --bg2:#16203a;
+    --panel:rgba(24,34,58,.62); --panel-solid:#17213a;
+    --text:#F1EAD6; --text-soft:#9AA3BE; --text-warm:#C9BC98;
+    --gold:#E9B75E; --gold-deep:#C08A34; --gold-dim:rgba(233,183,94,.16);
+    --jade:#6BC79A; --jade-glow:rgba(107,199,154,.22);
+    --ember:#E39860; --rose:#DC6E4C;
+    --hair:rgba(233,183,94,.15); --hair-cool:rgba(154,163,190,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--bg0); color:var(--text);
+    font-family:'IBM Plex Sans Arabic',system-ui,sans-serif; line-height:1.55;
+    min-height:100vh; padding:clamp(14px,4vw,30px); position:relative; overflow-x:hidden;
+    background-image:
+      radial-gradient(120% 80% at 50% -10%, #1a2740 0%, var(--bg1) 38%, var(--bg0) 78%);
+  }
+  /* ambient lamp glow — opacity-only breathing (no transform) to avoid repaint jitter */
+  .ambient{position:fixed; inset:0; z-index:0; pointer-events:none; will-change:opacity;
+    transform:translateZ(0);
+    background:radial-gradient(closest-side at 50% 32%, rgba(233,183,94,.15), transparent 70%);
+    animation:breathe 8s ease-in-out infinite;}
+  .stars{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5; transform:translateZ(0);
+    background-image:radial-gradient(1px 1px at 20% 30%, rgba(241,234,214,.6), transparent),
+      radial-gradient(1px 1px at 70% 20%, rgba(241,234,214,.4), transparent),
+      radial-gradient(1px 1px at 85% 60%, rgba(241,234,214,.5), transparent),
+      radial-gradient(1px 1px at 35% 75%, rgba(241,234,214,.35), transparent),
+      radial-gradient(1px 1px at 55% 45%, rgba(241,234,214,.3), transparent);}
+  @keyframes breathe{0%,100%{opacity:.45}50%{opacity:.9}}
+  @media (prefers-reduced-motion:reduce){.ambient{animation:none}}
+  .wrap{max-width:560px;margin:0 auto;position:relative;z-index:1}
+
+  header{display:flex;justify-content:space-between;align-items:center;
+    padding-bottom:14px;margin-bottom:4px;border-bottom:1px solid var(--hair)}
+  .brand{font-family:'Aref Ruqaa',serif;font-size:2.3rem;font-weight:700;line-height:1;
+    color:var(--gold);text-shadow:0 0 22px rgba(233,183,94,.35)}
+  .brand small{font-family:'IBM Plex Mono',monospace;font-size:.58rem;font-weight:500;
+    letter-spacing:.32em;color:var(--text-soft);display:block;margin-top:6px;text-shadow:none}
+  .daytag{text-align:left}
+  .daytag .d{font-family:'Amiri',serif;font-size:1.2rem;font-weight:700;color:var(--text)}
+  .daytag .p{font-size:.68rem;color:var(--text-soft);letter-spacing:.05em}
+
+  .epigraph{font-family:'Amiri',serif;font-style:italic;font-size:1.02rem;color:var(--gold);
+    opacity:.8;text-align:center;margin:18px 0 2px;letter-spacing:.01em}
+  .phase-title{margin:14px 0 4px;font-family:'Amiri',serif;font-size:1.55rem;color:var(--text)}
+  .phase-sub{color:var(--text-soft);font-size:.9rem;margin-bottom:20px}
+
+  .card{background:rgba(23,33,58,.9);border:1px solid var(--hair);border-radius:20px;
+    padding:22px 18px;margin-bottom:16px;
+    box-shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04)}
+  .card.hidden{display:none}
+
+  .step-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:500;
+    letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;opacity:.85}
+  .card h2{font-family:'Amiri',serif;font-size:1.5rem;margin-bottom:8px;color:var(--text)}
+  .card p.lead{font-size:.92rem;color:var(--text-soft);margin-bottom:18px}
+
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:13px;
+    font-weight:600;font-size:1rem;padding:15px 20px;transition:transform .1s,box-shadow .2s,background .2s,opacity .2s;
+    display:inline-flex;align-items:center;justify-content:center;gap:9px}
+  button:active{transform:scale(.975)}
+  .btn-primary{width:100%;color:#1a1305;
+    background:linear-gradient(135deg,#F0C570,#E9B75E 45%,#C08A34);
+    box-shadow:0 8px 24px rgba(233,183,94,.28), inset 0 1px 0 rgba(255,255,255,.4)}
+  .btn-primary:hover{box-shadow:0 10px 30px rgba(233,183,94,.42)}
+  .btn-primary:disabled{background:#2a3350;color:var(--text-soft);box-shadow:none;cursor:not-allowed}
+  .btn-ghost{background:rgba(233,183,94,.06);border:1px solid var(--hair);color:var(--gold)}
+  .btn-ghost:hover{background:rgba(233,183,94,.12)}
+  .btn-rec{width:100%;color:#fff;
+    background:linear-gradient(135deg,#E68A5E,#DC6E4C);box-shadow:0 8px 24px rgba(220,110,76,.3)}
+  .btn-rec.recording{background:linear-gradient(135deg,#6BC79A,#3f8f6a);
+    box-shadow:0 0 0 0 rgba(107,199,154,.5);animation:pulse 1.6s ease-out infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(107,199,154,.45)}70%{box-shadow:0 0 0 16px rgba(107,199,154,0)}100%{box-shadow:0 0 0 0 rgba(107,199,154,0)}}
+
+  /* ---- meter (signature) ---- */
+  .meter-wrap{margin:12px 0 4px}
+  .bignote{position:relative;display:flex;align-items:center;justify-content:center;gap:18px;margin:6px 0 10px}
+  .bignote::before{content:"";position:absolute;width:170px;height:170px;border-radius:50%;
+    background:radial-gradient(closest-side,rgba(233,183,94,.22),transparent 70%);z-index:0}
+  .bignote .ar{position:relative;z-index:1;font-family:'Aref Ruqaa',serif;font-size:4.2rem;font-weight:700;
+    line-height:.85;color:var(--gold);text-shadow:0 0 30px rgba(233,183,94,.5)}
+  .bignote .meta{position:relative;z-index:1;text-align:right}
+  .bignote .lat{direction:ltr;font-family:'IBM Plex Mono',monospace;font-size:.95rem;color:var(--text);font-weight:500}
+  .bignote .hz{direction:ltr;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--text-soft)}
+
+  .cents-live{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:1.7rem;font-weight:600;
+    min-height:1.5em;direction:ltr;letter-spacing:.02em;transition:color .15s,text-shadow .15s}
+  .cents-live.ok{color:var(--jade);text-shadow:0 0 18px var(--jade-glow)}
+  .cents-live.off{color:var(--ember);text-shadow:0 0 16px rgba(227,152,96,.3)}
+  .cents-live.mute{color:var(--text-soft);font-family:'IBM Plex Sans Arabic';font-size:1.05rem;text-shadow:none}
+
+  .ruler{position:relative;height:58px;margin:8px 0 2px;border-radius:12px;
+    background:linear-gradient(180deg,#0d1526,#10192e);border:1px solid var(--hair-cool);overflow:hidden;
+    box-shadow:inset 0 2px 10px rgba(0,0,0,.5)}
+  .ruler .band{position:absolute;top:0;bottom:0;left:40%;right:40%;
+    background:var(--jade-glow);border-inline:1px dashed rgba(107,199,154,.45)}
+  .ruler .center{position:absolute;top:0;bottom:0;left:50%;width:2px;background:rgba(241,234,214,.55);transform:translateX(-50%)}
+  .ruler .tick{position:absolute;top:50%;transform:translate(-50%,-50%);
+    font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--text-soft)}
+  .ruler .needle{position:absolute;top:5px;bottom:5px;width:4px;border-radius:3px;background:var(--gold);
+    left:50%;transform:translateX(-50%);transition:left .07s linear,background .12s,box-shadow .12s;
+    box-shadow:0 0 12px var(--gold)}
+  .ruler .needle.ok{background:var(--jade);box-shadow:0 0 16px var(--jade)}
+  .ruler .needle.off{background:var(--ember);box-shadow:0 0 14px var(--ember)}
+
+  canvas#trace{width:100%;height:120px;display:block;border-radius:12px;
+    background:#0d1526;border:1px solid var(--hair-cool);margin-top:10px;
+    box-shadow:inset 0 2px 12px rgba(0,0,0,.45)}
+
+  .sustain{margin-top:16px}
+  .sustain .lbl{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-soft);margin-bottom:6px}
+  .sustain .lbl .t{direction:ltr;font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--text)}
+  .bar{height:12px;border-radius:7px;background:#0f1830;overflow:hidden;border:1px solid var(--hair-cool)}
+  .bar>i{display:block;height:100%;width:0;border-radius:7px;
+    background:linear-gradient(90deg,var(--gold),var(--jade));box-shadow:0 0 12px rgba(233,183,94,.5);
+    transition:width .1s linear}
+
+  .stats{display:flex;gap:10px;margin-top:18px}
+  .stat{flex:1;background:rgba(13,21,38,.7);border:1px solid var(--hair-cool);border-radius:13px;padding:12px 8px;text-align:center}
+  .stat .v{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;direction:ltr;color:var(--text)}
+  .stat .k{font-size:.66rem;color:var(--text-soft);margin-top:2px}
+  .stat.g .v{color:var(--jade);text-shadow:0 0 14px var(--jade-glow)}
+  .stat.w .v{color:var(--ember)} .stat.b .v{color:var(--rose)}
+
+  /* ---- result message: ONE actionable line ---- */
+  .msg{border-inline-start:3px solid var(--gold);background:rgba(13,21,38,.6);border-radius:0 14px 14px 0;
+    padding:15px 16px;margin-top:18px;font-size:.96rem;font-weight:400;color:var(--text)}
+  .msg.ok{border-color:var(--jade)} .msg.retry{border-color:var(--ember)}
+  .msg .head{font-family:'Amiri',serif;font-size:1.25rem;font-weight:700;margin-bottom:3px}
+  .msg.ok .head{color:var(--jade)} .msg.retry .head{color:var(--ember)}
+
+  .attempts{display:flex;gap:9px;justify-content:center;margin:6px 0 16px}
+  .pip{width:42px;height:6px;border-radius:4px;background:#1a2540;border:1px solid var(--hair-cool);transition:all .3s}
+  .pip.done{background:var(--jade);border-color:var(--jade);box-shadow:0 0 12px var(--jade-glow)}
+
+  .concert-ref{font-size:.8rem;text-align:center;padding:9px 12px;border-radius:11px;
+    background:rgba(233,183,94,.06);border:1px solid var(--hair);margin-bottom:14px;color:var(--text-soft)}
+  .concert-ref b{color:var(--gold)}
+  .concert-ref .ltr{direction:ltr;display:inline-block;font-family:'IBM Plex Mono',monospace;color:var(--text);font-weight:500}
+  .concert-ref.off{border-color:rgba(227,152,96,.4)}
+  .hint{font-size:.82rem;color:var(--text-soft);text-align:center;margin-top:12px;line-height:1.7}
+  .listen-row{display:flex;gap:10px;align-items:center;justify-content:center;margin:8px 0 4px}
+  .listen-row .btn-ghost{flex:1}
+  .toggle{display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--text-soft);cursor:pointer;user-select:none;white-space:nowrap}
+  .toggle input{width:18px;height:18px;accent-color:var(--jade)}
+
+  .done-card{text-align:center}
+  .done-card .seal{font-family:'Aref Ruqaa',serif;font-size:2.4rem;color:var(--gold);margin-bottom:8px;
+    text-shadow:0 0 30px rgba(233,183,94,.5);animation:bloom 1.2s ease-out}
+  @keyframes bloom{0%{opacity:0;transform:scale(.7);filter:blur(6px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
+  .done-card .next{background:rgba(13,21,38,.6);border:1px solid var(--hair);border-radius:14px;
+    padding:15px;margin-top:16px;font-size:.9rem;color:var(--text);text-align:right}
+  .done-card .next b{color:var(--gold)}
+  footer{text-align:center;font-size:.72rem;color:var(--text-soft);margin-top:10px;padding-top:14px;
+    border-top:1px solid var(--hair);opacity:.75}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="stars"></div>
+<div class="wrap">
+  <header>
+    <div class="brand">مِران<small>MIRAN · NEY</small></div>
+    <div class="daytag"><div class="d">اليوم ١</div><div class="p">تأسيس الصوت</div></div>
+  </header>
+
+  <div class="epigraph">من نَفَسٍ واحدٍ يبدأ كلُّ لحن</div>
+  <div class="phase-title">نغمة القرار الطويلة</div>
+  <div class="phase-sub">هدف اليوم: تُخرج نغمة «دو» ثابتة ونقية ٦ ثوانٍ دون تمايل. ثلاث محاولات ناجحة تُتقن اليوم.</div>
+
+  <!-- STEP 0: intro / mic -->
+  <div class="card" id="cardIntro">
+    <div class="step-eyebrow">الخطوة الأولى</div>
+    <h2>نبدأ بإذن الميكروفون</h2>
+    <p class="lead">التطبيق يسمع نايك ليقيس طبقتك وثباتك مباشرةً. الصوت لا يغادر جهازك.</p>
+    <button class="btn-primary" id="btnMic">تشغيل الميكروفون والبدء</button>
+    <div class="hint" id="micHint"></div>
+  </div>
+
+  <!-- STEP 1: calibration -->
+  <div class="card hidden" id="cardCalib">
+    <div class="step-eyebrow">الخطوة الثانية · معايرة</div>
+    <h2>عايِر نايك اليوم</h2>
+    <p class="lead">اعزف نغمة القرار (كل الثقوب مغلقة) واثبت عليها. سألتقط «دو» الخاصة بنايك اليوم لأقيس عليها.</p>
+    <div class="cents-live mute" id="calibReadout">…</div>
+    <button class="btn-primary" id="btnCalib">التقاط نغمة القرار</button>
+    <div class="hint" id="calibHint">اعزف واثبت — سألتقطها خلال ثلاث ثوانٍ.</div>
+  </div>
+
+  <!-- STEP 2: exercise -->
+  <div class="card hidden" id="cardExercise">
+    <div class="step-eyebrow">التمرين · نغمة طويلة</div>
+    <div class="attempts" id="pips"></div>
+    <div class="concert-ref" id="concertRef"></div>
+
+    <div class="meter-wrap">
+      <div class="bignote">
+        <span class="ar">دو</span>
+        <span class="meta"><span class="lat">C · قرار</span><br><span class="hz" id="targetHz">—</span></span>
+      </div>
+      <div class="cents-live mute" id="centsLive">اضغط «ابدأ العزف»</div>
+      <div class="ruler">
+        <div class="band"></div><div class="center"></div>
+        <span class="tick" style="left:10%">-50</span>
+        <span class="tick" style="left:30%">-20</span>
+        <span class="tick" style="left:70%">+20</span>
+        <span class="tick" style="left:90%">+50</span>
+        <div class="needle" id="needle"></div>
+      </div>
+      <canvas id="trace" width="524" height="120"></canvas>
+      <div class="sustain">
+        <div class="lbl"><span>ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / 6.0 ث</span></div>
+        <div class="bar"><i id="sustainBar"></i></div>
+      </div>
+    </div>
+
+    <div class="listen-row">
+      <button class="btn-ghost" id="btnListen">🔊 استمع للمثال</button>
+      <label class="toggle"><input type="checkbox" id="metroChk"> نقر خفيف للنفَس</label>
+    </div>
+
+    <button class="btn-rec" id="btnRec">ابدأ العزف</button>
+
+    <div id="resultZone"></div>
+  </div>
+
+  <!-- STEP 3: day complete -->
+  <div class="card hidden done-card" id="cardDone">
+    <div class="seal">✦ أُتقن اليوم الأول ✦</div>
+    <p class="lead">ثلاث نغمات قرار ثابتة ونقية. أساس الصوت وُضِع.</p>
+    <div class="stats" id="doneStats"></div>
+    <div class="next">
+      <b>الغد — اليوم ٢:</b> نمدّ الثبات إلى ٨ ثوانٍ، ونضيف نغمة «ري» (الثقب الأول)، فتبدأ أول نغمتين.
+    </div>
+  </div>
+
+  <footer>مِران · نموذج اليوم الأول — يعمل بالكامل في المتصفح، صوتك يبقى على جهازك</footer>
+</div>
+
+<script>
+/* ============================================================
+   Miran — Day 1 engine
+   Pitch: McLeod Pitch Method (NSDF) — validated to ~5 cents vs pYIN
+   ============================================================ */
+const SR_TARGET = 44100;
+let audioCtx, analyser, micStream, buf, rafId;
+let targetHz = null;              // his ney's captured qarar
+const FMIN=180, FMAX=1400, CLARITY=0.86;
+
+/* ===== LAYER 1: absolute concert-pitch reference (configurable) =====
+   Default A4 = 440 Hz (ISO 16, equal temperament). This layer is ONLY for
+   cross-instrument / recording compatibility and credibility — NOT for
+   scoring maqam intonation (that is Layer 2, the calibrated ney positions). */
+let CONCERT_A4 = 440;            // future: user-settable (440 / 442 / 445 / 415 …)
+// standard equal-tempered frequency of a note given semitone offset from A4
+const etFreq = (semisFromA4) => CONCERT_A4 * Math.pow(2, semisFromA4/12);
+// the qarar note is "دو / C" — for his Dūkāh ney the closed-holes note is C5,
+// which is 3 semitones ABOVE A4 (A4→A#4→B4→C5). standard C5 = A4 * 2^(3/12).
+const STD_QARAR_SEMIS = 3;
+// given a measured qarar Hz, what concert-A does the ney imply, and how far off 440?
+function neyConcertPitch(qararHz){
+  const impliedA4 = qararHz / Math.pow(2, STD_QARAR_SEMIS/12);
+  const centsOff  = 1200*Math.log2(impliedA4 / CONCERT_A4);
+  return { impliedA4, centsOff };
+}
+
+// ---- pitch detection (MPM / NSDF) ----
+function detectPitch(x, sr){
+  const n=x.length;
+  // remove DC
+  let mean=0; for(let i=0;i<n;i++) mean+=x[i]; mean/=n;
+  for(let i=0;i<n;i++) x[i]-=mean;
+  // energy gate
+  let rms=0; for(let i=0;i<n;i++) rms+=x[i]*x[i]; rms=Math.sqrt(rms/n);
+  if(rms<0.006) return {hz:null,clarity:0,rms};
+  const tauMin=Math.floor(sr/FMAX), tauMax=Math.min(Math.floor(sr/FMIN), n-1);
+  const nsdf=new Float32Array(tauMax+1);
+  for(let tau=tauMin;tau<=tauMax;tau++){
+    let ac=0, m=0;
+    for(let j=0;j<n-tau;j++){ ac+=x[j]*x[j+tau]; m+=x[j]*x[j]+x[j+tau]*x[j+tau]; }
+    nsdf[tau]= m>0 ? 2*ac/m : 0;
+  }
+  // key maxima: peaks in positive regions after first positive zero-crossing
+  const peaks=[]; let tau=tauMin;
+  while(tau<=tauMax && nsdf[tau]>0) tau++;      // skip initial positive lobe
+  while(tau<=tauMax){
+    if(nsdf[tau]<=0){ tau++; continue; }
+    let start=tau, best=tau;
+    while(tau<=tauMax && nsdf[tau]>0){ if(nsdf[tau]>nsdf[best]) best=tau; tau++; }
+    peaks.push(best);
+  }
+  if(!peaks.length) return {hz:null,clarity:0,rms};
+  let maxv=0; for(const p of peaks) if(nsdf[p]>maxv) maxv=nsdf[p];
+  const thresh=0.8*maxv;
+  let chosen=peaks[0];
+  for(const p of peaks){ if(nsdf[p]>=thresh){ chosen=p; break; } }
+  // parabolic interpolation
+  let shift=0;
+  if(chosen>0 && chosen<tauMax){
+    const a=nsdf[chosen-1], b=nsdf[chosen], c=nsdf[chosen+1], d=a-2*b+c;
+    if(d!==0) shift=0.5*(a-c)/d;
+  }
+  const hz=sr/(chosen+shift);
+  return {hz, clarity:maxv, rms};
+}
+const centsBetween=(f,ref)=>1200*Math.log2(f/ref);
+
+// ---- audio setup ----
+async function initAudio(){
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  micStream=await navigator.mediaDevices.getUserMedia({audio:{
+    echoCancellation:false, noiseSuppression:false, autoGainControl:false
+  }});
+  const src=audioCtx.createMediaStreamSource(micStream);
+  analyser=audioCtx.createAnalyser();
+  analyser.fftSize=2048;
+  src.connect(analyser);
+  buf=new Float32Array(analyser.fftSize);
+}
+
+// ---- shared read loop ----
+let onFrame=null, _lastDetect=0;
+function loop(ts){
+  // throttle the heavy autocorrelation to ~30fps — plenty for a tuning meter,
+  // and leaves the main thread free so the metronome never drops a frame
+  if(analyser && (ts - _lastDetect) >= 32){
+    _lastDetect = ts;
+    analyser.getFloatTimeDomainData(buf);
+    const p=detectPitch(buf.slice(), audioCtx.sampleRate);
+    if(onFrame) onFrame(p);
+  }
+  rafId=requestAnimationFrame(loop);
+}
+
+/* ---------- STEP 0: mic ---------- */
+const $=id=>document.getElementById(id);
+$('btnMic').addEventListener('click', async ()=>{
+  $('btnMic').disabled=true; $('micHint').textContent='…جارٍ طلب الإذن';
+  try{
+    await initAudio();
+    if(audioCtx.state==='suspended') await audioCtx.resume();
+    loop();
+    $('cardIntro').classList.add('hidden');
+    $('cardCalib').classList.remove('hidden');
+  }catch(e){
+    $('btnMic').disabled=false;
+    $('micHint').textContent='تعذّر تشغيل الميكروفون — تأكد من السماح بالإذن ثم أعد المحاولة.';
+  }
+});
+
+/* ---------- STEP 1: calibration ---------- */
+$('btnCalib').addEventListener('click', ()=>{
+  const samples=[]; let t0=performance.now(); $('btnCalib').disabled=true;
+  $('calibHint').textContent='اثبت على النغمة…';
+  onFrame=(p)=>{
+    if(p.hz && p.clarity>=CLARITY){
+      samples.push(p.hz);
+      $('calibReadout').className='cents-live ok';
+      $('calibReadout').textContent=p.hz.toFixed(1)+' Hz';
+    }
+    if(performance.now()-t0>3200){
+      onFrame=null;
+      if(samples.length<15){
+        $('btnCalib').disabled=false;
+        $('calibReadout').className='cents-live off';
+        $('calibReadout').textContent='لم أسمع نغمة ثابتة — أعد المحاولة';
+        $('calibHint').textContent='اعزف أعلى قليلًا واثبت ٣ ثوانٍ.';
+        return;
+      }
+      samples.sort((a,b)=>a-b);
+      targetHz=samples[Math.floor(samples.length/2)]; // median (Layer 2 target)
+      $('targetHz').textContent=targetHz.toFixed(1)+' Hz';
+      // ---- Layer 1: report the ney's tuning vs concert A=440 ----
+      const cp=neyConcertPitch(targetHz);
+      const off=cp.centsOff, aligned=Math.abs(off)<=10;
+      const word = aligned ? 'مضبوط على' : (off>0 ? 'أعلى قليلًا من' : 'أخفض قليلًا من');
+      $('concertRef').className = 'concert-ref '+(aligned?'ok':'off');
+      $('concertRef').innerHTML =
+        `<b>مرجع الضبط الدولي:</b> نايك ${word} A=${CONCERT_A4}
+         <span class="ltr">(A≈${cp.impliedA4.toFixed(1)}Hz · ${off>=0?'+':''}${off.toFixed(0)} cents)</span>`;
+      $('cardCalib').classList.add('hidden');
+      $('cardExercise').classList.remove('hidden');
+      renderPips();
+    }
+  };
+});
+
+/* ---------- reference tone + metronome ---------- */
+let droneOsc=null;
+$('btnListen').addEventListener('click', ()=>{
+  if(!targetHz) return;
+  if(droneOsc){ droneOsc.stop(); droneOsc=null; $('btnListen').textContent='🔊 استمع للمثال'; return; }
+  droneOsc=audioCtx.createOscillator(); const g=audioCtx.createGain();
+  droneOsc.type='sine'; droneOsc.frequency.value=targetHz;
+  g.gain.value=0.0001; droneOsc.connect(g).connect(audioCtx.destination);
+  droneOsc.start(); g.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime+0.1);
+  $('btnListen').textContent='⏹ إيقاف المثال';
+  setTimeout(()=>{ if(droneOsc){droneOsc.stop();droneOsc=null;$('btnListen').textContent='🔊 استمع للمثال';} },4000);
+});
+/* metronome: lookahead scheduler on the AUDIO clock (not the render loop),
+   so beats are sample-accurate and never cause visual stutter */
+let metroTimer=null, nextBeatTime=0;
+const BEAT_SEC=1.0;                 // 60 BPM breathing pace (day 1)
+function scheduleClick(atTime){
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.frequency.value=1600; g.gain.value=0.0001;
+  o.connect(g).connect(audioCtx.destination);
+  o.start(atTime);
+  g.gain.setValueAtTime(0.0001, atTime);
+  g.gain.exponentialRampToValueAtTime(0.05, atTime+0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, atTime+0.06);
+  o.stop(atTime+0.07);
+}
+function metroScheduler(){
+  // schedule any beats falling inside the next 120ms window, ahead of time
+  while(nextBeatTime < audioCtx.currentTime + 0.12){
+    scheduleClick(nextBeatTime);
+    nextBeatTime += BEAT_SEC;
+  }
+}
+function startMetro(){
+  nextBeatTime = audioCtx.currentTime + 0.06;
+  metroScheduler();
+  metroTimer = setInterval(metroScheduler, 25);   // light: just checks the clock
+}
+function stopMetro(){ if(metroTimer){ clearInterval(metroTimer); metroTimer=null; } }
+
+/* ---------- STEP 2: exercise ---------- */
+const TARGET_SEC=6.0, TOL=20, STAB_MAX=20;   // mastery thresholds
+let attempts=0, recording=false, recData=null;
+const canvas=$('trace'), cx=canvas.getContext('2d');
+function setupCanvas(){ const r=canvas.getBoundingClientRect(); canvas.width=r.width*2; canvas.height=240; cx.scale(2,2);} 
+setupCanvas();
+function renderPips(){
+  $('pips').innerHTML='';
+  for(let i=0;i<3;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);}
+}
+function drawTraceBg(){
+  const w=canvas.width/2, h=canvas.height/2;
+  cx.clearRect(0,0,w,h);
+  cx.fillStyle='#0d1526'; cx.fillRect(0,0,w,h);
+  // tolerance band (jade glow)
+  const cy=h/2, px=(TOL/50)*(h/2);
+  cx.fillStyle='rgba(107,199,154,.12)'; cx.fillRect(0,cy-px,w,2*px);
+  cx.strokeStyle='rgba(107,199,154,.4)'; cx.setLineDash([4,4]);
+  cx.beginPath();cx.moveTo(0,cy-px);cx.lineTo(w,cy-px);cx.moveTo(0,cy+px);cx.lineTo(w,cy+px);cx.stroke();
+  cx.setLineDash([]);
+  cx.strokeStyle='rgba(241,234,214,.45)';cx.lineWidth=1;cx.beginPath();cx.moveTo(0,cy);cx.lineTo(w,cy);cx.stroke();
+}
+drawTraceBg();
+
+$('btnRec').addEventListener('click', ()=>{ recording ? stopAttempt() : startAttempt(); });
+
+function startAttempt(){
+  recording=true; $('btnRec').textContent='إنهاء المحاولة'; $('btnRec').classList.add('recording');
+  $('resultZone').innerHTML='';
+  recData={t0:performance.now(), pts:[], voiced:[]};
+  drawTraceBg();
+  if($('metroChk').checked){ startMetro(); }
+  const w=canvas.width/2, h=canvas.height/2, cy=h/2;
+  let lastX=0;
+  onFrame=(p)=>{
+    const now=(performance.now()-recData.t0)/1000;
+    const inTune = p.hz && p.clarity>=CLARITY;
+    let cents=null;
+    if(inTune){ cents=centsBetween(p.hz,targetHz); recData.pts.push({t:now,c:cents}); }
+    recData.voiced.push({t:now, on: inTune});
+    // live readout + needle
+    const nd=$('needle'), cl=$('centsLive');
+    if(inTune){
+      const clamped=Math.max(-50,Math.min(50,cents));
+      nd.style.left=(50+clamped)+'%';
+      const ok=Math.abs(cents)<=TOL;
+      nd.className='needle '+(ok?'ok':'off');
+      cl.className='cents-live '+(ok?'ok':'off');
+      cl.textContent=(cents>=0?'+':'')+cents.toFixed(0)+' cents';
+    }else{
+      cl.className='cents-live mute'; cl.textContent='… انفخ في الناي';
+    }
+    // scrolling trace
+    const x=Math.min(w, (now/ (TARGET_SEC+2)) * w);
+    if(inTune){
+      const y=cy - (Math.max(-50,Math.min(50,cents))/50)*(h/2);
+      const inTol=Math.abs(cents)<=TOL;
+      cx.strokeStyle=inTol?'#6BC79A':'#E39860'; cx.lineWidth=2.5;
+      cx.shadowBlur=8; cx.shadowColor=inTol?'rgba(107,199,154,.8)':'rgba(227,152,96,.7)';
+      cx.beginPath(); cx.moveTo(lastX,cy - (recData._ly!=null?recData._ly:0)); 
+      cx.lineTo(x,y); cx.stroke(); cx.shadowBlur=0; recData._ly=(cy-y); lastX=x;
+      recData._lyv=y;
+    }
+    lastX=x;
+    // sustain bar = longest continuous voiced run so far
+    const run=longestVoicedRun(recData.voiced);
+    $('sustainNum').textContent=run.toFixed(1);
+    $('sustainBar').style.width=Math.min(100,(run/TARGET_SEC)*100)+'%';
+    // auto-stop: sustained enough, or long silence after real playing
+    if(run>=TARGET_SEC+0.4){ stopAttempt(); }
+    if(now>14){ stopAttempt(); }
+  };
+}
+
+function longestVoicedRun(v){
+  // longest continuous 'on' stretch, tolerating gaps < 0.15s
+  let best=0, curStart=null, lastOn=null;
+  for(const s of v){
+    if(s.on){ if(curStart==null) curStart=s.t; lastOn=s.t; }
+    else { if(curStart!=null && s.t-lastOn>0.15){ best=Math.max(best,lastOn-curStart); curStart=null; } }
+  }
+  if(curStart!=null) best=Math.max(best,(lastOn??curStart)-curStart);
+  return best;
+}
+
+function stopAttempt(){
+  if(!recording) return;
+  recording=false; onFrame=null;
+  if(metroTimer){ stopMetro(); }
+  $('btnRec').textContent='ابدأ العزف'; $('btnRec').classList.remove('recording');
+  $('centsLive').className='cents-live mute'; $('centsLive').textContent='—';
+  $('needle').style.left='50%'; $('needle').className='needle';
+  score(recData);
+}
+
+/* ---------- scoring & ONE actionable message ---------- */
+function median(a){a=a.slice().sort((x,y)=>x-y);return a.length?a[Math.floor(a.length/2)]:0;}
+function std(a){if(a.length<2)return 0;const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/a.length);}
+
+function score(d){
+  const run=longestVoicedRun(d.voiced);
+  // restrict pitch stats to the sustained window
+  const cs=d.pts.map(p=>p.c);
+  const medC=median(cs), stab=std(cs);
+  let ok=false, head='', body='', cls='retry';
+
+  if(run < TARGET_SEC-0.3){
+    head='نفَسك أقصر قليلًا';
+    body=`ثبتّ ${run.toFixed(1)} ثانية والهدف ${TARGET_SEC}. خذ نفسًا أعمق من البطن قبل البدء، وابدأ النفخ بهدوء.`;
+  } else if(Math.abs(medC) > TOL){
+    const dir = medC>0 ? 'أعلى' : 'أخفض';
+    head='الطبقة مالت عن دو';
+    body=`نغمتك ${Math.abs(medC).toFixed(0)} سنت ${dir} من القرار. استمع للمثال ثم طابقه — ${medC>0?'خفّف ضغط النفخ قليلًا':'زد ضغط النفخ قليلًا'}.`;
+  } else if(stab > STAB_MAX){
+    head='بدأت ثابتة ثم تمايلت';
+    body=`تشتّت طبقتك ${stab.toFixed(0)} سنت. ثبّت ضغط النفَس ولا ترخِ الشفاه قرب النهاية — تخيّل خطًا مستقيمًا.`;
+  } else {
+    ok=true; cls='ok'; attempts++;
+    head=`محاولة ناجحة (${attempts}/3)`;
+    body=`ثبات ${stab.toFixed(0)} سنت على مدى ${run.toFixed(1)} ثانية، والطبقة مضبوطة (${medC>=0?'+':''}${medC.toFixed(0)}). ${attempts<3?'أعد مرة أخرى بنفس الجودة.':''}`;
+  }
+
+  const statHtml=`
+    <div class="stats">
+      <div class="stat ${Math.abs(medC)<=TOL?'g':'w'}"><div class="v">${medC>=0?'+':''}${medC.toFixed(0)}</div><div class="k">سنت عن دو</div></div>
+      <div class="stat ${stab<=STAB_MAX?'g':'w'}"><div class="v">${stab.toFixed(0)}</div><div class="k">تشتّت الطبقة</div></div>
+      <div class="stat ${run>=TARGET_SEC-0.3?'g':'b'}"><div class="v">${run.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
+    </div>`;
+  $('resultZone').innerHTML = statHtml +
+    `<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>` +
+    `<button class="btn-ghost" style="width:100%;margin-top:12px" onclick="exportReport()">↓ احفظ تقرير الجلسة (لأرسله لك)</button>`;
+  renderPips();
+
+  // ---- session log (raw metrics for later analysis by Claude) ----
+  sessionLog.attempts.push({
+    n: sessionLog.attempts.length+1,
+    success: ok,
+    cents_off_qarar: +medC.toFixed(1),
+    stability_cents: +stab.toFixed(1),
+    sustained_sec: +run.toFixed(2),
+    pitch_series: d.pts.map(p=>({t:+p.t.toFixed(2), c:+p.c.toFixed(1)})),
+    ts: new Date().toISOString()
+  });
+
+  if(attempts>=3) setTimeout(finishDay, 900, medC, stab, run);
+}
+
+/* ---- export a small report file the user can upload to Claude ---- */
+let sessionLog = { app:'miran', day:1, exercise:'long-tone qarar (دو/C)',
+  concert_A4:CONCERT_A4, started:new Date().toISOString(), attempts:[] };
+function exportReport(){
+  const cp = targetHz ? neyConcertPitch(targetHz) : null;
+  const report = {
+    ...sessionLog,
+    ney_calibration: targetHz ? {
+      qarar_hz:+targetHz.toFixed(2),
+      implied_concert_A4:+cp.impliedA4.toFixed(2),
+      cents_from_440:+cp.centsOff.toFixed(1)
+    } : null,
+    mastery_thresholds:{ tol_cents:TOL, stability_max_cents:STAB_MAX, target_sec:TARGET_SEC },
+    successful_attempts: attempts
+  };
+  const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`miran-day1-report-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+function finishDay(medC,stab,run){
+  $('cardExercise').classList.add('hidden');
+  $('doneStats').innerHTML=`
+    <div class="stat g"><div class="v">${stab.toFixed(0)}</div><div class="k">أفضل ثبات (سنت)</div></div>
+    <div class="stat g"><div class="v">${run.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
+    <div class="stat g"><div class="v">3/3</div><div class="k">محاولات ناجحة</div></div>`;
+  $('cardDone').classList.remove('hidden');
+  $('doneStats').insertAdjacentHTML('afterend',
+    `<button class="btn-primary" style="margin-top:14px" onclick="exportReport()">↓ احفظ تقرير اليوم كاملًا</button>`);
+  if(micStream) micStream.getTracks().forEach(t=>t.stop());
+  cancelAnimationFrame(rafId);
+}
+</script>
+</body>
+</html>
