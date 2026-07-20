@@ -378,12 +378,16 @@ $('btnCalib').addEventListener('click', ()=>{
         $('calibHint').textContent='اعزف أعلى قليلًا واثبت ٣ ثوانٍ.';
         return;
       }
+      // robust calibration: keep the stable cloud (last ~2s), drop octave/attack outliers
       samples.sort((a,b)=>a-b);
-      targetHz=samples[Math.floor(samples.length/2)]; // median (Layer 2 target)
+      let med=samples[Math.floor(samples.length/2)];
+      const cloud=samples.filter(h=>Math.abs(1200*Math.log2(h/med))<80);
+      cloud.sort((a,b)=>a-b);
+      targetHz=cloud.length? cloud[Math.floor(cloud.length/2)] : med; // Layer 2 target
       $('targetHz').textContent=targetHz.toFixed(1)+' Hz';
       // ---- Layer 1: report the ney's tuning vs concert A=440 ----
       const cp=neyConcertPitch(targetHz);
-      const off=cp.centsOff, aligned=Math.abs(off)<=10;
+      const off=cp.centsOff, aligned=Math.abs(off)<=15;
       const word = aligned ? 'مضبوط على' : (off>0 ? 'أعلى قليلًا من' : 'أخفض قليلًا من');
       $('concertRef').className = 'concert-ref '+(aligned?'ok':'off');
       $('concertRef').innerHTML =
@@ -474,7 +478,14 @@ function startAttempt(){
     const now=(performance.now()-recData.t0)/1000;
     const inTune = p.hz && p.clarity>=CLARITY;
     let cents=null;
-    if(inTune){ cents=centsBetween(p.hz,targetHz); recData.pts.push({t:now,c:cents}); }
+    if(inTune){
+      cents=centsBetween(p.hz,targetHz);
+      // we KNOW the intended note is the qarar — fold any octave/harmonic
+      // mis-read toward the target so the ney's rich octave overtone can't fool the score
+      while(cents> 600) cents-=1200;
+      while(cents<-600) cents+=1200;
+      recData.pts.push({t:now,c:cents});
+    }
     recData.voiced.push({t:now, on: inTune});
     // live readout + needle
     const nd=$('needle'), cl=$('centsLive');
@@ -538,8 +549,11 @@ function std(a){if(a.length<2)return 0;const m=a.reduce((s,x)=>s+x,0)/a.length;r
 function score(d){
   const run=longestVoicedRun(d.voiced);
   // restrict pitch stats to the sustained window
-  const cs=d.pts.map(p=>p.c);
-  const medC=median(cs), stab=std(cs);
+  const csAll=d.pts.map(p=>p.c);
+  const medC=median(csAll);
+  // stability only over the true note cloud — drop any residual octave/harmonic glitches
+  const cs=csAll.filter(c=>Math.abs(c-medC)<80);
+  const stab=std(cs);
   let ok=false, head='', body='', cls='retry';
 
   if(run < TARGET_SEC-0.3){
