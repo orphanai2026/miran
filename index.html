@@ -84,6 +84,7 @@
   button:active{transform:scale(.975)}
   .btn-primary{width:100%;color:#1a1305;background:linear-gradient(135deg,#F0C570,#E9B75E 45%,#C08A34);
     box-shadow:0 8px 24px rgba(233,183,94,.28), inset 0 1px 0 rgba(255,255,255,.4);margin-top:16px}
+  .btn-primary:disabled{background:#20293f;color:var(--text-soft);box-shadow:none;border:1px dashed var(--hair-cool);cursor:not-allowed}
   .btn-ghost{background:rgba(233,183,94,.06);border:1px solid var(--hair);color:var(--gold)}
   .btn-rec{width:100%;color:#fff;background:linear-gradient(135deg,#E68A5E,#DC6E4C);box-shadow:0 8px 24px rgba(220,110,76,.3)}
   .btn-rec.recording{background:linear-gradient(135deg,#6BC79A,#3f8f6a);animation:pulse2 1.6s ease-out infinite}
@@ -130,6 +131,8 @@
   .ruler .needle.ok{background:var(--jade);box-shadow:0 0 16px var(--jade)}
   .ruler .needle.off{background:var(--ember);box-shadow:0 0 14px var(--ember)}
 
+  canvas#orbit{width:100%;height:300px;display:block;border-radius:16px;background:#0d1526;
+    border:1px solid var(--hair-cool);margin-top:6px;box-shadow:inset 0 2px 14px rgba(0,0,0,.5)}
   canvas#trace{width:100%;height:110px;display:block;border-radius:12px;background:#0d1526;
     border:1px solid var(--hair-cool);margin-top:10px;box-shadow:inset 0 2px 12px rgba(0,0,0,.45)}
 
@@ -199,6 +202,7 @@
     </div>
 
     <div class="ney-tuning" id="neyTuning"></div>
+    <button class="btn-ghost" id="btnExport" style="width:100%;margin-top:14px">↓ احفظ تقرير الرحلة (لأرسله لك)</button>
   </div>
 
   <!-- ============ CALIBRATION ============ -->
@@ -223,14 +227,7 @@
         <span class="ar" id="sessGlyph">دو</span>
         <span class="meta"><span class="lat" id="sessLat">C</span><br><span class="hz" id="targetHz">—</span></span>
       </div>
-      <div class="cents-live mute" id="centsLive">اضغط «ابدأ العزف»</div>
-      <div class="ruler">
-        <div class="band"></div><div class="center"></div>
-        <span class="tick" style="left:10%">-50</span><span class="tick" style="left:30%">-20</span>
-        <span class="tick" style="left:70%">+20</span><span class="tick" style="left:90%">+50</span>
-        <div class="needle" id="needle"></div>
-      </div>
-      <canvas id="trace" width="524" height="110"></canvas>
+      <canvas id="orbit" width="524" height="300"></canvas>
       <div class="sustain">
         <div class="lbl"><span>ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span> ث</span></div>
         <div class="bar"><i id="sustainBar"></i></div>
@@ -253,12 +250,12 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d2.0-shell</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
+  <footer>مِران · <span class="v">الإصدار d2.2-orbit</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d2.0-shell';
+const APP_VERSION='d2.2-orbit';
 
 /* ================= CURRICULUM (days as DATA) =================
    semis = semitones above the qarar (دو). playable long-tone days
@@ -432,8 +429,18 @@ $('btnCalib').addEventListener('click', async ()=>{
 /* ================= SESSION ================= */
 let targetDayId=1, curDay=null, targetHz=null, TARGET_SEC=6, TOL=20, STAB_MAX=20, NEED=3;
 let attempts=0, recording=false, recData=null, sessionLog=null;
-const canvas=$('trace'), cx=canvas.getContext('2d');
-function setupCanvas(){ const r=canvas.getBoundingClientRect(); if(r.width){canvas.width=r.width*2;canvas.height=220;cx.setTransform(1,0,0,1,0,0);cx.scale(2,2);} }
+const canvas=$('orbit'), cx=canvas.getContext('2d');
+let ORB={w:0,h:0,cx:0,cy:0,unit:0}; const ORB_RANGE=55;
+function setupCanvas(){ const r=canvas.getBoundingClientRect(); if(!r.width)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1); canvas.width=r.width*dpr; canvas.height=300*dpr;
+  cx.setTransform(dpr,0,0,dpr,0,0); ORB={w:r.width,h:300,cx:r.width/2,cy:150,unit:(150-30)/ORB_RANGE}; }
+function orbY(c){ return ORB.cy - Math.max(-ORB_RANGE,Math.min(ORB_RANGE,c))*ORB.unit; }
+function drawOrbitBg(){ const {w,h,cx:mx,cy}=ORB; cx.clearRect(0,0,w,h); cx.fillStyle='#0d1526'; cx.fillRect(0,0,w,h);
+  cx.strokeStyle='rgba(154,163,190,.14)'; cx.lineWidth=1;
+  for(let g=-40;g<=40;g+=20){const yy=cy-g*ORB.unit; cx.beginPath();cx.moveTo(22,yy);cx.lineTo(w-22,yy);cx.stroke();}
+  cx.strokeStyle='rgba(233,183,94,.5)'; cx.lineWidth=2; cx.setLineDash([3,4]);
+  cx.beginPath(); cx.arc(mx,cy,TOL*ORB.unit,0,7); cx.stroke(); cx.setLineDash([]);
+  cx.fillStyle='rgba(233,183,94,.05)'; cx.beginPath(); cx.arc(mx,cy,TOL*ORB.unit,0,7); cx.fill(); }
 
 function startSession(id){
   curDay=CURRICULUM[id-1];
@@ -445,21 +452,40 @@ function startSession(id){
   $('sessEyebrow').textContent=`اليوم ${toAr(id)} · نغمة طويلة`;
   $('sessGlyph').textContent=curDay.note; $('sessLat').textContent=curDay.lat;
   $('targetHz').textContent=targetHz.toFixed(1)+' Hz'; $('targetSec').textContent=TARGET_SEC.toFixed(1);
-  $('resultZone').innerHTML=''; $('centsLive').className='cents-live mute'; $('centsLive').textContent='اضغط «ابدأ العزف»';
+  $('resultZone').innerHTML='';
   $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
-  renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawTraceBg();},30);
+  renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawOrbitBg();drawIdleBall();},40);
 }
 function renderPips(){ $('pips').innerHTML=''; for(let i=0;i<NEED;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);} }
 
-function drawTraceBg(){
-  const w=canvas.width/2,h=canvas.height/2; cx.clearRect(0,0,w,h);
-  cx.fillStyle='#0d1526'; cx.fillRect(0,0,w,h);
-  const cy=h/2, px=(TOL/50)*(h/2);
-  cx.fillStyle='rgba(107,199,154,.12)'; cx.fillRect(0,cy-px,w,2*px);
-  cx.strokeStyle='rgba(107,199,154,.4)'; cx.setLineDash([4,4]);
-  cx.beginPath();cx.moveTo(0,cy-px);cx.lineTo(w,cy-px);cx.moveTo(0,cy+px);cx.lineTo(w,cy+px);cx.stroke();cx.setLineDash([]);
-  cx.strokeStyle='rgba(241,234,214,.45)';cx.lineWidth=1;cx.beginPath();cx.moveTo(0,cy);cx.lineTo(w,cy);cx.stroke();
+function drawIdleBall(){ // dim resting ball at centre + hint
+  const {cx:mx,cy}=ORB; cx.fillStyle='rgba(154,163,190,.45)'; cx.beginPath(); cx.arc(mx,cy,8,0,7); cx.fill();
+  cx.fillStyle='rgba(154,163,190,.7)'; cx.font="500 13px 'IBM Plex Sans Arabic'"; cx.textAlign='center';
+  cx.fillText('اضغط «ابدأ العزف»', mx, ORB.h-16); cx.textAlign='start'; }
+// live orbit render: ball at (centre-x, y=cents), fading breath tail, calm-rings
+let _rings=[], _tail=[], _steadyAcc=0, _lastTs=0;
+function renderOrbit(cents, inTune, now){
+  drawOrbitBg(); const {cx:mx,cy}=ORB; const px=mx, py=orbY(cents);
+  const dt=Math.min(0.05,(now-_lastTs)||0.016); _lastTs=now;
+  _tail.push({x:px,y:py,ok:inTune}); if(_tail.length>70)_tail.shift();
+  if(inTune){ _steadyAcc+=dt; if(_steadyAcc>0.5){_steadyAcc=0;_rings.push({r:TOL*ORB.unit,a:.5});} } else _steadyAcc=0;
+  for(let i=_rings.length-1;i>=0;i--){const r=_rings[i]; r.r+=dt*46; r.a-=dt*.55; if(r.a<=0){_rings.splice(i,1);continue;}
+    cx.strokeStyle='rgba(107,199,154,'+r.a.toFixed(3)+')'; cx.lineWidth=2; cx.beginPath(); cx.arc(mx,cy,r.r,0,7); cx.stroke(); }
+  for(let i=1;i<_tail.length;i++){const a=i/_tail.length,s=_tail[i];
+    cx.strokeStyle=(s.ok?'rgba(107,199,154,':'rgba(227,152,96,')+(a*.7).toFixed(3)+')'; cx.lineWidth=1+a*2.5;
+    cx.beginPath(); cx.moveTo(_tail[i-1].x,_tail[i-1].y); cx.lineTo(s.x,s.y); cx.stroke(); }
+  const col=inTune?'#6BC79A':'#E39860';
+  const g=cx.createRadialGradient(px,py,1,px,py,26); g.addColorStop(0,inTune?'rgba(107,199,154,.5)':'rgba(227,152,96,.45)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  cx.fillStyle=g; cx.beginPath(); cx.arc(px,py,26,0,7); cx.fill();
+  cx.fillStyle=col; cx.beginPath(); cx.arc(px,py,10,0,7); cx.fill();
+  cx.fillStyle='rgba(255,255,255,.85)'; cx.beginPath(); cx.arc(px-3,py-3,3,0,7); cx.fill();
+  cx.fillStyle=inTune?'#8fdcb4':'#f0b98a'; cx.font="600 16px 'IBM Plex Mono',monospace"; cx.textAlign='center';
+  cx.fillText((cents>=0?'+':'')+cents.toFixed(0)+' cents', mx, 26); cx.textAlign='start';
 }
+function renderOrbitSilent(now){ drawOrbitBg(); const {cx:mx,cy}=ORB; const dt=Math.min(0.05,(now-_lastTs)||0.016); _lastTs=now;
+  for(let i=_rings.length-1;i>=0;i--){const r=_rings[i];r.r+=dt*46;r.a-=dt*.55;if(r.a<=0){_rings.splice(i,1);continue;}cx.strokeStyle='rgba(107,199,154,'+r.a.toFixed(3)+')';cx.lineWidth=2;cx.beginPath();cx.arc(mx,cy,r.r,0,7);cx.stroke();}
+  cx.fillStyle='rgba(154,163,190,.55)'; cx.beginPath(); cx.arc(mx,cy,8,0,7); cx.fill();
+  cx.fillStyle='rgba(154,163,190,.7)'; cx.font="500 13px 'IBM Plex Sans Arabic'"; cx.textAlign='center'; cx.fillText('… انفخ في الناي', mx, 26); cx.textAlign='start'; }
 
 /* reference tone + metronome */
 let droneOsc=null;
@@ -482,31 +508,21 @@ function startMetro(){ nextBeatTime=audioCtx.currentTime+0.06; metroSched(); met
 function stopMetro(){ if(metroTimer){clearInterval(metroTimer);metroTimer=null;} }
 
 $('btnRec').addEventListener('click', async ()=>{
-  if(!audioCtx){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ $('centsLive').className='cents-live off';$('centsLive').textContent='تعذّر الميكروفون';return;} }
+  if(!audioCtx){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ setupCanvas();drawOrbitBg(); cx.fillStyle='#f0b98a';cx.font="500 14px 'IBM Plex Sans Arabic'";cx.textAlign='center';cx.fillText('تعذّر الميكروفون — اسمح بالإذن',ORB.cx,ORB.cy);cx.textAlign='start'; return;} }
   recording? stopAttempt() : startAttempt();
 });
 function startAttempt(){
   recording=true; $('btnRec').textContent='إنهاء المحاولة'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
-  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); drawTraceBg();
+  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); _tail=[]; _rings=[]; _steadyAcc=0; _lastTs=0;
   if($('metroChk').checked) startMetro();
-  const w=canvas.width/2,h=canvas.height/2,cy=h/2; let lastX=0;
   onFrame=(p)=>{
-    const now=(performance.now()-recData.t0)/1000;
+    const now=(performance.now()-recData.t0)/1000; const nowS=performance.now()/1000;
     const inTune=p.hz && p.clarity>=CLARITY; let cents=null;
     if(inTune){ cents=centsBetween(p.hz,targetHz);
       while(cents>600)cents-=1200; while(cents<-600)cents+=1200;   // fold to known target
       recData.pts.push({t:now,c:cents}); }
     recData.voiced.push({t:now,on:inTune});
-    const nd=$('needle'),cl=$('centsLive');
-    if(inTune){ const cl2=Math.max(-50,Math.min(50,cents)); nd.style.left=(50+cl2)+'%';
-      const ok=Math.abs(cents)<=TOL; nd.className='needle '+(ok?'ok':'off'); cl.className='cents-live '+(ok?'ok':'off');
-      cl.textContent=(cents>=0?'+':'')+cents.toFixed(0)+' cents'; }
-    else { cl.className='cents-live mute'; cl.textContent='… انفخ في الناي'; }
-    const x=Math.min(w,(now/(TARGET_SEC+2))*w);
-    if(inTune){ const y=cy-(Math.max(-50,Math.min(50,cents))/50)*(h/2); const inTol=Math.abs(cents)<=TOL;
-      cx.strokeStyle=inTol?'#6BC79A':'#E39860'; cx.lineWidth=2.5; cx.shadowBlur=8; cx.shadowColor=inTol?'rgba(107,199,154,.8)':'rgba(227,152,96,.7)';
-      cx.beginPath(); cx.moveTo(lastX, recData._ly!=null?recData._ly:cy); cx.lineTo(x,y); cx.stroke(); cx.shadowBlur=0; recData._ly=y; }
-    lastX=x;
+    if(inTune) renderOrbit(cents, Math.abs(cents)<=TOL, nowS); else renderOrbitSilent(nowS);
     const run=longestRun(recData.voiced); $('sustainNum').textContent=run.toFixed(1);
     $('sustainBar').style.width=Math.min(100,(run/TARGET_SEC)*100)+'%';
     if(run>=TARGET_SEC+0.4) stopAttempt(); if(now>16) stopAttempt();
@@ -515,7 +531,7 @@ function startAttempt(){
 function longestRun(v){ let best=0,cs=null,lo=null; for(const s of v){ if(s.on){if(cs==null)cs=s.t;lo=s.t;} else{if(cs!=null&&s.t-lo>0.15){best=Math.max(best,lo-cs);cs=null;}} } if(cs!=null)best=Math.max(best,(lo??cs)-cs); return best; }
 function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; stopMetro();
   $('btnRec').textContent='ابدأ العزف'; $('btnRec').classList.remove('recording');
-  $('centsLive').className='cents-live mute'; $('centsLive').textContent='—'; $('needle').style.left='50%'; $('needle').className='needle';
+  setupCanvas(); drawOrbitBg(); drawIdleBall();
   score(recData); }
 
 function median(a){a=a.slice().sort((x,y)=>x-y);return a.length?a[Math.floor(a.length/2)]:0;}
@@ -539,7 +555,8 @@ function score(d){
 }
 function finishDay(medC,stab,run){
   // record progress + streak
-  prog.done[curDay.id]={bestStab:+stab.toFixed(1),bestCents:+medC.toFixed(1),ts:new Date().toISOString()};
+  prog.done[curDay.id]={bestStab:+stab.toFixed(1),bestCents:+medC.toFixed(1),ts:new Date().toISOString(),
+    attempts:sessionLog.attempts, target_hz:sessionLog.target_hz};
   const today=new Date().toISOString().slice(0,10);
   if(prog.lastDate!==today){ const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
     prog.streakDays=(prog.lastDate===y)?(prog.streakDays+1):1; prog.lastDate=today; }
@@ -552,6 +569,19 @@ function finishDay(medC,stab,run){
     <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>`;
   show('done');
 }
+
+/* ================= EXPORT PROGRESS ================= */
+$('btnExport').addEventListener('click', ()=>{
+  const report={ app:'miran', version:APP_VERSION, exported:new Date().toISOString(),
+    ney_calibration: calib ? {qarar_hz:+calib.qararHz.toFixed(2), implied_concert_A4:+neyConcertPitch(calib.qararHz).impliedA4.toFixed(2), cents_from_440:+calib.cents.toFixed(1)} : null,
+    days_mastered: Object.keys(prog.done).length,
+    streak_days: prog.streakDays,
+    progress: prog.done };
+  const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`miran-journey-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+});
 
 /* ================= BOOT ================= */
 renderHome(); show('home');
