@@ -265,12 +265,12 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d2.6-staff</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
+  <footer>مِران · <span class="v">الإصدار d2.7-fix</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d2.6-staff';
+const APP_VERSION='d2.7-fix';
 
 /* ================= CURRICULUM (days as DATA) =================
    semis = semitones above the qarar (دو). playable long-tone days
@@ -657,22 +657,25 @@ function score(d){
       <div class="stat ${run>=TARGET_SEC-0.3?'g':'b'}"><div class="v">${run.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
     </div><div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
   renderPips();
-  if(attempts>=NEED) setTimeout(()=>finishDay(medC,stab,run),900);
+  if(attempts>=NEED) setTimeout(()=>finishDay({bestStab:+stab.toFixed(1), bestCents:+medC.toFixed(1), bestSustainSec:+run.toFixed(2), target_hz:sessionLog.target_hz}),900);
 }
-function finishDay(medC,stab,run){
-  // record progress + streak
-  prog.done[curDay.id]={bestStab:+stab.toFixed(1),bestCents:+medC.toFixed(1),ts:new Date().toISOString(),
-    attempts:sessionLog.attempts, target_hz:sessionLog.target_hz};
+function finishDay(stats){
+  // record progress + streak — fields depend on exercise kind, never mislabeled
+  prog.done[curDay.id]=Object.assign({ts:new Date().toISOString(), kind:curDay.kind,
+    attempts:sessionLog.attempts}, stats);
   const today=new Date().toISOString().slice(0,10);
   if(prog.lastDate!==today){ const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
     prog.streakDays=(prog.lastDate===y)?(prog.streakDays+1):1; prog.lastDate=today; }
   saveProg();
   stopAll();
   $('doneSub').textContent=`نجمة اليوم ${toAr(curDay.id)} أُضيئت في سماء رحلتك.`;
-  $('doneStats').innerHTML=`
-    <div class="stat g"><div class="v">${stab.toFixed(0)}</div><div class="k">أفضل ثبات (سنت)</div></div>
-    <div class="stat g"><div class="v">${run.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
-    <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>`;
+  $('doneStats').innerHTML = curDay.kind==='transition' ?
+    `<div class="stat g"><div class="v">${stats.bestGapMs}</div><div class="k">أنظف انتقال (م.ث)</div></div>
+     <div class="stat g"><div class="v">${stats.bestToOffset>=0?'+':''}${stats.bestToOffset.toFixed(0)}</div><div class="k">دقة الوصول (سنت)</div></div>
+     <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>` :
+    `<div class="stat g"><div class="v">${stats.bestStab.toFixed(0)}</div><div class="k">أفضل ثبات (سنت)</div></div>
+     <div class="stat g"><div class="v">${stats.bestSustainSec.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
+     <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>`;
   show('done');
 }
 
@@ -765,7 +768,7 @@ function scoreTransition(d){
       <div class="stat ${gap<=0.45?'g':'b'}"><div class="v">${Math.round(gap*1000)}</div><div class="k">فجوة الانتقال (م.ث)</div></div>
     </div><div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
   renderPips();
-  if(attempts>=NEED) setTimeout(()=>finishDay(toM!=null?toM-TR.span:0, gap*1000, TR_END),900);
+  if(attempts>=NEED) setTimeout(()=>finishDay({bestGapMs:Math.round(gap*1000), bestToOffset:toM!=null?+(toM-TR.span).toFixed(1):0}),900);
 }
 
 /* ================= EXPORT PROGRESS ================= */
