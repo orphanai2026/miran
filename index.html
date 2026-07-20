@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>مِران — اليوم ١ · نغمة القرار الطويلة</title>
+<title>مِران · رحلة تعلّم الناي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg0:#0B111F; --bg1:#111A2E; --bg2:#16203a;
-    --panel:rgba(24,34,58,.62); --panel-solid:#17213a;
     --text:#F1EAD6; --text-soft:#9AA3BE; --text-warm:#C9BC98;
     --gold:#E9B75E; --gold-deep:#C08A34; --gold-dim:rgba(233,183,94,.16);
     --jade:#6BC79A; --jade-glow:rgba(107,199,154,.22);
@@ -19,618 +18,543 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html{-webkit-text-size-adjust:100%}
-  body{
-    background:var(--bg0); color:var(--text);
-    font-family:'IBM Plex Sans Arabic',system-ui,sans-serif; line-height:1.55;
-    min-height:100vh; padding:clamp(14px,4vw,30px); position:relative; overflow-x:hidden;
-    background-image:
-      radial-gradient(120% 80% at 50% -10%, #1a2740 0%, var(--bg1) 38%, var(--bg0) 78%);
-  }
-  /* ambient lamp glow — opacity-only breathing (no transform) to avoid repaint jitter */
-  .ambient{position:fixed; inset:0; z-index:0; pointer-events:none; will-change:opacity;
-    transform:translateZ(0);
-    background:radial-gradient(closest-side at 50% 32%, rgba(233,183,94,.15), transparent 70%);
+  body{background:var(--bg0);color:var(--text);
+    font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;line-height:1.55;
+    min-height:100vh;position:relative;overflow-x:hidden;
+    background-image:radial-gradient(130% 90% at 50% -8%, #1a2740 0%, var(--bg1) 40%, var(--bg0) 80%);}
+  .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;will-change:opacity;transform:translateZ(0);
+    background:radial-gradient(closest-side at 50% 28%, rgba(233,183,94,.13), transparent 72%);
     animation:breathe 8s ease-in-out infinite;}
-  .stars{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5; transform:translateZ(0);
-    background-image:radial-gradient(1px 1px at 20% 30%, rgba(241,234,214,.6), transparent),
-      radial-gradient(1px 1px at 70% 20%, rgba(241,234,214,.4), transparent),
-      radial-gradient(1px 1px at 85% 60%, rgba(241,234,214,.5), transparent),
-      radial-gradient(1px 1px at 35% 75%, rgba(241,234,214,.35), transparent),
-      radial-gradient(1px 1px at 55% 45%, rgba(241,234,214,.3), transparent);}
-  @keyframes breathe{0%,100%{opacity:.45}50%{opacity:.9}}
-  @media (prefers-reduced-motion:reduce){.ambient{animation:none}}
-  .wrap{max-width:560px;margin:0 auto;position:relative;z-index:1}
+  .stars-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;transform:translateZ(0);
+    background-image:radial-gradient(1px 1px at 18% 22%,rgba(241,234,214,.6),transparent),
+      radial-gradient(1px 1px at 72% 15%,rgba(241,234,214,.4),transparent),
+      radial-gradient(1px 1px at 88% 55%,rgba(241,234,214,.5),transparent),
+      radial-gradient(1px 1px at 33% 68%,rgba(241,234,214,.35),transparent),
+      radial-gradient(1px 1px at 58% 40%,rgba(241,234,214,.3),transparent),
+      radial-gradient(1px 1px at 8% 80%,rgba(241,234,214,.4),transparent);}
+  @keyframes breathe{0%,100%{opacity:.45}50%{opacity:.85}}
+  @media (prefers-reduced-motion:reduce){.ambient{animation:none}.pulse{animation:none!important}}
+  .wrap{max-width:560px;margin:0 auto;position:relative;z-index:1;padding:clamp(14px,4vw,26px)}
 
-  header{display:flex;justify-content:space-between;align-items:center;
-    padding-bottom:14px;margin-bottom:4px;border-bottom:1px solid var(--hair)}
-  .brand{font-family:'Aref Ruqaa',serif;font-size:2.3rem;font-weight:700;line-height:1;
-    color:var(--gold);text-shadow:0 0 22px rgba(233,183,94,.35)}
-  .brand small{font-family:'IBM Plex Mono',monospace;font-size:.58rem;font-weight:500;
-    letter-spacing:.32em;color:var(--text-soft);display:block;margin-top:6px;text-shadow:none}
-  .daytag{text-align:left}
-  .daytag .d{font-family:'Amiri',serif;font-size:1.2rem;font-weight:700;color:var(--text)}
-  .daytag .p{font-size:.68rem;color:var(--text-soft);letter-spacing:.05em}
+  header{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;
+    border-bottom:1px solid var(--hair);margin-bottom:6px}
+  .brand{font-family:'Aref Ruqaa',serif;font-size:2.1rem;font-weight:700;line-height:1;color:var(--gold);
+    text-shadow:0 0 22px rgba(233,183,94,.35)}
+  .brand small{font-family:'IBM Plex Mono',monospace;font-size:.54rem;font-weight:500;letter-spacing:.3em;
+    color:var(--text-soft);display:block;margin-top:5px}
+  .streak{text-align:left;font-family:'IBM Plex Mono',monospace}
+  .streak .n{font-size:1.5rem;font-weight:600;color:var(--gold)}
+  .streak .l{font-size:.6rem;color:var(--text-soft);letter-spacing:.04em}
 
-  .epigraph{font-family:'Amiri',serif;font-style:italic;font-size:1.02rem;color:var(--gold);
-    opacity:.8;text-align:center;margin:18px 0 2px;letter-spacing:.01em}
-  .phase-title{margin:14px 0 4px;font-family:'Amiri',serif;font-size:1.55rem;color:var(--text)}
-  .phase-sub{color:var(--text-soft);font-size:.9rem;margin-bottom:20px}
+  .view{display:none} .view.active{display:block}
 
-  .card{background:rgba(23,33,58,.9);border:1px solid var(--hair);border-radius:20px;
-    padding:22px 18px;margin-bottom:16px;
-    box-shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04)}
-  .card.hidden{display:none}
+  /* ===== HOME / constellation ===== */
+  .epigraph{font-family:'Amiri',serif;font-style:italic;font-size:1rem;color:var(--gold);opacity:.8;
+    text-align:center;margin:16px 0 2px}
+  .phase-band{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.22em;
+    color:var(--text-soft);text-transform:uppercase;margin-bottom:6px}
+  .sky{position:relative;width:100%;margin:4px 0 10px}
+  .sky svg{width:100%;height:auto;display:block;overflow:visible}
+  .star-num{font-family:'IBM Plex Mono',monospace;font-size:9px;fill:var(--text-soft)}
+  .thread-done{stroke:var(--gold);stroke-width:1.6;fill:none;filter:drop-shadow(0 0 4px rgba(233,183,94,.6));opacity:.9}
+  .thread-todo{stroke:rgba(154,163,190,.28);stroke-width:1.2;fill:none;stroke-dasharray:3 5}
+  .st-done{fill:var(--gold);filter:drop-shadow(0 0 6px rgba(233,183,94,.9))}
+  .st-current{fill:var(--jade);filter:drop-shadow(0 0 8px var(--jade))}
+  .st-lock{fill:#26324e;stroke:var(--hair-cool);stroke-width:1}
+  .st-current-ring{fill:none;stroke:var(--jade);stroke-width:1.5;opacity:.6}
+  .pulse{transform-origin:center;transform-box:fill-box;animation:starpulse 2.4s ease-in-out infinite}
+  @keyframes starpulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.9);opacity:0}}
+  .st-tap{cursor:pointer}
 
-  .step-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:500;
-    letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;opacity:.85}
-  .card h2{font-family:'Amiri',serif;font-size:1.5rem;margin-bottom:8px;color:var(--text)}
-  .card p.lead{font-size:.92rem;color:var(--text-soft);margin-bottom:18px}
+  .tonight{background:rgba(23,33,58,.9);border:1px solid var(--hair);border-radius:20px;padding:20px 18px;
+    box-shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);margin-top:8px}
+  .tonight .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.2em;color:var(--gold);
+    text-transform:uppercase;margin-bottom:6px}
+  .tonight .row{display:flex;align-items:center;gap:16px}
+  .tonight .glyph{font-family:'Aref Ruqaa',serif;font-size:3.4rem;color:var(--gold);line-height:.8;
+    text-shadow:0 0 26px rgba(233,183,94,.45);position:relative}
+  .tonight .info{flex:1}
+  .tonight .info h2{font-family:'Amiri',serif;font-size:1.5rem;margin-bottom:2px}
+  .tonight .info p{font-size:.86rem;color:var(--text-soft)}
+  .tonight .info .lat{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--text-soft)}
 
-  button{font-family:inherit;cursor:pointer;border:none;border-radius:13px;
-    font-weight:600;font-size:1rem;padding:15px 20px;transition:transform .1s,box-shadow .2s,background .2s,opacity .2s;
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:13px;font-weight:600;font-size:1rem;
+    padding:15px 20px;transition:transform .1s,box-shadow .2s,background .2s;
     display:inline-flex;align-items:center;justify-content:center;gap:9px}
   button:active{transform:scale(.975)}
-  .btn-primary{width:100%;color:#1a1305;
-    background:linear-gradient(135deg,#F0C570,#E9B75E 45%,#C08A34);
-    box-shadow:0 8px 24px rgba(233,183,94,.28), inset 0 1px 0 rgba(255,255,255,.4)}
-  .btn-primary:hover{box-shadow:0 10px 30px rgba(233,183,94,.42)}
-  .btn-primary:disabled{background:#2a3350;color:var(--text-soft);box-shadow:none;cursor:not-allowed}
+  .btn-primary{width:100%;color:#1a1305;background:linear-gradient(135deg,#F0C570,#E9B75E 45%,#C08A34);
+    box-shadow:0 8px 24px rgba(233,183,94,.28), inset 0 1px 0 rgba(255,255,255,.4);margin-top:16px}
   .btn-ghost{background:rgba(233,183,94,.06);border:1px solid var(--hair);color:var(--gold)}
-  .btn-ghost:hover{background:rgba(233,183,94,.12)}
-  .btn-rec{width:100%;color:#fff;
-    background:linear-gradient(135deg,#E68A5E,#DC6E4C);box-shadow:0 8px 24px rgba(220,110,76,.3)}
-  .btn-rec.recording{background:linear-gradient(135deg,#6BC79A,#3f8f6a);
-    box-shadow:0 0 0 0 rgba(107,199,154,.5);animation:pulse 1.6s ease-out infinite}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(107,199,154,.45)}70%{box-shadow:0 0 0 16px rgba(107,199,154,0)}100%{box-shadow:0 0 0 0 rgba(107,199,154,0)}}
+  .btn-rec{width:100%;color:#fff;background:linear-gradient(135deg,#E68A5E,#DC6E4C);box-shadow:0 8px 24px rgba(220,110,76,.3)}
+  .btn-rec.recording{background:linear-gradient(135deg,#6BC79A,#3f8f6a);animation:pulse2 1.6s ease-out infinite}
+  @keyframes pulse2{0%{box-shadow:0 0 0 0 rgba(107,199,154,.45)}70%{box-shadow:0 0 0 16px rgba(107,199,154,0)}100%{box-shadow:0 0 0 0 rgba(107,199,154,0)}}
 
-  /* ---- meter (signature) ---- */
-  .meter-wrap{margin:12px 0 4px}
+  .ney-tuning{text-align:center;font-size:.76rem;color:var(--text-soft);margin-top:14px}
+  .ney-tuning b{color:var(--gold)} .ney-tuning .ltr{direction:ltr;font-family:'IBM Plex Mono',monospace}
+  .ney-tuning a{color:var(--gold);text-decoration:underline;cursor:pointer}
+
+  /* ===== CARD (calib + session shared) ===== */
+  .card{background:rgba(23,33,58,.9);border:1px solid var(--hair);border-radius:20px;padding:22px 18px;
+    box-shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);margin-top:14px}
+  .back{background:none;border:none;color:var(--text-soft);font-size:.85rem;padding:6px 0;margin-top:8px;cursor:pointer}
+  .step-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.2em;color:var(--gold);
+    text-transform:uppercase;margin-bottom:8px;opacity:.85}
+  .card h2{font-family:'Amiri',serif;font-size:1.5rem;margin-bottom:8px}
+  .card p.lead{font-size:.9rem;color:var(--text-soft);margin-bottom:18px}
+  .hint{font-size:.8rem;color:var(--text-soft);text-align:center;margin-top:12px;line-height:1.7}
+
   .bignote{position:relative;display:flex;align-items:center;justify-content:center;gap:18px;margin:6px 0 10px}
-  .bignote::before{content:"";position:absolute;width:170px;height:170px;border-radius:50%;
-    background:radial-gradient(closest-side,rgba(233,183,94,.22),transparent 70%);z-index:0}
-  .bignote .ar{position:relative;z-index:1;font-family:'Aref Ruqaa',serif;font-size:4.2rem;font-weight:700;
-    line-height:.85;color:var(--gold);text-shadow:0 0 30px rgba(233,183,94,.5)}
+  .bignote::before{content:"";position:absolute;width:160px;height:160px;border-radius:50%;
+    background:radial-gradient(closest-side,rgba(233,183,94,.2),transparent 70%);z-index:0}
+  .bignote .ar{position:relative;z-index:1;font-family:'Aref Ruqaa',serif;font-size:4rem;font-weight:700;line-height:.85;
+    color:var(--gold);text-shadow:0 0 30px rgba(233,183,94,.5)}
   .bignote .meta{position:relative;z-index:1;text-align:right}
-  .bignote .lat{direction:ltr;font-family:'IBM Plex Mono',monospace;font-size:.95rem;color:var(--text);font-weight:500}
-  .bignote .hz{direction:ltr;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--text-soft)}
+  .bignote .lat{direction:ltr;font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:var(--text);font-weight:500}
+  .bignote .hz{direction:ltr;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--text-soft)}
 
-  .cents-live{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:1.7rem;font-weight:600;
-    min-height:1.5em;direction:ltr;letter-spacing:.02em;transition:color .15s,text-shadow .15s}
+  .cents-live{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:1.6rem;font-weight:600;
+    min-height:1.5em;direction:ltr;transition:color .15s,text-shadow .15s}
   .cents-live.ok{color:var(--jade);text-shadow:0 0 18px var(--jade-glow)}
-  .cents-live.off{color:var(--ember);text-shadow:0 0 16px rgba(227,152,96,.3)}
-  .cents-live.mute{color:var(--text-soft);font-family:'IBM Plex Sans Arabic';font-size:1.05rem;text-shadow:none}
+  .cents-live.off{color:var(--ember)}
+  .cents-live.mute{color:var(--text-soft);font-family:'IBM Plex Sans Arabic';font-size:1rem}
 
-  .ruler{position:relative;height:58px;margin:8px 0 2px;border-radius:12px;
+  .ruler{position:relative;height:56px;margin:8px 0 2px;border-radius:12px;
     background:linear-gradient(180deg,#0d1526,#10192e);border:1px solid var(--hair-cool);overflow:hidden;
     box-shadow:inset 0 2px 10px rgba(0,0,0,.5)}
-  .ruler .band{position:absolute;top:0;bottom:0;left:40%;right:40%;
-    background:var(--jade-glow);border-inline:1px dashed rgba(107,199,154,.45)}
+  .ruler .band{position:absolute;top:0;bottom:0;left:40%;right:40%;background:var(--jade-glow);
+    border-inline:1px dashed rgba(107,199,154,.45)}
   .ruler .center{position:absolute;top:0;bottom:0;left:50%;width:2px;background:rgba(241,234,214,.55);transform:translateX(-50%)}
-  .ruler .tick{position:absolute;top:50%;transform:translate(-50%,-50%);
-    font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--text-soft)}
-  .ruler .needle{position:absolute;top:5px;bottom:5px;width:4px;border-radius:3px;background:var(--gold);
-    left:50%;transform:translateX(-50%);transition:left .07s linear,background .12s,box-shadow .12s;
-    box-shadow:0 0 12px var(--gold)}
+  .ruler .tick{position:absolute;top:50%;transform:translate(-50%,-50%);font-family:'IBM Plex Mono',monospace;font-size:.56rem;color:var(--text-soft)}
+  .ruler .needle{position:absolute;top:5px;bottom:5px;width:4px;border-radius:3px;background:var(--gold);left:50%;
+    transform:translateX(-50%);transition:left .07s linear,background .12s;box-shadow:0 0 12px var(--gold)}
   .ruler .needle.ok{background:var(--jade);box-shadow:0 0 16px var(--jade)}
   .ruler .needle.off{background:var(--ember);box-shadow:0 0 14px var(--ember)}
 
-  canvas#trace{width:100%;height:120px;display:block;border-radius:12px;
-    background:#0d1526;border:1px solid var(--hair-cool);margin-top:10px;
-    box-shadow:inset 0 2px 12px rgba(0,0,0,.45)}
+  canvas#trace{width:100%;height:110px;display:block;border-radius:12px;background:#0d1526;
+    border:1px solid var(--hair-cool);margin-top:10px;box-shadow:inset 0 2px 12px rgba(0,0,0,.45)}
 
   .sustain{margin-top:16px}
-  .sustain .lbl{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-soft);margin-bottom:6px}
-  .sustain .lbl .t{direction:ltr;font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--text)}
+  .sustain .lbl{display:flex;justify-content:space-between;font-size:.76rem;color:var(--text-soft);margin-bottom:6px}
+  .sustain .lbl .t{direction:ltr;font-family:'IBM Plex Mono',monospace;color:var(--text)}
   .bar{height:12px;border-radius:7px;background:#0f1830;overflow:hidden;border:1px solid var(--hair-cool)}
-  .bar>i{display:block;height:100%;width:0;border-radius:7px;
-    background:linear-gradient(90deg,var(--gold),var(--jade));box-shadow:0 0 12px rgba(233,183,94,.5);
-    transition:width .1s linear}
+  .bar>i{display:block;height:100%;width:0;border-radius:7px;background:linear-gradient(90deg,var(--gold),var(--jade));
+    box-shadow:0 0 12px rgba(233,183,94,.5);transition:width .1s linear}
 
-  .stats{display:flex;gap:10px;margin-top:18px}
-  .stat{flex:1;background:rgba(13,21,38,.7);border:1px solid var(--hair-cool);border-radius:13px;padding:12px 8px;text-align:center}
-  .stat .v{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;direction:ltr;color:var(--text)}
-  .stat .k{font-size:.66rem;color:var(--text-soft);margin-top:2px}
-  .stat.g .v{color:var(--jade);text-shadow:0 0 14px var(--jade-glow)}
-  .stat.w .v{color:var(--ember)} .stat.b .v{color:var(--rose)}
-
-  /* ---- result message: ONE actionable line ---- */
-  .msg{border-inline-start:3px solid var(--gold);background:rgba(13,21,38,.6);border-radius:0 14px 14px 0;
-    padding:15px 16px;margin-top:18px;font-size:.96rem;font-weight:400;color:var(--text)}
-  .msg.ok{border-color:var(--jade)} .msg.retry{border-color:var(--ember)}
-  .msg .head{font-family:'Amiri',serif;font-size:1.25rem;font-weight:700;margin-bottom:3px}
-  .msg.ok .head{color:var(--jade)} .msg.retry .head{color:var(--ember)}
-
-  .attempts{display:flex;gap:9px;justify-content:center;margin:6px 0 16px}
-  .pip{width:42px;height:6px;border-radius:4px;background:#1a2540;border:1px solid var(--hair-cool);transition:all .3s}
+  .attempts{display:flex;gap:9px;justify-content:center;margin:6px 0 14px}
+  .pip{width:40px;height:6px;border-radius:4px;background:#1a2540;border:1px solid var(--hair-cool);transition:all .3s}
   .pip.done{background:var(--jade);border-color:var(--jade);box-shadow:0 0 12px var(--jade-glow)}
 
-  .concert-ref{font-size:.8rem;text-align:center;padding:9px 12px;border-radius:11px;
-    background:rgba(233,183,94,.06);border:1px solid var(--hair);margin-bottom:14px;color:var(--text-soft)}
-  .concert-ref b{color:var(--gold)}
-  .concert-ref .ltr{direction:ltr;display:inline-block;font-family:'IBM Plex Mono',monospace;color:var(--text);font-weight:500}
-  .concert-ref.off{border-color:rgba(227,152,96,.4)}
-  .hint{font-size:.82rem;color:var(--text-soft);text-align:center;margin-top:12px;line-height:1.7}
   .listen-row{display:flex;gap:10px;align-items:center;justify-content:center;margin:8px 0 4px}
   .listen-row .btn-ghost{flex:1}
-  .toggle{display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--text-soft);cursor:pointer;user-select:none;white-space:nowrap}
+  .toggle{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-soft);cursor:pointer;user-select:none;white-space:nowrap}
   .toggle input{width:18px;height:18px;accent-color:var(--jade)}
 
-  .done-card{text-align:center}
-  .done-card .seal{font-family:'Aref Ruqaa',serif;font-size:2.4rem;color:var(--gold);margin-bottom:8px;
-    text-shadow:0 0 30px rgba(233,183,94,.5);animation:bloom 1.2s ease-out}
-  @keyframes bloom{0%{opacity:0;transform:scale(.7);filter:blur(6px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
-  .done-card .next{background:rgba(13,21,38,.6);border:1px solid var(--hair);border-radius:14px;
-    padding:15px;margin-top:16px;font-size:.9rem;color:var(--text);text-align:right}
-  .done-card .next b{color:var(--gold)}
-  footer{text-align:center;font-size:.72rem;color:var(--text-soft);margin-top:10px;padding-top:14px;
-    border-top:1px solid var(--hair);opacity:.75}
+  .stats{display:flex;gap:10px;margin-top:16px}
+  .stat{flex:1;background:rgba(13,21,38,.7);border:1px solid var(--hair-cool);border-radius:13px;padding:12px 8px;text-align:center}
+  .stat .v{font-family:'IBM Plex Mono',monospace;font-size:1.45rem;font-weight:600;direction:ltr;color:var(--text)}
+  .stat .k{font-size:.64rem;color:var(--text-soft);margin-top:2px}
+  .stat.g .v{color:var(--jade)} .stat.w .v{color:var(--ember)} .stat.b .v{color:var(--rose)}
+  .msg{border-inline-start:3px solid var(--gold);background:rgba(13,21,38,.6);border-radius:0 14px 14px 0;
+    padding:14px 16px;margin-top:16px;font-size:.94rem;color:var(--text)}
+  .msg.ok{border-color:var(--jade)} .msg.retry{border-color:var(--ember)}
+  .msg .head{font-family:'Amiri',serif;font-size:1.2rem;font-weight:700;margin-bottom:3px}
+  .msg.ok .head{color:var(--jade)} .msg.retry .head{color:var(--ember)}
+
+  /* ===== DAY DONE ===== */
+  #view-done{text-align:center;padding-top:20px}
+  #view-done .seal{font-family:'Aref Ruqaa',serif;font-size:2.3rem;color:var(--gold);
+    text-shadow:0 0 34px rgba(233,183,94,.6);animation:bloom 1.3s ease-out}
+  @keyframes bloom{0%{opacity:0;transform:scale(.6);filter:blur(8px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
+  #view-done p.sub{color:var(--text-soft);margin:8px 0 4px}
+  footer{text-align:center;font-size:.7rem;color:var(--text-soft);margin-top:22px;padding-top:14px;
+    border-top:1px solid var(--hair);opacity:.7}
+  footer .v{font-family:'IBM Plex Mono',monospace}
 </style>
 </head>
 <body>
-<div class="ambient"></div>
-<div class="stars"></div>
+<div class="ambient"></div><div class="stars-bg"></div>
 <div class="wrap">
   <header>
     <div class="brand">مِران<small>MIRAN · NEY</small></div>
-    <div class="daytag"><div class="d">اليوم ١</div><div class="p">تأسيس الصوت</div></div>
+    <div class="streak"><span class="n" id="streakN">0</span><div class="l">أيام مُتقنة</div></div>
   </header>
 
-  <div class="epigraph">من نَفَسٍ واحدٍ يبدأ كلُّ لحن</div>
-  <div class="phase-title">نغمة القرار الطويلة</div>
-  <div class="phase-sub">هدف اليوم: تُخرج نغمة «دو» ثابتة ونقية ٦ ثوانٍ دون تمايل. ثلاث محاولات ناجحة تُتقن اليوم.</div>
+  <!-- ============ HOME ============ -->
+  <div class="view active" id="view-home">
+    <div class="epigraph">من نَفَسٍ واحدٍ يبدأ كلُّ لحن</div>
+    <div class="phase-band" id="phaseBand">المرحلة الأولى · تأسيس الصوت</div>
+    <div class="sky" id="sky"></div>
 
-  <!-- STEP 0: intro / mic -->
-  <div class="card" id="cardIntro">
-    <div class="step-eyebrow">الخطوة الأولى</div>
-    <h2>نبدأ بإذن الميكروفون</h2>
-    <p class="lead">التطبيق يسمع نايك ليقيس طبقتك وثباتك مباشرةً. الصوت لا يغادر جهازك.</p>
-    <button class="btn-primary" id="btnMic">تشغيل الميكروفون والبدء</button>
-    <div class="hint" id="micHint"></div>
+    <div class="tonight">
+      <div class="eyebrow" id="tonightEyebrow">تدريب اليوم</div>
+      <div class="row">
+        <div class="glyph" id="tonightGlyph">دو</div>
+        <div class="info">
+          <h2 id="tonightTitle">نغمة القرار الطويلة</h2>
+          <p id="tonightBlurb">اثبت على نغمة القرار ٦ ثوانٍ دون تمايل.</p>
+          <span class="lat" id="tonightLat">C · اليوم ١</span>
+        </div>
+      </div>
+      <button class="btn-primary" id="btnStart">ابدأ التدريب</button>
+    </div>
+
+    <div class="ney-tuning" id="neyTuning"></div>
   </div>
 
-  <!-- STEP 1: calibration -->
-  <div class="card hidden" id="cardCalib">
-    <div class="step-eyebrow">الخطوة الثانية · معايرة</div>
-    <h2>عايِر نايك اليوم</h2>
-    <p class="lead">اعزف نغمة القرار (كل الثقوب مغلقة) واثبت عليها. سألتقط «دو» الخاصة بنايك اليوم لأقيس عليها.</p>
-    <div class="cents-live mute" id="calibReadout">…</div>
-    <button class="btn-primary" id="btnCalib">التقاط نغمة القرار</button>
-    <div class="hint" id="calibHint">اعزف واثبت — سألتقطها خلال ثلاث ثوانٍ.</div>
+  <!-- ============ CALIBRATION ============ -->
+  <div class="view" id="view-calib">
+    <div class="card">
+      <div class="step-eyebrow">معايرة الناي · مرة واحدة</div>
+      <h2>عايِر نايك</h2>
+      <p class="lead">اعزف نغمة القرار (كل الثقوب مغلقة) بنفَس هادئ ثابت. سألتقط «دو» الخاصة بنايك وأحفظها، فلا تعيدها كل يوم.</p>
+      <div class="cents-live mute" id="calibReadout">…</div>
+      <button class="btn-primary" id="btnCalib">التقاط نغمة القرار</button>
+      <div class="hint" id="calibHint">اعزف واثبت — سألتقطها خلال ثلاث ثوانٍ. انفخ برفق كما ستثبت في التمرين.</div>
+    </div>
+    <button class="back" id="calibBack">→ رجوع</button>
   </div>
 
-  <!-- STEP 2: exercise -->
-  <div class="card hidden" id="cardExercise">
-    <div class="step-eyebrow">التمرين · نغمة طويلة</div>
-    <div class="attempts" id="pips"></div>
-    <div class="concert-ref" id="concertRef"></div>
-
-    <div class="meter-wrap">
+  <!-- ============ SESSION ============ -->
+  <div class="view" id="view-session">
+    <div class="card">
+      <div class="step-eyebrow" id="sessEyebrow">اليوم ١ · نغمة طويلة</div>
+      <div class="attempts" id="pips"></div>
       <div class="bignote">
-        <span class="ar">دو</span>
-        <span class="meta"><span class="lat">C · قرار</span><br><span class="hz" id="targetHz">—</span></span>
+        <span class="ar" id="sessGlyph">دو</span>
+        <span class="meta"><span class="lat" id="sessLat">C</span><br><span class="hz" id="targetHz">—</span></span>
       </div>
       <div class="cents-live mute" id="centsLive">اضغط «ابدأ العزف»</div>
       <div class="ruler">
         <div class="band"></div><div class="center"></div>
-        <span class="tick" style="left:10%">-50</span>
-        <span class="tick" style="left:30%">-20</span>
-        <span class="tick" style="left:70%">+20</span>
-        <span class="tick" style="left:90%">+50</span>
+        <span class="tick" style="left:10%">-50</span><span class="tick" style="left:30%">-20</span>
+        <span class="tick" style="left:70%">+20</span><span class="tick" style="left:90%">+50</span>
         <div class="needle" id="needle"></div>
       </div>
-      <canvas id="trace" width="524" height="120"></canvas>
+      <canvas id="trace" width="524" height="110"></canvas>
       <div class="sustain">
-        <div class="lbl"><span>ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / 6.0 ث</span></div>
+        <div class="lbl"><span>ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span> ث</span></div>
         <div class="bar"><i id="sustainBar"></i></div>
       </div>
+      <div class="listen-row">
+        <button class="btn-ghost" id="btnListen">🔊 استمع للمثال</button>
+        <label class="toggle"><input type="checkbox" id="metroChk"> نقر خفيف للنفَس</label>
+      </div>
+      <button class="btn-rec" id="btnRec">ابدأ العزف</button>
+      <div id="resultZone"></div>
     </div>
-
-    <div class="listen-row">
-      <button class="btn-ghost" id="btnListen">🔊 استمع للمثال</button>
-      <label class="toggle"><input type="checkbox" id="metroChk"> نقر خفيف للنفَس</label>
-    </div>
-
-    <button class="btn-rec" id="btnRec">ابدأ العزف</button>
-
-    <div id="resultZone"></div>
+    <button class="back" id="sessBack">→ رجوع للرحلة</button>
   </div>
 
-  <!-- STEP 3: day complete -->
-  <div class="card hidden done-card" id="cardDone">
-    <div class="seal">✦ أُتقن اليوم الأول ✦</div>
-    <p class="lead">ثلاث نغمات قرار ثابتة ونقية. أساس الصوت وُضِع.</p>
+  <!-- ============ DONE ============ -->
+  <div class="view" id="view-done">
+    <div class="seal" id="doneSeal">✦ أُتقن اليوم ✦</div>
+    <p class="sub" id="doneSub">نجمة جديدة أُضيئت في سماء رحلتك.</p>
     <div class="stats" id="doneStats"></div>
-    <div class="next">
-      <b>الغد — اليوم ٢:</b> نمدّ الثبات إلى ٨ ثوانٍ، ونضيف نغمة «ري» (الثقب الأول)، فتبدأ أول نغمتين.
-    </div>
+    <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · اليوم ١ · <span style="font-family:'IBM Plex Mono',monospace">الإصدار d1.3-fix</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
+  <footer>مِران · <span class="v">الإصدار d2.0-shell</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
 </div>
 
 <script>
-/* ============================================================
-   Miran — Day 1 engine
-   Pitch: McLeod Pitch Method (NSDF) — validated to ~5 cents vs pYIN
-   ============================================================ */
-const SR_TARGET = 44100;
-let audioCtx, analyser, micStream, buf, rafId;
-let targetHz = null;              // his ney's captured qarar
-const FMIN=180, FMAX=1400, CLARITY=0.86;
+const $=id=>document.getElementById(id);
+const APP_VERSION='d2.0-shell';
 
-/* ===== LAYER 1: absolute concert-pitch reference (configurable) =====
-   Default A4 = 440 Hz (ISO 16, equal temperament). This layer is ONLY for
-   cross-instrument / recording compatibility and credibility — NOT for
-   scoring maqam intonation (that is Layer 2, the calibrated ney positions). */
-let CONCERT_A4 = 440;            // future: user-settable (440 / 442 / 445 / 415 …)
-// standard equal-tempered frequency of a note given semitone offset from A4
-const etFreq = (semisFromA4) => CONCERT_A4 * Math.pow(2, semisFromA4/12);
-// the qarar note is "دو / C" — for his Dūkāh ney the closed-holes note is C5,
-// which is 3 semitones ABOVE A4 (A4→A#4→B4→C5). standard C5 = A4 * 2^(3/12).
-const STD_QARAR_SEMIS = 3;
-// given a measured qarar Hz, what concert-A does the ney imply, and how far off 440?
-function neyConcertPitch(qararHz){
-  const impliedA4 = qararHz / Math.pow(2, STD_QARAR_SEMIS/12);
-  const centsOff  = 1200*Math.log2(impliedA4 / CONCERT_A4);
-  return { impliedA4, centsOff };
+/* ================= CURRICULUM (days as DATA) =================
+   semis = semitones above the qarar (دو). playable long-tone days
+   are built now; later days are stars awaiting their exercises. */
+const CURRICULUM=[
+  {id:1, note:'دو', lat:'C',  semis:0, kind:'longtone', targetSec:6, tol:20, stabMax:20, need:3, title:'نغمة القرار الطويلة', blurb:'اثبت على نغمة القرار ٦ ثوانٍ دون تمايل.'},
+  {id:2, note:'ري', lat:'D',  semis:2, kind:'longtone', targetSec:7, tol:20, stabMax:20, need:3, title:'نغمة ري الطويلة', blurb:'أضف نغمة ري (الثقب الأول)، واثبت ٧ ثوانٍ.'},
+  {id:3, note:'فا', lat:'F',  semis:5, kind:'longtone', targetSec:7, tol:20, stabMax:20, need:3, title:'نغمة فا الطويلة', blurb:'انتقل إلى فا، وثبّت النفَس ٧ ثوانٍ.'},
+  {id:4, note:'صول',lat:'G',  semis:7, kind:'longtone', targetSec:8, tol:20, stabMax:22, need:3, title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ثبّتها ٨ ثوانٍ.'},
+  {id:5, note:'—', lat:'',   semis:0, kind:'soon', title:'خمس نغمات ببطء', blurb:'قريبًا — تربط النغمات الأربع في نفَس هادئ.'},
+  {id:6, note:'—', lat:'',   semis:0, kind:'soon', title:'التحكم في الثقوب', blurb:'قريبًا.'},
+  {id:7, note:'—', lat:'',   semis:0, kind:'soon', title:'بداية النغمة ونهايتها', blurb:'قريبًا.'},
+  {id:8, note:'—', lat:'',   semis:0, kind:'soon', title:'النفَس الطويل', blurb:'قريبًا.'},
+  {id:9, note:'—', lat:'',   semis:0, kind:'soon', title:'ثبات دو وري', blurb:'قريبًا.'},
+  {id:10,note:'—', lat:'',   semis:0, kind:'soon', title:'ثبات فا وصول', blurb:'قريبًا.'},
+  {id:11,note:'—', lat:'',   semis:0, kind:'soon', title:'مراجعة متباعدة', blurb:'قريبًا.'},
+  {id:12,note:'—', lat:'',   semis:0, kind:'soon', title:'يوم تثبيت', blurb:'قريبًا.'},
+  {id:13,note:'—', lat:'',   semis:0, kind:'soon', title:'يوم اختبار', blurb:'قريبًا.'},
+  {id:14,note:'—', lat:'',   semis:0, kind:'soon', title:'أداء تأسيسي', blurb:'قريبًا.'},
+];
+// constellation coordinates (viewBox 320x430) — hand-placed winding path bottom→top
+const SKY=[[165,400],[110,368],[205,344],[135,306],[225,286],[95,258],[180,236],
+          [258,214],[130,190],[215,166],[92,146],[190,124],[262,100],[150,74]];
+
+/* ================= PERSISTENCE (localStorage, safe) ================= */
+const store={
+  get(k,f){ try{const v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return (this._m&&this._m[k])??f;} },
+  set(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){(this._m=this._m||{})[k]=v;} },
+  _m:{}
+};
+let calib = store.get('miran_cal', null);          // {qararHz, concertA4, cents, ts}
+let prog  = store.get('miran_prog', {done:{}, streakDays:0, lastDate:null});
+function saveProg(){ store.set('miran_prog', prog); }
+function saveCalib(){ store.set('miran_cal', calib); }
+
+const CONCERT_A4=440;
+const neyConcertPitch=q=>{const a=q/Math.pow(2,3/12);return{impliedA4:a,centsOff:1200*Math.log2(a/CONCERT_A4)};};
+const dayTarget=d=> calib ? calib.qararHz*Math.pow(2, d.semis/12) : null;   // Hz for a day's note
+function firstIncomplete(){ for(const d of CURRICULUM){ if(d.kind!=='soon' && !prog.done[d.id]) return d.id; } return CURRICULUM.length; }
+function isUnlocked(id){ // immediate unlock: any built day up to first-incomplete, plus completed ones
+  const fi=firstIncomplete(); return id<=fi && CURRICULUM.find(d=>d.id===id).kind!=='soon'; }
+
+/* ================= VIEW ROUTING ================= */
+function show(v){ document.querySelectorAll('.view').forEach(x=>x.classList.remove('active')); $('view-'+v).classList.add('active'); window.scrollTo(0,0); }
+
+/* ================= HOME RENDER ================= */
+function renderHome(){
+  const doneCount=Object.keys(prog.done).length;
+  $('streakN').textContent=doneCount;
+  // constellation
+  const W=320,H=430; let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة رحلة الأيام">`;
+  const fi=firstIncomplete();
+  // threads
+  for(let i=0;i<SKY.length-1;i++){
+    const [x1,y1]=SKY[i],[x2,y2]=SKY[i+1];
+    const done = prog.done[i+1];
+    svg+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${done?'thread-done':'thread-todo'}"/>`;
+  }
+  // stars
+  SKY.forEach(([x,y],i)=>{
+    const id=i+1, d=CURRICULUM[i], done=prog.done[id], current=(id===fi && d.kind!=='soon');
+    if(current) svg+=`<circle cx="${x}" cy="${y}" r="9" class="st-current-ring pulse"/>`;
+    const r = done?6:(current?6:4);
+    const cls = done?'st-done':(current?'st-current':'st-lock');
+    const tap = (done||current)?'st-tap':'';
+    svg+=`<circle cx="${x}" cy="${y}" r="${r}" class="${cls} ${tap}" data-day="${id}"/>`;
+    if(done||current) svg+=`<circle cx="${x}" cy="${y}" r="16" fill="transparent" class="st-tap" data-day="${id}"/>`;
+    svg+=`<text x="${x}" y="${y-11}" text-anchor="middle" class="star-num">${id}</text>`;
+  });
+  svg+=`</svg>`;
+  $('sky').innerHTML=svg;
+  $('sky').querySelectorAll('.st-tap').forEach(c=>c.addEventListener('click',()=>openDay(+c.dataset.day)));
+
+  // tonight card = first incomplete day
+  const d=CURRICULUM[fi-1] || CURRICULUM[CURRICULUM.length-1];
+  $('tonightGlyph').textContent=d.note;
+  $('tonightTitle').textContent=d.title;
+  $('tonightBlurb').textContent=d.blurb;
+  $('tonightLat').textContent=(d.lat?d.lat+' · ':'')+'اليوم '+toAr(d.id);
+  $('tonightEyebrow').textContent = doneCount>0 ? 'التالي في رحلتك' : 'أول أيام الرحلة';
+  $('btnStart').textContent = d.kind==='soon' ? 'قريبًا' : (doneCount>0?'تابع التدريب':'ابدأ التدريب');
+  $('btnStart').disabled = d.kind==='soon';
+  $('btnStart').style.opacity = d.kind==='soon' ? .5 : 1;
+  targetDayId=d.id;
+
+  // ney tuning line
+  if(calib){
+    const off=calib.cents, aligned=Math.abs(off)<=15;
+    $('neyTuning').innerHTML=`نايك: <b>${aligned?'مضبوط على A=440':(off>0?'أعلى قليلًا من A=440':'أخفض قليلًا من A=440')}</b>
+      <span class="ltr">(${calib.qararHz.toFixed(1)}Hz · ${off>=0?'+':''}${off.toFixed(0)}¢)</span> · <a id="reCalib">إعادة المعايرة</a>`;
+    $('reCalib').addEventListener('click',()=>show('calib'));
+  } else {
+    $('neyTuning').innerHTML=`<a id="reCalib">لم تُعايَر بعد — عايِر نايك أولًا</a>`;
+    $('reCalib').addEventListener('click',()=>show('calib'));
+  }
 }
+const arNum='٠١٢٣٤٥٦٧٨٩';
+const toAr=n=>String(n).replace(/\d/g,d=>arNum[d]);
 
-// ---- pitch detection (MPM / NSDF) ----
+function openDay(id){
+  if(!isUnlocked(id)) return;
+  targetDayId=id;
+  if(!calib){ show('calib'); return; }
+  startSession(id);
+}
+$('btnStart').addEventListener('click',()=>openDay(targetDayId));
+$('sessBack').addEventListener('click',()=>{ stopAll(); renderHome(); show('home'); });
+$('calibBack').addEventListener('click',()=>{ stopAll(); show('home'); });
+$('doneNext').addEventListener('click',()=>{ renderHome(); show('home'); });
+
+/* ================= AUDIO + PITCH (validated engine) ================= */
+let audioCtx, analyser, micStream, buf, rafId, onFrame=null, _lastDetect=0;
+const FMIN=140, FMAX=1600, CLARITY=0.86;
 function detectPitch(x, sr){
-  const n=x.length;
-  // remove DC
-  let mean=0; for(let i=0;i<n;i++) mean+=x[i]; mean/=n;
+  const n=x.length; let mean=0; for(let i=0;i<n;i++) mean+=x[i]; mean/=n;
   for(let i=0;i<n;i++) x[i]-=mean;
-  // energy gate
   let rms=0; for(let i=0;i<n;i++) rms+=x[i]*x[i]; rms=Math.sqrt(rms/n);
-  if(rms<0.006) return {hz:null,clarity:0,rms};
-  const tauMin=Math.floor(sr/FMAX), tauMax=Math.min(Math.floor(sr/FMIN), n-1);
-  const nsdf=new Float32Array(tauMax+1);
-  for(let tau=tauMin;tau<=tauMax;tau++){
-    let ac=0, m=0;
-    for(let j=0;j<n-tau;j++){ ac+=x[j]*x[j+tau]; m+=x[j]*x[j]+x[j+tau]*x[j+tau]; }
-    nsdf[tau]= m>0 ? 2*ac/m : 0;
-  }
-  // key maxima: peaks in positive regions after first positive zero-crossing
-  const peaks=[]; let tau=tauMin;
-  while(tau<=tauMax && nsdf[tau]>0) tau++;      // skip initial positive lobe
-  while(tau<=tauMax){
-    if(nsdf[tau]<=0){ tau++; continue; }
-    let start=tau, best=tau;
-    while(tau<=tauMax && nsdf[tau]>0){ if(nsdf[tau]>nsdf[best]) best=tau; tau++; }
-    peaks.push(best);
-  }
-  if(!peaks.length) return {hz:null,clarity:0,rms};
-  let maxv=0; for(const p of peaks) if(nsdf[p]>maxv) maxv=nsdf[p];
-  const thresh=0.8*maxv;
-  let chosen=peaks[0];
-  for(const p of peaks){ if(nsdf[p]>=thresh){ chosen=p; break; } }
-  // parabolic interpolation
-  let shift=0;
-  if(chosen>0 && chosen<tauMax){
-    const a=nsdf[chosen-1], b=nsdf[chosen], c=nsdf[chosen+1], d=a-2*b+c;
-    if(d!==0) shift=0.5*(a-c)/d;
-  }
-  const hz=sr/(chosen+shift);
-  return {hz, clarity:maxv, rms};
+  if(rms<0.006) return {hz:null,clarity:0};
+  const tauMin=Math.floor(sr/FMAX), tauMax=Math.min(Math.floor(sr/FMIN),n-1);
+  const d=new Float32Array(tauMax+1);
+  for(let t=tauMin;t<=tauMax;t++){ let ac=0,m=0; for(let j=0;j<n-t;j++){ac+=x[j]*x[j+t];m+=x[j]*x[j]+x[j+t]*x[j+t];} d[t]=m>0?2*ac/m:0; }
+  const peaks=[]; let t=tauMin; while(t<=tauMax&&d[t]>0)t++;
+  while(t<=tauMax){ if(d[t]<=0){t++;continue;} let best=t; while(t<=tauMax&&d[t]>0){if(d[t]>d[best])best=t;t++;} peaks.push(best); }
+  if(!peaks.length) return {hz:null,clarity:0};
+  let mx=0; for(const p of peaks) if(d[p]>mx)mx=d[p];
+  const th=0.8*mx; let ch=peaks[0]; for(const p of peaks){if(d[p]>=th){ch=p;break;}}
+  let sh=0; if(ch>0&&ch<tauMax){const a=d[ch-1],b=d[ch],c=d[ch+1],dd=a-2*b+c; if(dd!==0)sh=0.5*(a-c)/dd;}
+  return {hz:sr/(ch+sh), clarity:mx};
 }
 const centsBetween=(f,ref)=>1200*Math.log2(f/ref);
-
-// ---- audio setup ----
 async function initAudio(){
+  if(audioCtx) return;
   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  micStream=await navigator.mediaDevices.getUserMedia({audio:{
-    echoCancellation:false, noiseSuppression:false, autoGainControl:false
-  }});
+  micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
   const src=audioCtx.createMediaStreamSource(micStream);
-  analyser=audioCtx.createAnalyser();
-  analyser.fftSize=2048;
-  src.connect(analyser);
+  analyser=audioCtx.createAnalyser(); analyser.fftSize=2048; src.connect(analyser);
   buf=new Float32Array(analyser.fftSize);
 }
-
-// ---- shared read loop ----
-let onFrame=null, _lastDetect=0;
 function loop(ts){
-  // throttle the heavy autocorrelation to ~30fps — plenty for a tuning meter,
-  // and leaves the main thread free so the metronome never drops a frame
-  if(analyser && (ts - _lastDetect) >= 32){
-    _lastDetect = ts;
-    analyser.getFloatTimeDomainData(buf);
-    const p=detectPitch(buf.slice(), audioCtx.sampleRate);
-    if(onFrame) onFrame(p);
-  }
+  if(analyser && (ts-_lastDetect)>=32){ _lastDetect=ts; analyser.getFloatTimeDomainData(buf);
+    const p=detectPitch(buf.slice(),audioCtx.sampleRate); if(onFrame)onFrame(p); }
   rafId=requestAnimationFrame(loop);
 }
+function stopAll(){ onFrame=null; stopMetro(); if(droneOsc){try{droneOsc.stop();}catch(e){} droneOsc=null;} recording=false; }
 
-/* ---------- STEP 0: mic ---------- */
-const $=id=>document.getElementById(id);
-$('btnMic').addEventListener('click', async ()=>{
-  $('btnMic').disabled=true; $('micHint').textContent='…جارٍ طلب الإذن';
-  try{
-    await initAudio();
-    if(audioCtx.state==='suspended') await audioCtx.resume();
-    loop();
-    $('cardIntro').classList.add('hidden');
-    $('cardCalib').classList.remove('hidden');
-  }catch(e){
-    $('btnMic').disabled=false;
-    $('micHint').textContent='تعذّر تشغيل الميكروفون — تأكد من السماح بالإذن ثم أعد المحاولة.';
-  }
-});
-
-/* ---------- STEP 1: calibration ---------- */
-$('btnCalib').addEventListener('click', ()=>{
-  const samples=[]; let t0=performance.now(); $('btnCalib').disabled=true;
-  $('calibHint').textContent='اثبت على النغمة…';
+/* ================= CALIBRATION ================= */
+$('btnCalib').addEventListener('click', async ()=>{
+  $('btnCalib').disabled=true; $('calibHint').textContent='…جارٍ تشغيل الميكروفون';
+  try{ await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop(); }
+  catch(e){ $('btnCalib').disabled=false; $('calibReadout').className='cents-live off';
+    $('calibReadout').textContent='تعذّر الميكروفون — اسمح بالإذن'; return; }
+  const samples=[]; const t0=performance.now(); $('calibHint').textContent='اثبت على النغمة…';
   onFrame=(p)=>{
-    if(p.hz && p.clarity>=CLARITY){
-      samples.push(p.hz);
-      $('calibReadout').className='cents-live ok';
-      $('calibReadout').textContent=p.hz.toFixed(1)+' Hz';
-    }
+    if(p.hz && p.clarity>=CLARITY){ samples.push(p.hz);
+      $('calibReadout').className='cents-live ok'; $('calibReadout').textContent=p.hz.toFixed(1)+' Hz'; }
     if(performance.now()-t0>3200){
-      onFrame=null;
-      if(samples.length<15){
-        $('btnCalib').disabled=false;
-        $('calibReadout').className='cents-live off';
-        $('calibReadout').textContent='لم أسمع نغمة ثابتة — أعد المحاولة';
-        $('calibHint').textContent='اعزف أعلى قليلًا واثبت ٣ ثوانٍ.';
-        return;
-      }
-      // robust calibration: keep the stable cloud (last ~2s), drop octave/attack outliers
-      samples.sort((a,b)=>a-b);
-      let med=samples[Math.floor(samples.length/2)];
-      const cloud=samples.filter(h=>Math.abs(1200*Math.log2(h/med))<80);
-      cloud.sort((a,b)=>a-b);
-      targetHz=cloud.length? cloud[Math.floor(cloud.length/2)] : med; // Layer 2 target
-      $('targetHz').textContent=targetHz.toFixed(1)+' Hz';
-      // ---- Layer 1: report the ney's tuning vs concert A=440 ----
-      const cp=neyConcertPitch(targetHz);
-      const off=cp.centsOff, aligned=Math.abs(off)<=15;
-      const word = aligned ? 'مضبوط على' : (off>0 ? 'أعلى قليلًا من' : 'أخفض قليلًا من');
-      $('concertRef').className = 'concert-ref '+(aligned?'ok':'off');
-      $('concertRef').innerHTML =
-        `<b>مرجع الضبط الدولي:</b> نايك ${word} A=${CONCERT_A4}
-         <span class="ltr">(A≈${cp.impliedA4.toFixed(1)}Hz · ${off>=0?'+':''}${off.toFixed(0)} cents)</span>`;
-      $('cardCalib').classList.add('hidden');
-      $('cardExercise').classList.remove('hidden');
-      renderPips();
+      onFrame=null; $('btnCalib').disabled=false;
+      if(samples.length<15){ $('calibReadout').className='cents-live off';
+        $('calibReadout').textContent='لم أسمع نغمة ثابتة — أعد المحاولة'; $('calibHint').textContent='انفخ برفق واثبت ٣ ثوانٍ.'; return; }
+      samples.sort((a,b)=>a-b); let med=samples[Math.floor(samples.length/2)];
+      const cloud=samples.filter(h=>Math.abs(1200*Math.log2(h/med))<80); cloud.sort((a,b)=>a-b);
+      const q=cloud.length?cloud[Math.floor(cloud.length/2)]:med;
+      const cp=neyConcertPitch(q);
+      calib={qararHz:q, concertA4:CONCERT_A4, cents:cp.centsOff, ts:new Date().toISOString()}; saveCalib();
+      renderHome();
+      if(targetDayId) startSession(targetDayId); else show('home');
     }
   };
 });
 
-/* ---------- reference tone + metronome ---------- */
-let droneOsc=null;
-$('btnListen').addEventListener('click', ()=>{
-  if(!targetHz) return;
-  if(droneOsc){ droneOsc.stop(); droneOsc=null; $('btnListen').textContent='🔊 استمع للمثال'; return; }
-  droneOsc=audioCtx.createOscillator(); const g=audioCtx.createGain();
-  droneOsc.type='sine'; droneOsc.frequency.value=targetHz;
-  g.gain.value=0.0001; droneOsc.connect(g).connect(audioCtx.destination);
-  droneOsc.start(); g.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime+0.1);
-  $('btnListen').textContent='⏹ إيقاف المثال';
-  setTimeout(()=>{ if(droneOsc){droneOsc.stop();droneOsc=null;$('btnListen').textContent='🔊 استمع للمثال';} },4000);
-});
-/* metronome: lookahead scheduler on the AUDIO clock (not the render loop),
-   so beats are sample-accurate and never cause visual stutter */
-let metroTimer=null, nextBeatTime=0;
-const BEAT_SEC=1.0;                 // 60 BPM breathing pace (day 1)
-function scheduleClick(atTime){
-  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-  o.frequency.value=1600; g.gain.value=0.0001;
-  o.connect(g).connect(audioCtx.destination);
-  o.start(atTime);
-  g.gain.setValueAtTime(0.0001, atTime);
-  g.gain.exponentialRampToValueAtTime(0.05, atTime+0.005);
-  g.gain.exponentialRampToValueAtTime(0.0001, atTime+0.06);
-  o.stop(atTime+0.07);
-}
-function metroScheduler(){
-  // schedule any beats falling inside the next 120ms window, ahead of time
-  while(nextBeatTime < audioCtx.currentTime + 0.12){
-    scheduleClick(nextBeatTime);
-    nextBeatTime += BEAT_SEC;
-  }
-}
-function startMetro(){
-  nextBeatTime = audioCtx.currentTime + 0.06;
-  metroScheduler();
-  metroTimer = setInterval(metroScheduler, 25);   // light: just checks the clock
-}
-function stopMetro(){ if(metroTimer){ clearInterval(metroTimer); metroTimer=null; } }
-
-/* ---------- STEP 2: exercise ---------- */
-const TARGET_SEC=6.0, TOL=20, STAB_MAX=20;   // mastery thresholds
-let attempts=0, recording=false, recData=null;
+/* ================= SESSION ================= */
+let targetDayId=1, curDay=null, targetHz=null, TARGET_SEC=6, TOL=20, STAB_MAX=20, NEED=3;
+let attempts=0, recording=false, recData=null, sessionLog=null;
 const canvas=$('trace'), cx=canvas.getContext('2d');
-function setupCanvas(){ const r=canvas.getBoundingClientRect(); canvas.width=r.width*2; canvas.height=240; cx.scale(2,2);} 
-setupCanvas();
-function renderPips(){
-  $('pips').innerHTML='';
-  for(let i=0;i<3;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);}
+function setupCanvas(){ const r=canvas.getBoundingClientRect(); if(r.width){canvas.width=r.width*2;canvas.height=220;cx.setTransform(1,0,0,1,0,0);cx.scale(2,2);} }
+
+function startSession(id){
+  curDay=CURRICULUM[id-1];
+  if(curDay.kind==='soon') return;
+  targetHz=dayTarget(curDay); TARGET_SEC=curDay.targetSec; TOL=curDay.tol; STAB_MAX=curDay.stabMax; NEED=curDay.need;
+  attempts=0;
+  sessionLog={app:'miran', version:APP_VERSION, day:id, note:curDay.lat, kind:curDay.kind,
+    concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2), target_hz:+targetHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
+  $('sessEyebrow').textContent=`اليوم ${toAr(id)} · نغمة طويلة`;
+  $('sessGlyph').textContent=curDay.note; $('sessLat').textContent=curDay.lat;
+  $('targetHz').textContent=targetHz.toFixed(1)+' Hz'; $('targetSec').textContent=TARGET_SEC.toFixed(1);
+  $('resultZone').innerHTML=''; $('centsLive').className='cents-live mute'; $('centsLive').textContent='اضغط «ابدأ العزف»';
+  $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
+  renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawTraceBg();},30);
 }
+function renderPips(){ $('pips').innerHTML=''; for(let i=0;i<NEED;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);} }
+
 function drawTraceBg(){
-  const w=canvas.width/2, h=canvas.height/2;
-  cx.clearRect(0,0,w,h);
+  const w=canvas.width/2,h=canvas.height/2; cx.clearRect(0,0,w,h);
   cx.fillStyle='#0d1526'; cx.fillRect(0,0,w,h);
-  // tolerance band (jade glow)
   const cy=h/2, px=(TOL/50)*(h/2);
   cx.fillStyle='rgba(107,199,154,.12)'; cx.fillRect(0,cy-px,w,2*px);
   cx.strokeStyle='rgba(107,199,154,.4)'; cx.setLineDash([4,4]);
-  cx.beginPath();cx.moveTo(0,cy-px);cx.lineTo(w,cy-px);cx.moveTo(0,cy+px);cx.lineTo(w,cy+px);cx.stroke();
-  cx.setLineDash([]);
+  cx.beginPath();cx.moveTo(0,cy-px);cx.lineTo(w,cy-px);cx.moveTo(0,cy+px);cx.lineTo(w,cy+px);cx.stroke();cx.setLineDash([]);
   cx.strokeStyle='rgba(241,234,214,.45)';cx.lineWidth=1;cx.beginPath();cx.moveTo(0,cy);cx.lineTo(w,cy);cx.stroke();
 }
-drawTraceBg();
 
-$('btnRec').addEventListener('click', ()=>{ recording ? stopAttempt() : startAttempt(); });
+/* reference tone + metronome */
+let droneOsc=null;
+$('btnListen').addEventListener('click', async ()=>{
+  if(!targetHz) return; if(!audioCtx){await initAudio();}
+  if(droneOsc){ try{droneOsc.stop();}catch(e){} droneOsc=null; $('btnListen').textContent='🔊 استمع للمثال'; return; }
+  droneOsc=audioCtx.createOscillator(); const g=audioCtx.createGain();
+  droneOsc.type='sine'; droneOsc.frequency.value=targetHz; g.gain.value=0.0001;
+  droneOsc.connect(g).connect(audioCtx.destination); droneOsc.start();
+  g.gain.exponentialRampToValueAtTime(0.12,audioCtx.currentTime+0.1); $('btnListen').textContent='⏹ إيقاف المثال';
+  setTimeout(()=>{ if(droneOsc){try{droneOsc.stop();}catch(e){}droneOsc=null;$('btnListen').textContent='🔊 استمع للمثال';} },4000);
+});
+let metroTimer=null, nextBeatTime=0; const BEAT_SEC=1.0;
+function scheduleClick(at){ const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.frequency.value=1600;g.gain.value=0.0001;o.connect(g).connect(audioCtx.destination);o.start(at);
+  g.gain.setValueAtTime(0.0001,at);g.gain.exponentialRampToValueAtTime(0.05,at+0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001,at+0.06);o.stop(at+0.07); }
+function metroSched(){ while(nextBeatTime<audioCtx.currentTime+0.12){ scheduleClick(nextBeatTime); nextBeatTime+=BEAT_SEC; } }
+function startMetro(){ nextBeatTime=audioCtx.currentTime+0.06; metroSched(); metroTimer=setInterval(metroSched,25); }
+function stopMetro(){ if(metroTimer){clearInterval(metroTimer);metroTimer=null;} }
 
+$('btnRec').addEventListener('click', async ()=>{
+  if(!audioCtx){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ $('centsLive').className='cents-live off';$('centsLive').textContent='تعذّر الميكروفون';return;} }
+  recording? stopAttempt() : startAttempt();
+});
 function startAttempt(){
-  recording=true; $('btnRec').textContent='إنهاء المحاولة'; $('btnRec').classList.add('recording');
-  $('resultZone').innerHTML='';
-  recData={t0:performance.now(), pts:[], voiced:[]};
-  drawTraceBg();
-  if($('metroChk').checked){ startMetro(); }
-  const w=canvas.width/2, h=canvas.height/2, cy=h/2;
-  let lastX=0;
+  recording=true; $('btnRec').textContent='إنهاء المحاولة'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
+  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); drawTraceBg();
+  if($('metroChk').checked) startMetro();
+  const w=canvas.width/2,h=canvas.height/2,cy=h/2; let lastX=0;
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000;
-    const inTune = p.hz && p.clarity>=CLARITY;
-    let cents=null;
-    if(inTune){
-      cents=centsBetween(p.hz,targetHz);
-      // we KNOW the intended note is the qarar — fold any octave/harmonic
-      // mis-read toward the target so the ney's rich octave overtone can't fool the score
-      while(cents> 600) cents-=1200;
-      while(cents<-600) cents+=1200;
-      recData.pts.push({t:now,c:cents});
-    }
-    recData.voiced.push({t:now, on: inTune});
-    // live readout + needle
-    const nd=$('needle'), cl=$('centsLive');
-    if(inTune){
-      const clamped=Math.max(-50,Math.min(50,cents));
-      nd.style.left=(50+clamped)+'%';
-      const ok=Math.abs(cents)<=TOL;
-      nd.className='needle '+(ok?'ok':'off');
-      cl.className='cents-live '+(ok?'ok':'off');
-      cl.textContent=(cents>=0?'+':'')+cents.toFixed(0)+' cents';
-    }else{
-      cl.className='cents-live mute'; cl.textContent='… انفخ في الناي';
-    }
-    // scrolling trace
-    const x=Math.min(w, (now/ (TARGET_SEC+2)) * w);
-    if(inTune){
-      const y=cy - (Math.max(-50,Math.min(50,cents))/50)*(h/2);
-      const inTol=Math.abs(cents)<=TOL;
-      cx.strokeStyle=inTol?'#6BC79A':'#E39860'; cx.lineWidth=2.5;
-      cx.shadowBlur=8; cx.shadowColor=inTol?'rgba(107,199,154,.8)':'rgba(227,152,96,.7)';
-      cx.beginPath(); cx.moveTo(lastX,cy - (recData._ly!=null?recData._ly:0)); 
-      cx.lineTo(x,y); cx.stroke(); cx.shadowBlur=0; recData._ly=(cy-y); lastX=x;
-      recData._lyv=y;
-    }
+    const inTune=p.hz && p.clarity>=CLARITY; let cents=null;
+    if(inTune){ cents=centsBetween(p.hz,targetHz);
+      while(cents>600)cents-=1200; while(cents<-600)cents+=1200;   // fold to known target
+      recData.pts.push({t:now,c:cents}); }
+    recData.voiced.push({t:now,on:inTune});
+    const nd=$('needle'),cl=$('centsLive');
+    if(inTune){ const cl2=Math.max(-50,Math.min(50,cents)); nd.style.left=(50+cl2)+'%';
+      const ok=Math.abs(cents)<=TOL; nd.className='needle '+(ok?'ok':'off'); cl.className='cents-live '+(ok?'ok':'off');
+      cl.textContent=(cents>=0?'+':'')+cents.toFixed(0)+' cents'; }
+    else { cl.className='cents-live mute'; cl.textContent='… انفخ في الناي'; }
+    const x=Math.min(w,(now/(TARGET_SEC+2))*w);
+    if(inTune){ const y=cy-(Math.max(-50,Math.min(50,cents))/50)*(h/2); const inTol=Math.abs(cents)<=TOL;
+      cx.strokeStyle=inTol?'#6BC79A':'#E39860'; cx.lineWidth=2.5; cx.shadowBlur=8; cx.shadowColor=inTol?'rgba(107,199,154,.8)':'rgba(227,152,96,.7)';
+      cx.beginPath(); cx.moveTo(lastX, recData._ly!=null?recData._ly:cy); cx.lineTo(x,y); cx.stroke(); cx.shadowBlur=0; recData._ly=y; }
     lastX=x;
-    // sustain bar = longest continuous voiced run so far
-    const run=longestVoicedRun(recData.voiced);
-    $('sustainNum').textContent=run.toFixed(1);
+    const run=longestRun(recData.voiced); $('sustainNum').textContent=run.toFixed(1);
     $('sustainBar').style.width=Math.min(100,(run/TARGET_SEC)*100)+'%';
-    // auto-stop: sustained enough, or long silence after real playing
-    if(run>=TARGET_SEC+0.4){ stopAttempt(); }
-    if(now>14){ stopAttempt(); }
+    if(run>=TARGET_SEC+0.4) stopAttempt(); if(now>16) stopAttempt();
   };
 }
-
-function longestVoicedRun(v){
-  // longest continuous 'on' stretch, tolerating gaps < 0.15s
-  let best=0, curStart=null, lastOn=null;
-  for(const s of v){
-    if(s.on){ if(curStart==null) curStart=s.t; lastOn=s.t; }
-    else { if(curStart!=null && s.t-lastOn>0.15){ best=Math.max(best,lastOn-curStart); curStart=null; } }
-  }
-  if(curStart!=null) best=Math.max(best,(lastOn??curStart)-curStart);
-  return best;
-}
-
-function stopAttempt(){
-  if(!recording) return;
-  recording=false; onFrame=null;
-  if(metroTimer){ stopMetro(); }
+function longestRun(v){ let best=0,cs=null,lo=null; for(const s of v){ if(s.on){if(cs==null)cs=s.t;lo=s.t;} else{if(cs!=null&&s.t-lo>0.15){best=Math.max(best,lo-cs);cs=null;}} } if(cs!=null)best=Math.max(best,(lo??cs)-cs); return best; }
+function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; stopMetro();
   $('btnRec').textContent='ابدأ العزف'; $('btnRec').classList.remove('recording');
-  $('centsLive').className='cents-live mute'; $('centsLive').textContent='—';
-  $('needle').style.left='50%'; $('needle').className='needle';
-  score(recData);
-}
+  $('centsLive').className='cents-live mute'; $('centsLive').textContent='—'; $('needle').style.left='50%'; $('needle').className='needle';
+  score(recData); }
 
-/* ---------- scoring & ONE actionable message ---------- */
 function median(a){a=a.slice().sort((x,y)=>x-y);return a.length?a[Math.floor(a.length/2)]:0;}
 function std(a){if(a.length<2)return 0;const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/a.length);}
-
 function score(d){
-  const run=longestVoicedRun(d.voiced);
-  // restrict pitch stats to the sustained window
-  const csAll=d.pts.map(p=>p.c);
-  const medC=median(csAll);
-  // stability only over the true note cloud — drop any residual octave/harmonic glitches
-  const cs=csAll.filter(c=>Math.abs(c-medC)<80);
-  const stab=std(cs);
-  let ok=false, head='', body='', cls='retry';
-
-  if(run < TARGET_SEC-0.3){
-    head='نفَسك أقصر قليلًا';
-    body=`ثبتّ ${run.toFixed(1)} ثانية والهدف ${TARGET_SEC}. خذ نفسًا أعمق من البطن قبل البدء، وابدأ النفخ بهدوء.`;
-  } else if(Math.abs(medC) > TOL){
-    const dir = medC>0 ? 'أعلى' : 'أخفض';
-    head='الطبقة مالت عن دو';
-    body=`نغمتك ${Math.abs(medC).toFixed(0)} سنت ${dir} من القرار. استمع للمثال ثم طابقه — ${medC>0?'خفّف ضغط النفخ قليلًا':'زد ضغط النفخ قليلًا'}.`;
-  } else if(stab > STAB_MAX){
-    head='بدأت ثابتة ثم تمايلت';
-    body=`تشتّت طبقتك ${stab.toFixed(0)} سنت. ثبّت ضغط النفَس ولا ترخِ الشفاه قرب النهاية — تخيّل خطًا مستقيمًا.`;
-  } else {
-    ok=true; cls='ok'; attempts++;
-    head=`محاولة ناجحة (${attempts}/3)`;
-    body=`ثبات ${stab.toFixed(0)} سنت على مدى ${run.toFixed(1)} ثانية، والطبقة مضبوطة (${medC>=0?'+':''}${medC.toFixed(0)}). ${attempts<3?'أعد مرة أخرى بنفس الجودة.':''}`;
-  }
-
-  const statHtml=`
-    <div class="stats">
-      <div class="stat ${Math.abs(medC)<=TOL?'g':'w'}"><div class="v">${medC>=0?'+':''}${medC.toFixed(0)}</div><div class="k">سنت عن دو</div></div>
+  const run=longestRun(d.voiced); const all=d.pts.map(p=>p.c); const medC=median(all);
+  const cs=all.filter(c=>Math.abs(c-medC)<80); const stab=std(cs);
+  let ok=false,head='',body='',cls='retry';
+  if(run<TARGET_SEC-0.3){ head='نفَسك أقصر قليلًا'; body=`ثبتّ ${run.toFixed(1)} ثانية والهدف ${TARGET_SEC}. خذ نفسًا أعمق من البطن، وابدأ النفخ بهدوء.`; }
+  else if(Math.abs(medC)>TOL){ const dir=medC>0?'أعلى':'أخفض'; head=`الطبقة مالت عن ${curDay.note}`; body=`نغمتك ${Math.abs(medC).toFixed(0)} سنت ${dir}. استمع للمثال ثم طابقه — ${medC>0?'خفّف ضغط النفخ':'زد ضغط النفخ'} قليلًا.`; }
+  else if(stab>STAB_MAX){ head='بدأت ثابتة ثم تمايلت'; body=`تشتّت طبقتك ${stab.toFixed(0)} سنت. ثبّت ضغط النفَس ولا ترخِ الشفاه قرب النهاية.`; }
+  else { ok=true; cls='ok'; attempts++; head=`محاولة ناجحة (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبات ${stab.toFixed(0)} سنت على ${run.toFixed(1)} ثانية، والطبقة مضبوطة (${medC>=0?'+':''}${medC.toFixed(0)}). ${attempts<NEED?'أعد مرة أخرى بنفس الجودة.':''}`; }
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1,success:ok,cents_off:+medC.toFixed(1),stability_cents:+stab.toFixed(1),sustained_sec:+run.toFixed(2),ts:new Date().toISOString()});
+  $('resultZone').innerHTML=`<div class="stats">
+      <div class="stat ${Math.abs(medC)<=TOL?'g':'w'}"><div class="v">${medC>=0?'+':''}${medC.toFixed(0)}</div><div class="k">سنت عن ${curDay.note}</div></div>
       <div class="stat ${stab<=STAB_MAX?'g':'w'}"><div class="v">${stab.toFixed(0)}</div><div class="k">تشتّت الطبقة</div></div>
       <div class="stat ${run>=TARGET_SEC-0.3?'g':'b'}"><div class="v">${run.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
-    </div>`;
-  $('resultZone').innerHTML = statHtml +
-    `<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>` +
-    `<button class="btn-ghost" style="width:100%;margin-top:12px" onclick="exportReport()">↓ احفظ تقرير الجلسة (لأرسله لك)</button>`;
+    </div><div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
   renderPips();
-
-  // ---- session log (raw metrics for later analysis by Claude) ----
-  sessionLog.attempts.push({
-    n: sessionLog.attempts.length+1,
-    success: ok,
-    cents_off_qarar: +medC.toFixed(1),
-    stability_cents: +stab.toFixed(1),
-    sustained_sec: +run.toFixed(2),
-    pitch_series: d.pts.map(p=>({t:+p.t.toFixed(2), c:+p.c.toFixed(1)})),
-    ts: new Date().toISOString()
-  });
-
-  if(attempts>=3) setTimeout(finishDay, 900, medC, stab, run);
+  if(attempts>=NEED) setTimeout(()=>finishDay(medC,stab,run),900);
 }
-
-/* ---- export a small report file the user can upload to Claude ---- */
-let sessionLog = { app:'miran', version:'d1.3-fix', day:1, exercise:'long-tone qarar (دو/C)',
-  concert_A4:CONCERT_A4, started:new Date().toISOString(), attempts:[] };
-function exportReport(){
-  const cp = targetHz ? neyConcertPitch(targetHz) : null;
-  const report = {
-    ...sessionLog,
-    ney_calibration: targetHz ? {
-      qarar_hz:+targetHz.toFixed(2),
-      implied_concert_A4:+cp.impliedA4.toFixed(2),
-      cents_from_440:+cp.centsOff.toFixed(1)
-    } : null,
-    mastery_thresholds:{ tol_cents:TOL, stability_max_cents:STAB_MAX, target_sec:TARGET_SEC },
-    successful_attempts: attempts
-  };
-  const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`miran-day1-report-${new Date().toISOString().slice(0,10)}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-}
-
 function finishDay(medC,stab,run){
-  $('cardExercise').classList.add('hidden');
+  // record progress + streak
+  prog.done[curDay.id]={bestStab:+stab.toFixed(1),bestCents:+medC.toFixed(1),ts:new Date().toISOString()};
+  const today=new Date().toISOString().slice(0,10);
+  if(prog.lastDate!==today){ const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+    prog.streakDays=(prog.lastDate===y)?(prog.streakDays+1):1; prog.lastDate=today; }
+  saveProg();
+  stopAll();
+  $('doneSub').textContent=`نجمة اليوم ${toAr(curDay.id)} أُضيئت في سماء رحلتك.`;
   $('doneStats').innerHTML=`
     <div class="stat g"><div class="v">${stab.toFixed(0)}</div><div class="k">أفضل ثبات (سنت)</div></div>
     <div class="stat g"><div class="v">${run.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
-    <div class="stat g"><div class="v">3/3</div><div class="k">محاولات ناجحة</div></div>`;
-  $('cardDone').classList.remove('hidden');
-  $('doneStats').insertAdjacentHTML('afterend',
-    `<button class="btn-primary" style="margin-top:14px" onclick="exportReport()">↓ احفظ تقرير اليوم كاملًا</button>`);
-  if(micStream) micStream.getTracks().forEach(t=>t.stop());
-  cancelAnimationFrame(rafId);
+    <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>`;
+  show('done');
 }
+
+/* ================= BOOT ================= */
+renderHome(); show('home');
 </script>
 </body>
 </html>
