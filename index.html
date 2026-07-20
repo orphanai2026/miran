@@ -86,8 +86,19 @@
     box-shadow:0 8px 24px rgba(233,183,94,.28), inset 0 1px 0 rgba(255,255,255,.4);margin-top:16px}
   .btn-primary:disabled{background:#20293f;color:var(--text-soft);box-shadow:none;border:1px dashed var(--hair-cool);cursor:not-allowed}
   .btn-ghost{background:rgba(233,183,94,.06);border:1px solid var(--hair);color:var(--gold)}
-  .btn-rec{width:100%;color:#fff;background:linear-gradient(135deg,#E68A5E,#DC6E4C);box-shadow:0 8px 24px rgba(220,110,76,.3)}
-  .btn-rec.recording{background:linear-gradient(135deg,#6BC79A,#3f8f6a);animation:pulse2 1.6s ease-out infinite}
+  .control-deck{display:flex;align-items:center;justify-content:center;gap:22px;margin:18px 0 4px}
+  .deck-side{width:52px;height:52px;border-radius:50%;background:rgba(233,183,94,.06);border:1px solid var(--hair);
+    color:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    transition:background .15s,border-color .15s}
+  .deck-side .deck-icon{font-size:19px;pointer-events:none}
+  label.deck-side{position:relative}
+  label.deck-side input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0}
+  label.deck-side:has(input:checked){background:rgba(107,199,154,.16);border-color:var(--jade);color:var(--jade)}
+  .btn-rec-round{width:84px;height:84px;border-radius:50%;flex-shrink:0;padding:0;color:#fff;
+    background:linear-gradient(135deg,#E68A5E,#DC6E4C);box-shadow:0 8px 28px rgba(220,110,76,.38);
+    font-size:.9rem;font-weight:700}
+  .btn-rec-round.recording{background:linear-gradient(135deg,#6BC79A,#3f8f6a);animation:pulse2 1.6s ease-out infinite}
+  .btn-rec-round:active{transform:scale(.96)}
   @keyframes pulse2{0%{box-shadow:0 0 0 0 rgba(107,199,154,.45)}70%{box-shadow:0 0 0 16px rgba(107,199,154,0)}100%{box-shadow:0 0 0 0 rgba(107,199,154,0)}}
 
   .ney-tuning{text-align:center;font-size:.76rem;color:var(--text-soft);margin-top:14px}
@@ -132,7 +143,8 @@
   .ruler .needle.off{background:var(--ember);box-shadow:0 0 14px var(--ember)}
 
   canvas#orbit{width:100%;height:300px;display:block;border-radius:16px;background:#0d1526;
-    border:1px solid var(--hair-cool);margin-top:6px;box-shadow:inset 0 2px 14px rgba(0,0,0,.5)}
+    border:1px solid var(--hair-cool);margin-top:6px;box-shadow:inset 0 2px 14px rgba(0,0,0,.5);transition:height .15s}
+  canvas#orbit.thread{height:96px}
   canvas#trace{width:100%;height:110px;display:block;border-radius:12px;background:#0d1526;
     border:1px solid var(--hair-cool);margin-top:10px;box-shadow:inset 0 2px 12px rgba(0,0,0,.45)}
 
@@ -232,11 +244,14 @@
         <div class="lbl"><span id="sustainLabel">ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span> ث</span></div>
         <div class="bar"><i id="sustainBar"></i></div>
       </div>
-      <div class="listen-row">
-        <button class="btn-ghost" id="btnListen">🔊 استمع للمثال</button>
-        <label class="toggle"><input type="checkbox" id="metroChk"> نقر خفيف للنفَس</label>
+      <div class="control-deck">
+        <label class="deck-side" id="metroChkWrap" title="نقر خفيف للنفَس">
+          <input type="checkbox" id="metroChk">
+          <span class="deck-icon">♩</span>
+        </label>
+        <button class="btn-rec-round" id="btnRec"><span id="btnRecLabel">ابدأ</span></button>
+        <button class="deck-side" id="btnListen" title="استمع للمثال"><span class="deck-icon">🔊</span></button>
       </div>
-      <button class="btn-rec" id="btnRec">ابدأ العزف</button>
       <div id="resultZone"></div>
     </div>
     <button class="back" id="sessBack">→ رجوع للرحلة</button>
@@ -250,12 +265,12 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d2.3-transition</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
+  <footer>مِران · <span class="v">الإصدار d2.6-staff</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d2.3-transition';
+const APP_VERSION='d2.6-staff';
 
 /* ================= CURRICULUM (days as DATA) =================
    semis = semitones above the qarar (دو). playable long-tone days
@@ -433,8 +448,11 @@ let attempts=0, recording=false, recData=null, sessionLog=null;
 const canvas=$('orbit'), cx=canvas.getContext('2d');
 let ORB={w:0,h:0,cx:0,cy:0,unit:0}; const ORB_RANGE=55;
 function setupCanvas(){ const r=canvas.getBoundingClientRect(); if(!r.width)return;
-  const dpr=Math.min(2,window.devicePixelRatio||1); canvas.width=r.width*dpr; canvas.height=300*dpr;
-  cx.setTransform(dpr,0,0,dpr,0,0); ORB={w:r.width,h:300,cx:r.width/2,cy:150,unit:(150-30)/ORB_RANGE}; }
+  const thread = curDay && curDay.kind==='longtone';
+  canvas.classList.toggle('thread', !!thread);
+  const cssH = thread ? 96 : 300;
+  const dpr=Math.min(2,window.devicePixelRatio||1); canvas.width=r.width*dpr; canvas.height=cssH*dpr;
+  cx.setTransform(dpr,0,0,dpr,0,0); ORB={w:r.width,h:cssH,cx:r.width/2,cy:cssH/2,unit:(cssH/2-14)/ORB_RANGE}; }
 function orbY(c){ return ORB.cy - Math.max(-ORB_RANGE,Math.min(ORB_RANGE,c))*ORB.unit; }
 function drawOrbitBg(){ const {w,h,cx:mx,cy}=ORB; cx.clearRect(0,0,w,h); cx.fillStyle='#0d1526'; cx.fillRect(0,0,w,h);
   cx.strokeStyle='rgba(154,163,190,.14)'; cx.lineWidth=1;
@@ -442,6 +460,49 @@ function drawOrbitBg(){ const {w,h,cx:mx,cy}=ORB; cx.clearRect(0,0,w,h); cx.fill
   cx.strokeStyle='rgba(233,183,94,.5)'; cx.lineWidth=2; cx.setLineDash([3,4]);
   cx.beginPath(); cx.arc(mx,cy,TOL*ORB.unit,0,7); cx.stroke(); cx.setLineDash([]);
   cx.fillStyle='rgba(233,183,94,.05)'; cx.beginPath(); cx.arc(mx,cy,TOL*ORB.unit,0,7); cx.fill(); }
+
+/* ---- compact horizontal thread meter (long-tone only, space-saving) ---- */
+let _thread=[]; const THREAD_N=90;
+function drawThreadBg(){ const {w,h}=ORB; cx.clearRect(0,0,w,h); cx.fillStyle='#0d1526'; cx.fillRect(0,0,w,h);
+  const cy=h/2, px=(TOL/ORB_RANGE)*(h/2-10);
+  // tolerance band around the target (middle staff line)
+  cx.fillStyle='rgba(107,199,154,.09)'; cx.fillRect(0,cy-px,w,2*px);
+  // five staff lines, evenly spaced like sheet music — the middle one is the target pitch
+  const gap=(h-24)/4;
+  for(let i=-2;i<=2;i++){
+    const yy=cy+i*gap;
+    if(i===0){ cx.strokeStyle='rgba(233,183,94,.55)'; cx.lineWidth=1.4; }
+    else { cx.strokeStyle='rgba(241,234,214,.16)'; cx.lineWidth=1; }
+    cx.beginPath(); cx.moveTo(14,yy); cx.lineTo(w-14,yy); cx.stroke();
+  }
+  cx.strokeStyle='rgba(107,199,154,.35)'; cx.setLineDash([3,4]);
+  cx.beginPath();cx.moveTo(0,cy-px);cx.lineTo(w,cy-px);cx.moveTo(0,cy+px);cx.lineTo(w,cy+px);cx.stroke();cx.setLineDash([]);
+  // a small clef-like dot at the staff's start, echoing a music score
+  cx.fillStyle='rgba(233,183,94,.5)'; cx.beginPath(); cx.arc(14,cy,2.4,0,7); cx.fill(); }
+function drawThreadIdle(){ drawThreadBg(); const {w,cy}= {w:ORB.w,cy:ORB.cy};
+  cx.fillStyle='rgba(154,163,190,.7)'; cx.font="500 12px 'IBM Plex Sans Arabic'"; cx.textAlign='center';
+  cx.fillText('اضغط «ابدأ» ثم انفخ', ORB.w/2, ORB.h-8); cx.textAlign='start'; }
+function renderThread(cents, inTune){
+  _thread.push({c:cents, ok:inTune}); if(_thread.length>THREAD_N)_thread.shift();
+  drawThreadBg(); const {w}=ORB;
+  cx.lineWidth=2; cx.lineJoin='round';
+  for(let i=1;i<_thread.length;i++){ const x0=(i-1)/(THREAD_N-1)*w, x1=i/(THREAD_N-1)*w;
+    cx.strokeStyle=_thread[i].ok?'#6BC79A':'#E39860';
+    cx.beginPath(); cx.moveTo(x0,orbY(_thread[i-1].c)); cx.lineTo(x1,orbY(_thread[i].c)); cx.stroke(); }
+  const head=_thread[_thread.length-1]; const hx=(_thread.length-1)/(THREAD_N-1)*w, hy=orbY(head.c);
+  const col=head.ok?'#6BC79A':'#E39860';
+  const g=cx.createRadialGradient(hx,hy,1,hx,hy,16); g.addColorStop(0,head.ok?'rgba(107,199,154,.55)':'rgba(227,152,96,.5)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  cx.fillStyle=g; cx.beginPath(); cx.arc(hx,hy,16,0,7); cx.fill();
+  cx.fillStyle=col; cx.beginPath(); cx.arc(hx,hy,6,0,7); cx.fill();
+  cx.fillStyle=head.ok?'#8fdcb4':'#f0b98a'; cx.font="600 13px 'IBM Plex Mono',monospace"; cx.textAlign='center';
+  cx.fillText((cents>=0?'+':'')+cents.toFixed(0)+'¢', Math.min(w-26,Math.max(26,hx)), 16); cx.textAlign='start';
+}
+function renderThreadSilent(){ _thread.push({c:0, ok:false, mute:true}); if(_thread.length>THREAD_N)_thread.shift();
+  drawThreadBg(); const {w}=ORB;
+  for(let i=1;i<_thread.length;i++){ if(_thread[i].mute||_thread[i-1].mute) continue;
+    const x0=(i-1)/(THREAD_N-1)*w, x1=i/(THREAD_N-1)*w;
+    cx.strokeStyle=_thread[i].ok?'#6BC79A':'#E39860'; cx.lineWidth=2;
+    cx.beginPath(); cx.moveTo(x0,orbY(_thread[i-1].c)); cx.lineTo(x1,orbY(_thread[i].c)); cx.stroke(); } }
 
 function startSession(id){
   curDay=CURRICULUM[id-1];
@@ -471,7 +532,7 @@ function startSession(id){
   $('sustainLabel').textContent='ثبات النفَس على النغمة';
   $('resultZone').innerHTML='';
   $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
-  renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawOrbitBg();drawIdleBall();},40);
+  renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawThreadIdle();},40);
 }
 function renderPips(){ $('pips').innerHTML=''; for(let i=0;i<NEED;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);} }
 
@@ -508,12 +569,12 @@ function renderOrbitSilent(now){ drawOrbitBg(); const {cx:mx,cy}=ORB; const dt=M
 let droneOsc=null;
 $('btnListen').addEventListener('click', async ()=>{
   if(!targetHz) return; if(!audioCtx){await initAudio();}
-  if(droneOsc){ try{droneOsc.stop();}catch(e){} droneOsc=null; $('btnListen').textContent='🔊 استمع للمثال'; return; }
+  if(droneOsc){ try{droneOsc.stop();}catch(e){} droneOsc=null; $('btnListen').innerHTML='<span class="deck-icon">🔊</span>'; return; }
   droneOsc=audioCtx.createOscillator(); const g=audioCtx.createGain();
   droneOsc.type='sine'; droneOsc.frequency.value=targetHz; g.gain.value=0.0001;
   droneOsc.connect(g).connect(audioCtx.destination); droneOsc.start();
-  g.gain.exponentialRampToValueAtTime(0.12,audioCtx.currentTime+0.1); $('btnListen').textContent='⏹ إيقاف المثال';
-  setTimeout(()=>{ if(droneOsc){try{droneOsc.stop();}catch(e){}droneOsc=null;$('btnListen').textContent='🔊 استمع للمثال';} },4000);
+  g.gain.exponentialRampToValueAtTime(0.12,audioCtx.currentTime+0.1); $('btnListen').innerHTML='<span class="deck-icon">⏹</span>';
+  setTimeout(()=>{ if(droneOsc){try{droneOsc.stop();}catch(e){}droneOsc=null;$('btnListen').innerHTML='<span class="deck-icon">🔊</span>';} },4000);
 });
 let metroTimer=null, nextBeatTime=0; const BEAT_SEC=1.0;
 function scheduleClick(at){ const o=audioCtx.createOscillator(),g=audioCtx.createGain();
@@ -524,13 +585,40 @@ function metroSched(){ while(nextBeatTime<audioCtx.currentTime+0.12){ scheduleCl
 function startMetro(){ nextBeatTime=audioCtx.currentTime+0.06; metroSched(); metroTimer=setInterval(metroSched,25); }
 function stopMetro(){ if(metroTimer){clearInterval(metroTimer);metroTimer=null;} }
 
+let counting=false;
+function playTick(freq){ if(!audioCtx)return; const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.frequency.value=freq||1200; g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination);
+  const t=audioCtx.currentTime; o.start(t); g.gain.exponentialRampToValueAtTime(0.06,t+0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+0.08); o.stop(t+0.09); }
+function drawCountdown(k){
+  setupCanvas();
+  const compact = curDay.kind==='longtone';
+  if(curDay.kind==='transition') drawTransitionBg(0); else if(compact) drawThreadBg(); else drawOrbitBg();
+  cx.fillStyle='rgba(233,183,94,.92)'; cx.font=(compact?"700 34px ":"700 66px ")+"'Aref Ruqaa',serif"; cx.textAlign='center';
+  cx.fillText(toAr(k), ORB.cx, ORB.cy + (compact?10:24));
+  if(!compact){
+    cx.fillStyle='rgba(241,234,214,.8)'; cx.font="500 14px 'IBM Plex Sans Arabic'";
+    const note = curDay.kind==='transition' ? 'دو' : curDay.note;
+    cx.fillText('استعدّ على '+note, ORB.cx, ORB.h-20);
+  }
+  cx.textAlign='start';
+}
+function runCountdown(cb){
+  counting=true; $('btnRecLabel').textContent='…'; let n=4; drawCountdown(n); playTick(1100);
+  const iv=setInterval(()=>{ n--;
+    if(n>=1){ drawCountdown(n); playTick(n===1?1650:1100); }
+    else { clearInterval(iv); counting=false; cb(); }
+  },1000);
+}
 $('btnRec').addEventListener('click', async ()=>{
+  if(counting) return;
+  if(recording){ stopAttempt(); return; }
   if(!audioCtx){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ setupCanvas();drawOrbitBg(); cx.fillStyle='#f0b98a';cx.font="500 14px 'IBM Plex Sans Arabic'";cx.textAlign='center';cx.fillText('تعذّر الميكروفون — اسمح بالإذن',ORB.cx,ORB.cy);cx.textAlign='start'; return;} }
-  recording? stopAttempt() : (curDay.kind==='transition'? startTransition() : startAttempt());
+  runCountdown(()=> curDay.kind==='transition'? startTransition() : startAttempt());
 });
 function startAttempt(){
-  recording=true; $('btnRec').textContent='إنهاء المحاولة'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
-  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); _tail=[]; _rings=[]; _steadyAcc=0; _lastTs=0;
+  recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
+  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); _thread=[]; _lastTs=0;
   if($('metroChk').checked) startMetro();
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000; const nowS=performance.now()/1000;
@@ -539,7 +627,7 @@ function startAttempt(){
       while(cents>600)cents-=1200; while(cents<-600)cents+=1200;   // fold to known target
       recData.pts.push({t:now,c:cents}); }
     recData.voiced.push({t:now,on:inTune});
-    if(inTune) renderOrbit(cents, Math.abs(cents)<=TOL, nowS); else renderOrbitSilent(nowS);
+    if(inTune) renderThread(cents, Math.abs(cents)<=TOL); else renderThreadSilent();
     const run=longestRun(recData.voiced); $('sustainNum').textContent=run.toFixed(1);
     $('sustainBar').style.width=Math.min(100,(run/TARGET_SEC)*100)+'%';
     if(run>=TARGET_SEC+0.4) stopAttempt(); if(now>16) stopAttempt();
@@ -547,10 +635,10 @@ function startAttempt(){
 }
 function longestRun(v){ let best=0,cs=null,lo=null; for(const s of v){ if(s.on){if(cs==null)cs=s.t;lo=s.t;} else{if(cs!=null&&s.t-lo>0.15){best=Math.max(best,lo-cs);cs=null;}} } if(cs!=null)best=Math.max(best,(lo??cs)-cs); return best; }
 function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; stopMetro();
-  $('btnRec').textContent='ابدأ العزف'; $('btnRec').classList.remove('recording');
+  $('btnRecLabel').textContent='ابدأ'; $('btnRec').classList.remove('recording');
   setupCanvas();
   if(curDay.kind==='transition'){ drawTransitionIdle(); scoreTransition(recData); }
-  else { drawOrbitBg(); drawIdleBall(); score(recData); } }
+  else { drawThreadIdle(); score(recData); } }
 
 function median(a){a=a.slice().sort((x,y)=>x-y);return a.length?a[Math.floor(a.length/2)]:0;}
 function std(a){if(a.length<2)return 0;const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/a.length);}
@@ -620,7 +708,7 @@ function cueChime(){ if(!audioCtx)return; const o=audioCtx.createOscillator(),g=
   g.gain.exponentialRampToValueAtTime(0.14,audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.3); o.stop(audioCtx.currentTime+0.32); }
 
 function startTransition(){
-  recording=true; $('btnRec').textContent='إلغاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
+  recording=true; $('btnRecLabel').textContent='إلغاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
   recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); _tail=[]; _rings=[]; _lastTs=0; recData._cued=false;
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000, nowS=performance.now()/1000;
