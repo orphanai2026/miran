@@ -291,13 +291,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d4.1-breath</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d4.2-exportfix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d4.1-breath';
+const APP_VERSION='d4.2-exportfix';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1158,6 +1158,8 @@ function finishBreath(){
 $('btnExport').addEventListener('click', ()=>{
   const report={ app:'miran', version:APP_VERSION, exported:new Date().toISOString(),
     ney_calibration: calib ? {qarar_hz:+calib.qararHz.toFixed(2), implied_concert_A4:+neyConcertPitch(calib.qararHz).impliedA4.toFixed(2), cents_from_440:+calib.cents.toFixed(1)} : null,
+    foundation: { breath_stage: prog.foundation.breath ? 'complete' : 'in-progress',
+                  breath_rung_reached: prog.foundation.rung||0, breath_rungs: BREATH.rungs },
     days_mastered: Object.keys(prog.done).length,
     streak_days: prog.streakDays,
     progress: prog.done };
