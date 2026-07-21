@@ -86,8 +86,10 @@
     box-shadow:0 8px 24px rgba(233,183,94,.28), inset 0 1px 0 rgba(255,255,255,.4);margin-top:16px}
   .btn-primary:disabled{background:#20293f;color:var(--text-soft);box-shadow:none;border:1px dashed var(--hair-cool);cursor:not-allowed}
   .btn-ghost{background:rgba(233,183,94,.06);border:1px solid var(--hair);color:var(--gold)}
-  .control-deck{display:flex;align-items:center;justify-content:center;gap:22px;margin:18px 0 4px}
-  .beat-light{position:absolute;top:-4px;left:-4px;width:12px;height:12px;border-radius:50%;
+  .control-deck{display:flex;align-items:center;justify-content:center;gap:26px;margin:18px auto 2px;max-width:320px}
+  .deck-item{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .deck-label{font-size:.62rem;color:var(--text-soft);white-space:nowrap}
+  .beat-light{position:absolute;top:-3px;left:-3px;width:11px;height:11px;border-radius:50%;
     background:var(--hair-cool);pointer-events:none}
   .beat-light.flash{animation:beatflash .25s ease-out}
   @keyframes beatflash{0%{background:var(--jade);box-shadow:0 0 12px 4px var(--jade)}100%{background:var(--hair-cool);box-shadow:none}}
@@ -95,9 +97,9 @@
     color:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
     transition:background .15s,border-color .15s}
   .deck-side .deck-icon{font-size:19px;pointer-events:none}
-  label.deck-side{position:relative}
-  label.deck-side input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0}
-  label.deck-side:has(input:checked){background:rgba(107,199,154,.16);border-color:var(--jade);color:var(--jade)}
+  .deck-side{position:relative}
+  .deck-side.active{background:rgba(107,199,154,.16);border-color:var(--jade);color:var(--jade)}
+  .deck-side.playing{background:rgba(233,183,94,.18);border-color:var(--gold)}
   .btn-rec-round{width:84px;height:84px;border-radius:50%;flex-shrink:0;padding:0;color:#fff;
     background:linear-gradient(135deg,#E68A5E,#DC6E4C);box-shadow:0 8px 28px rgba(220,110,76,.38);
     font-size:.9rem;font-weight:700}
@@ -261,16 +263,22 @@
         <div class="bar"><i id="sustainBar"></i></div>
       </div>
       <div class="control-deck">
-        <label class="deck-side" id="metroChkWrap" title="نقر خفيف للنفَس">
-          <input type="checkbox" id="metroChk">
-          <span class="deck-icon">♩</span>
-          <span id="beatLight" class="beat-light"></span>
-        </label>
+        <div class="deck-item">
+          <button class="deck-side" id="btnMetro" title="نقر المترونوم">
+            <span class="deck-icon" id="metroIcon">♩</span>
+            <span id="beatLight" class="beat-light"></span>
+          </button>
+          <span class="deck-label" id="metroLabel">متوقّف</span>
+        </div>
         <button class="btn-rec-round" id="btnRec"><span id="btnRecLabel">ابدأ</span></button>
-        <button class="deck-side" id="btnListen" title="استمع للمثال"><span class="deck-icon">🔊</span></button>
+        <div class="deck-item">
+          <button class="deck-side" id="btnListen" title="استمع للمثال بتكرار"><span class="deck-icon">🔊</span></button>
+          <span class="deck-label">استمع للمثال</span>
+        </div>
       </div>
       <div id="resultZone"></div>
     </div>
+    <div class="hint" id="deckHint">اضغط أيقونة النقر لتدوير الوضع: صوت وضوء، صوت فقط، ضوء فقط، أو إيقاف.</div>
     <button class="back" id="sessBack">→ رجوع للرحلة</button>
   </div>
 
@@ -283,13 +291,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d3.3-guidefix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d3.4-controls</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d3.3-guidefix';
+const APP_VERSION='d3.4-controls';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -675,32 +683,67 @@ function tone(freq, startAt, dur, peakGain){
   g.gain.exponentialRampToValueAtTime(0.0001, startAt+dur);
   o.stop(startAt+dur+0.05);
 }
-let _listenPlaying=false;
+/* ---- listening example: loops the target note/interval until stopped ---- */
+let _listenPlaying=false, _listenTimer=null;
+function scheduleListenCycle(){
+  if(!_listenPlaying) return;
+  const moving = curDay.kind==='transition' || curDay.kind==='exchange';
+  const t0=audioCtx.currentTime;
+  let cycleMs;
+  if(moving){ tone(TR.fromHz, t0+0.05, 0.9); tone(TR.toHz, t0+1.2, 0.9); cycleMs=2600; }
+  else { const hz = curDay.kind==='longtone' ? dayTarget(curDay) : targetHz; tone(hz, t0+0.05, 1.6); cycleMs=2200; }
+  _listenTimer=setTimeout(scheduleListenCycle, cycleMs);
+}
 $('btnListen').addEventListener('click', async ()=>{
   if(!audioCtx){await initAudio();} if(audioCtx.state==='suspended') await audioCtx.resume();
-  if(_listenPlaying) return;
+  if(_listenPlaying){
+    _listenPlaying=false; clearTimeout(_listenTimer);
+    $('btnListen').innerHTML='<span class="deck-icon">🔊</span>'; $('btnListen').classList.remove('playing');
+    return;
+  }
   const moving = curDay.kind==='transition' || curDay.kind==='exchange';
-  const hz = moving ? null : (curDay.kind==='longtone' ? dayTarget(curDay) : targetHz);
-  if(moving && !TR) return; if(!moving && !hz) return;
-  _listenPlaying=true; $('btnListen').innerHTML='<span class="deck-icon">⏹</span>';
-  const t0=audioCtx.currentTime;
-  if(moving){ tone(TR.fromHz, t0+0.05, 0.9); tone(TR.toHz, t0+1.15, 0.9); }
-  else { tone(hz, t0+0.05, 1.6); }
-  setTimeout(()=>{ _listenPlaying=false; $('btnListen').innerHTML='<span class="deck-icon">🔊</span>'; }, moving?2300:1900);
+  if(moving && !TR) return; if(!moving && curDay.kind==='longtone' && !dayTarget(curDay)) return;
+  _listenPlaying=true; $('btnListen').innerHTML='<span class="deck-icon">⏸</span>'; $('btnListen').classList.add('playing');
+  scheduleListenCycle();
 });
+
+/* ---- metronome: cycles both → sound-only → light-only → off ---- */
+let metroMode='off'; // 'off' | 'both' | 'sound' | 'light'
+const METRO_LABEL={off:'متوقّف', both:'صوت وضوء', sound:'صوت فقط', light:'ضوء فقط'};
+const METRO_ICON ={off:'♩', both:'🔊💡', sound:'🔊', light:'💡'};
+function updateMetroBtn(){
+  $('metroIcon').textContent=METRO_ICON[metroMode];
+  $('metroLabel').textContent=METRO_LABEL[metroMode];
+  $('btnMetro').classList.toggle('active', metroMode!=='off');
+}
+$('btnMetro').addEventListener('click', ()=>{
+  metroMode = metroMode==='off'?'both' : metroMode==='both'?'sound' : metroMode==='sound'?'light' : 'off';
+  updateMetroBtn();
+  if(metroMode==='off') stopMetro(); else if(!metroTimer && recording) startMetro();
+});
+updateMetroBtn();
+
 let metroTimer=null, nextBeatTime=0; const BEAT_SEC=1.0;
 function flashBeat(){ const el=$('beatLight'); if(!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
-function scheduleClick(at){ const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.frequency.value=1600;g.gain.value=0.0001;o.connect(g).connect(audioCtx.destination);o.start(at);
-  g.gain.setValueAtTime(0.0001,at);g.gain.exponentialRampToValueAtTime(0.22,at+0.005);
-  g.gain.exponentialRampToValueAtTime(0.0001,at+0.09);o.stop(at+0.1);
-  const delayMs=Math.max(0,(at-audioCtx.currentTime)*1000); setTimeout(flashBeat, delayMs); }
+function beepAllowed(){ return metroMode==='both' || metroMode==='sound'; }
+function scheduleClick(at){
+  if(beepAllowed()){
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.frequency.value=1600;g.gain.value=0.0001;o.connect(g).connect(audioCtx.destination);o.start(at);
+    g.gain.setValueAtTime(0.0001,at);g.gain.exponentialRampToValueAtTime(0.22,at+0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001,at+0.09);o.stop(at+0.1);
+  }
+  const delayMs=Math.max(0,(at-audioCtx.currentTime)*1000); setTimeout(flashBeat, delayMs);
+}
 function metroSched(){ while(nextBeatTime<audioCtx.currentTime+0.12){ scheduleClick(nextBeatTime); nextBeatTime+=BEAT_SEC; } }
-function startMetro(){ nextBeatTime=audioCtx.currentTime+0.06; metroSched(); metroTimer=setInterval(metroSched,25); }
+function startMetro(){ if(metroMode==='off')return; nextBeatTime=audioCtx.currentTime+0.06; metroSched(); metroTimer=setInterval(metroSched,25); }
 function stopMetro(){ if(metroTimer){clearInterval(metroTimer);metroTimer=null;} }
 
 let counting=false;
-function playTick(freq){ if(!audioCtx)return; flashBeat(); const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+/* playTick: the MANDATORY cue clicks (count-in, exchange beat pulse) — always
+   audible + always flashes, independent of the optional practice-metronome mode above. */
+function playTick(freq){ if(!audioCtx)return; flashBeat();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
   o.frequency.value=freq||1200; g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination);
   const t=audioCtx.currentTime; o.start(t); g.gain.exponentialRampToValueAtTime(0.22,t+0.005);
   g.gain.exponentialRampToValueAtTime(0.0001,t+0.1); o.stop(t+0.11); }
@@ -734,7 +777,7 @@ $('btnRec').addEventListener('click', async ()=>{
 function startAttempt(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
   recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); _thread=[]; _lastTs=0;
-  if($('metroChk').checked) startMetro();
+  if(metroMode!=='off') startMetro();
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000; const nowS=performance.now()/1000;
     const inTune=p.hz && p.clarity>=CLARITY; let cents=null;
