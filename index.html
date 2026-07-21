@@ -265,12 +265,12 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d2.8-exchange</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
+  <footer>مِران · <span class="v">الإصدار d2.9-exlead</span> — يعمل في المتصفح، صوتك يبقى على جهازك</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d2.8-exchange';
+const APP_VERSION='d2.9-exlead';
 
 /* ================= CURRICULUM (days as DATA) =================
    semis = semitones above the qarar (دو). playable long-tone days
@@ -795,8 +795,9 @@ function scoreTransition(d){
 }
 
 /* ================= EXCHANGE EXERCISE (repeated دو⇄ري with strict metronome) ================= */
-const TR_EX_TAIL=0.6;
-function activeTargetCentsExchange(now){
+const TR_EX_TAIL=0.6, EX_LEAD=1.3; // settle time on دو before the metronome pattern begins
+function activeTargetCentsExchange(now0){
+  const now=Math.max(0, now0-EX_LEAD);
   const b=TR.beatSec, slide=Math.min(0.25*b,0.18), reps=TR.reps;
   let idx=Math.floor(now/b); if(idx>reps) idx=reps;
   const noteAt=i=>(i%2===0?0:TR.span);
@@ -807,12 +808,14 @@ function activeTargetCentsExchange(now){
 }
 function startExchange(){
   recording=true; $('btnRecLabel').textContent='إلغاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
-  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); recData._lastBeat=-1;
-  const b=TR.beatSec, reps=TR.reps, END=reps*b+TR_EX_TAIL;
+  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); recData._lastBeat=-2; recData._goCued=false;
+  const b=TR.beatSec, reps=TR.reps, END=EX_LEAD+reps*b+TR_EX_TAIL;
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000;
-    const beatIdx=Math.min(Math.floor(now/b), reps);
-    if(beatIdx!==recData._lastBeat){ recData._lastBeat=beatIdx; playTick(beatIdx%2===0?1200:1500); }
+    if(!recData._goCued && now>=EX_LEAD){ recData._goCued=true; cueChime(); }
+    const now2=Math.max(0,now-EX_LEAD);
+    const beatIdx=Math.min(Math.floor(now2/b), reps);
+    if(now>=EX_LEAD && beatIdx!==recData._lastBeat){ recData._lastBeat=beatIdx; playTick(beatIdx%2===0?1200:1500); }
     const {ay}=drawTransitionBg(now, activeTargetCentsExchange);
     const inTune=p.hz && p.clarity>=CLARITY; let c=null;
     if(inTune){ c=centsBetween(p.hz,TR.fromHz); while(c-100>600)c-=1200; while(c-100<-600)c+=1200; recData.pts.push({t:now,c}); }
@@ -824,7 +827,8 @@ function startExchange(){
       cx.fillStyle='rgba(255,255,255,.85)'; cx.beginPath(); cx.arc(ORB.cx-3,py-3,3,0,7); cx.fill();
     } else { cx.fillStyle='rgba(154,163,190,.5)'; cx.beginPath(); cx.arc(ORB.cx,ay,7,0,7); cx.fill(); }
     cx.fillStyle='rgba(241,234,214,.85)'; cx.font="600 14px 'IBM Plex Sans Arabic'"; cx.textAlign='center';
-    cx.fillText(`النبضة ${toAr(Math.min(beatIdx+1,reps+1))} / ${toAr(reps+1)}`, ORB.cx, 22); cx.textAlign='start';
+    const hint = now<EX_LEAD ? 'اثبت على دو' : `النبضة ${toAr(Math.min(beatIdx+1,reps+1))} / ${toAr(reps+1)}`;
+    cx.fillText(hint, ORB.cx, 22); cx.textAlign='start';
     $('sustainNum').textContent=Math.min(now,END).toFixed(1);
     $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
     if(now>=END) stopAttempt();
@@ -835,15 +839,15 @@ function scoreExchange(d){
   const noteAt=i=>(i%2===0?0:TR.span);
   const holds=[];
   for(let i=0;i<=reps;i++){
-    const start=i*b+(i===0?0.15:slide+0.05);
-    const end=(i<reps)?(i+1)*b-slide-0.05:i*b+TR_EX_TAIL-0.05;
+    const start=EX_LEAD+i*b+(i===0?0.15:slide+0.05);
+    const end=(i<reps)?EX_LEAD+(i+1)*b-slide-0.05:EX_LEAD+i*b+TR_EX_TAIL-0.05;
     const seg=d.pts.filter(p=>p.t>=start&&p.t<end).map(p=>p.c);
     const med=seg.length?median(seg):null;
     holds.push({i, med, ok: med!=null && Math.abs(med-noteAt(i))<=TOL});
   }
   let maxGap=0;
   for(let i=0;i<reps;i++){
-    const wStart=(i+1)*b-slide-0.05, wEnd=(i+1)*b+slide+0.15;
+    const wStart=EX_LEAD+(i+1)*b-slide-0.05, wEnd=EX_LEAD+(i+1)*b+slide+0.15;
     const seg=d.pts.filter(p=>p.t>=wStart&&p.t<=wEnd);
     let gap=0; seg.forEach((p,idx,arr)=>{ if(idx>0){ const offBoth=Math.abs(p.c-noteAt(i))>TOL && Math.abs(p.c-noteAt(i+1))>TOL; if(offBoth) gap+=(p.t-arr[idx-1].t); } });
     maxGap=Math.max(maxGap,gap);
