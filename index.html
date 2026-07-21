@@ -265,13 +265,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d2.9.1-attrib</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d3.0-ladder</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d2.9.1-attrib';
+const APP_VERSION='d3.0-ladder';
 
 /* ================= CURRICULUM (days as DATA) =================
    semis = semitones above the qarar (دو). playable long-tone days
@@ -284,11 +284,15 @@ const CURRICULUM=[
   {id:5, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:3, title:'الانتقال: دو ← ري', blurb:'ابدأ ثابتًا على دو، وعند الإشارة انتقل بنظافة إلى ري.'},
   {id:6, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
-    tol:25, need:3, beatSec:1.0, reps:4, title:'التبادل: دو⇄ري مع المترونوم', blurb:'انتقل مع كل نبضة — دو، ري، دو، ري، دو.'},
-  {id:7, note:'—', lat:'',   semis:0, kind:'soon', title:'بداية النغمة ونهايتها', blurb:'قريبًا.'},
-  {id:8, note:'—', lat:'',   semis:0, kind:'soon', title:'النفَس الطويل', blurb:'قريبًا.'},
-  {id:9, note:'—', lat:'',   semis:0, kind:'soon', title:'ثبات دو وري', blurb:'قريبًا.'},
-  {id:10,note:'—', lat:'',   semis:0, kind:'soon', title:'ثبات فا وصول', blurb:'قريبًا.'},
+    tol:25, need:3, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: دو⇄ري مع المترونوم', blurb:'انتقل مع كل نبضة — دو، ري، دو، ري، دو.'},
+  {id:7, note:'ري→فا', lat:'D→F', kind:'transition', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
+    tol:25, need:3, title:'الانتقال: ري ← فا', blurb:'ابدأ ثابتًا على ري، وانتقل بنظافة إلى فا.'},
+  {id:8, note:'فا→صول', lat:'F→G', kind:'transition', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
+    tol:25, need:3, title:'الانتقال: فا ← صول', blurb:'ابدأ ثابتًا على فا، وانتقل بنظافة إلى صول.'},
+  {id:9, note:'ري⇄فا', lat:'D⇄F', kind:'exchange', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
+    tol:25, need:3, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: ري⇄فا مع المترونوم', blurb:'انتقل مع كل نبضة — ري، فا، ري، فا، ري.'},
+  {id:10, note:'فا⇄صول', lat:'F⇄G', kind:'exchange', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
+    tol:25, need:3, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: فا⇄صول مع المترونوم', blurb:'انتقل مع كل نبضة — فا، صول، فا، صول، فا.'},
   {id:11,note:'—', lat:'',   semis:0, kind:'soon', title:'مراجعة متباعدة', blurb:'قريبًا.'},
   {id:12,note:'—', lat:'',   semis:0, kind:'soon', title:'يوم تثبيت', blurb:'قريبًا.'},
   {id:13,note:'—', lat:'',   semis:0, kind:'soon', title:'يوم اختبار', blurb:'قريبًا.'},
@@ -528,11 +532,11 @@ function startSession(id){
   if(curDay.kind==='exchange'){
     TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
-        span:(curDay.to.semis-curDay.from.semis)*100, beatSec:curDay.beatSec, reps:curDay.reps};
+        span:(curDay.to.semis-curDay.from.semis)*100, beatSec:curDay.beatStart, reps:curDay.reps};
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'exchange', pair:curDay.lat,
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
-      from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), beat_sec:TR.beatSec, started:new Date().toISOString(), attempts:[]};
-    $('sessEyebrow').textContent=`اليوم ${toAr(id)} · تبادل`;
+      from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), beat_sec_start:TR.beatSec, started:new Date().toISOString(), attempts:[]};
+    $('sessEyebrow').textContent=`اليوم ${toAr(id)} · تبادل · النبضة كل ${TR.beatSec.toFixed(2)} ث`;
     $('sessGlyph').textContent=curDay.from.note+' ⇄ '+curDay.to.note; $('sessLat').textContent=curDay.lat;
     $('targetHz').textContent=`${TR.fromHz.toFixed(0)} ⇄ ${TR.toHz.toFixed(0)} Hz`;
     $('sustainLabel').textContent='تقدّم التمرين';
@@ -855,24 +859,31 @@ function scoreExchange(d){
   }
   const missed=holds.filter(h=>!h.ok);
   let ok=false,head='',body='',cls='retry';
+  const prevBeat=b;
   if(missed.length){
     const m=missed[0];
     head = m.med==null ? 'فاتتك إحدى الوقفات' : 'انحراف في إحدى النغمات';
     body = m.med==null ? `لم أسمعك ثابتًا عند الوقفة رقم ${toAr(m.i+1)}. حافظ على العزف مع كل نبضة.`
       : `عند الوقفة ${toAr(m.i+1)} انحرفت الطبقة ${Math.abs(m.med-noteAt(m.i)).toFixed(0)} سنت. تابع المترونوم بدقة أكبر.`;
-  } else if(maxGap>0.4){ head='بعض الانتقالات غير نظيفة'; body=`أطول فجوة بين نغمتين ${Math.round(maxGap*1000)} مللي ثانية. انتقل أسرع مع كل نبضة.`; }
+    TR.beatSec = Math.min(curDay.beatStart, +(prevBeat+curDay.stepUp).toFixed(2));
+  } else if(maxGap>0.4){ head='بعض الانتقالات غير نظيفة'; body=`أطول فجوة بين نغمتين ${Math.round(maxGap*1000)} مللي ثانية. انتقل أسرع مع كل نبضة.`;
+    TR.beatSec = Math.min(curDay.beatStart, +(prevBeat+curDay.stepUp*0.5).toFixed(2));
+  }
   else { ok=true; cls='ok'; attempts++; head=`تبادل نظيف (${toAr(attempts)}/${toAr(NEED)})`;
-    body=`أتقنت ${toAr(reps)} انتقالات متتالية مع المترونوم، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية.`; }
-  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok,
+    TR.beatSec = Math.max(curDay.beatMin, +(prevBeat-curDay.stepDown).toFixed(2));
+    const faster = TR.beatSec<prevBeat;
+    body=`أتقنت ${toAr(reps)} انتقالات متتالية، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية. ${attempts<NEED? (faster?`نرفع السرعة الآن — نبضة كل ${TR.beatSec.toFixed(2)} ث.`:'أنت عند أسرع سرعة — ثبّتها.') : ''}`; }
+  $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · تبادل · النبضة كل ${TR.beatSec.toFixed(2)} ث`;
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, beat_sec:prevBeat,
     holds:holds.map(h=>({i:h.i,med:h.med!=null?+h.med.toFixed(1):null,ok:h.ok})),
     maxGapMs:Math.round(maxGap*1000), ts:new Date().toISOString()});
   $('resultZone').innerHTML=`<div class="stats">
       <div class="stat ${!missed.length?'g':'w'}"><div class="v">${holds.filter(h=>h.ok).length}/${holds.length}</div><div class="k">وقفات مضبوطة</div></div>
       <div class="stat ${maxGap<=0.4?'g':'b'}"><div class="v">${Math.round(maxGap*1000)}</div><div class="k">أطول فجوة (م.ث)</div></div>
-      <div class="stat g"><div class="v">${toAr(reps)}</div><div class="k">انتقالات</div></div>
+      <div class="stat g"><div class="v">${prevBeat.toFixed(2)}</div><div class="k">سرعة المحاولة (ث/نبضة)</div></div>
     </div><div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
   renderPips();
-  if(attempts>=NEED) setTimeout(()=>finishDay({bestGapMs:Math.round(maxGap*1000), bestHoldsOk:holds.filter(h=>h.ok).length}),900);
+  if(attempts>=NEED) setTimeout(()=>finishDay({bestGapMs:Math.round(maxGap*1000), bestHoldsOk:holds.filter(h=>h.ok).length, fastestBeatSec:TR.beatSec}),900);
 }
 
 /* ================= EXPORT PROGRESS ================= */
