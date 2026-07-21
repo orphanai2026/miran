@@ -110,7 +110,17 @@
     box-shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);margin-top:14px}
   .back{background:none;border:none;color:var(--text-soft);font-size:.85rem;padding:6px 0;margin-top:8px;cursor:pointer}
   .step-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.2em;color:var(--gold);
-    text-transform:uppercase;margin-bottom:8px;opacity:.85}
+    text-transform:uppercase;margin-bottom:8px;opacity:.85;position:relative}
+  .dervish-call{position:absolute;top:-4px;left:0;width:26px;height:26px;border-radius:50%;
+    background:rgba(233,183,94,.1);border:1px solid var(--hair);color:var(--gold);font-family:'Amiri',serif;
+    font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .15s,transform .15s}
+  .dervish-call:active{transform:scale(.9)}
+  .dervish-bubble{max-height:0;overflow:hidden;opacity:0;transition:all .35s ease;
+    background:rgba(233,183,94,.08);border:1px solid var(--hair);border-radius:14px;
+    font-family:'Amiri',serif;font-size:.95rem;color:var(--text);text-align:center;line-height:1.6}
+  .dervish-bubble.show{max-height:120px;opacity:1;padding:12px 16px;margin-top:10px}
+  .dervish-bubble::before{content:"✦ ";color:var(--gold)}
   .card h2{font-family:'Amiri',serif;font-size:1.5rem;margin-bottom:8px}
   .card p.lead{font-size:.9rem;color:var(--text-soft);margin-bottom:18px}
   .hint{font-size:.8rem;color:var(--text-soft);text-align:center;margin-top:12px;line-height:1.7}
@@ -234,12 +244,14 @@
   <div class="view" id="view-session">
     <div class="card">
       <div class="step-eyebrow" id="sessEyebrow">اليوم ١ · نغمة طويلة</div>
+      <button class="dervish-call" id="btnDervish" title="استدعِ الدرويش">؟</button>
       <div class="attempts" id="pips"></div>
       <div class="bignote">
         <span class="ar" id="sessGlyph">دو</span>
         <span class="meta"><span class="lat" id="sessLat">C</span><br><span class="hz" id="targetHz">—</span></span>
       </div>
       <canvas id="orbit" width="524" height="300"></canvas>
+      <div class="dervish-bubble" id="dervishBubble"></div>
       <div class="sustain">
         <div class="lbl"><span id="sustainLabel">ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span> ث</span></div>
         <div class="bar"><i id="sustainBar"></i></div>
@@ -261,17 +273,67 @@
   <div class="view" id="view-done">
     <div class="seal" id="doneSeal">✦ أُتقن اليوم ✦</div>
     <p class="sub" id="doneSub">نجمة جديدة أُضيئت في سماء رحلتك.</p>
+    <div class="dervish-bubble" id="doneDervishBubble"></div>
     <div class="stats" id="doneStats"></div>
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d3.0-ladder</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d3.1-dervish</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d3.0-ladder';
+const APP_VERSION='d3.1-dervish';
+
+/* ================= الدرويش · voice-and-text companion ================= */
+const DERVISH = {
+  introLongtone: ['استعدّ… ثبّت نفَسك على النغمة بهدوء، وابدأ حين ترتاح.'],
+  introTransition: ['اثبت على النغمة الأولى، وحين تسمع الإشارة انتقل بنعومة إلى الثانية.'],
+  introExchange: ['تابع النبضة بأذنك، وانتقل معها بلا تردّد — لا تسبقها ولا تتأخّر عنها.'],
+  fail2: ['خذ نفَسًا عميقًا من البطن، وأرخِ كتفيك قبل أن تعيد المحاولة.',
+          'استمع للمثال مرة أخرى قبل أن تعزف — طابق أذنك قبل نفَسك.'],
+  fail3: ['راقب زاوية القصبة على شفتك السفلى — أميلها قليلًا حتى يصفو الصوت.',
+          'أرخِ قبضتك على الناي — الشدّ الزائد يُتعب نفَسك بسرعة.'],
+  fail4: ['لا بأس عليك — خذ استراحة قصيرة، ثم عد بنفَسٍ جديد. القصبة تنتظرك.'],
+  celebrate: ['نجمة جديدة أضاءت في سماء رحلتك — القصبة بدأت تعرفك أكثر.',
+              'إتقانٌ حقيقي، لا حظّ عابر. أحسنت.']
+};
+let failStreak=0, _seenIntro=new Set(), _dervishTimer=null, _arVoice=null;
+if('speechSynthesis' in window){
+  const pick=()=>{ const vs=speechSynthesis.getVoices(); _arVoice=vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith('ar'))||null; };
+  pick(); speechSynthesis.onvoiceschanged=pick;
+}
+function dervishSpeak(text){
+  if(!('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='ar-SA'; u.rate=0.95; u.pitch=1.0; if(_arVoice) u.voice=_arVoice;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function showDervish(text, opts){
+  opts=opts||{}; const el=$(opts.target||'dervishBubble'); if(!el) return;
+  el.textContent=text; el.classList.add('show');
+  if(opts.speak!==false) dervishSpeak(text);
+  clearTimeout(_dervishTimer);
+  if(!opts.sticky) _dervishTimer=setTimeout(()=>el.classList.remove('show'), 6000);
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function dervishIntroFor(day){
+  const key = day.kind==='longtone'?'introLongtone' : day.kind==='transition'?'introTransition' : 'introExchange';
+  if(_seenIntro.has(day.id)) return; _seenIntro.add(day.id);
+  setTimeout(()=>showDervish(pick(DERVISH[key])), 500);
+}
+function registerAttemptResult(ok){
+  if(ok){ failStreak=0; return; }
+  failStreak++;
+  if(failStreak===2) showDervish(pick(DERVISH.fail2));
+  else if(failStreak===3) showDervish(pick(DERVISH.fail3));
+  else if(failStreak>=4){ showDervish(pick(DERVISH.fail4), {sticky:true}); failStreak=0; }
+}
+function dervishCelebrate(){ showDervish(pick(DERVISH.celebrate), {target:'doneDervishBubble', sticky:true}); }
 
 /* ================= CURRICULUM (days as DATA) =================
    semis = semitones above the qarar (دو). playable long-tone days
@@ -513,7 +575,7 @@ function renderThreadSilent(){ _thread.push({c:0, ok:false, mute:true}); if(_thr
 function startSession(id){
   curDay=CURRICULUM[id-1];
   if(curDay.kind==='soon') return;
-  attempts=0; NEED=curDay.need; TOL=curDay.tol;
+  attempts=0; NEED=curDay.need; TOL=curDay.tol; failStreak=0;
   if(curDay.kind==='transition'){
     TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
@@ -527,6 +589,7 @@ function startSession(id){
     $('sustainLabel').textContent='تقدّم التمرين';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
     renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawTransitionIdle();},40);
+    dervishIntroFor(curDay);
     return;
   }
   if(curDay.kind==='exchange'){
@@ -542,6 +605,7 @@ function startSession(id){
     $('sustainLabel').textContent='تقدّم التمرين';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
     renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawTransitionIdle();},40);
+    dervishIntroFor(curDay);
     return;
   }
   targetHz=dayTarget(curDay); TARGET_SEC=curDay.targetSec; STAB_MAX=curDay.stabMax;
@@ -554,6 +618,7 @@ function startSession(id){
   $('resultZone').innerHTML='';
   $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
   renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawThreadIdle();},40);
+  dervishIntroFor(curDay);
 }
 function renderPips(){ $('pips').innerHTML=''; for(let i=0;i<NEED;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);} }
 
@@ -663,6 +728,12 @@ function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; sto
   else if(curDay.kind==='exchange'){ drawTransitionIdle(); scoreExchange(recData); }
   else { drawThreadIdle(); score(recData); } }
 
+$('btnDervish').addEventListener('click', ()=>{
+  if(!curDay) return;
+  const key = curDay.kind==='longtone'?'introLongtone' : curDay.kind==='transition'?'introTransition' : 'introExchange';
+  const pool=[...DERVISH[key], ...DERVISH.fail2, ...DERVISH.fail3];
+  showDervish(pick(pool));
+});
 function median(a){a=a.slice().sort((x,y)=>x-y);return a.length?a[Math.floor(a.length/2)]:0;}
 function std(a){if(a.length<2)return 0;const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/a.length);}
 function score(d){
@@ -673,6 +744,7 @@ function score(d){
   else if(Math.abs(medC)>TOL){ const dir=medC>0?'أعلى':'أخفض'; head=`الطبقة مالت عن ${curDay.note}`; body=`نغمتك ${Math.abs(medC).toFixed(0)} سنت ${dir}. استمع للمثال ثم طابقه — ${medC>0?'خفّف ضغط النفخ':'زد ضغط النفخ'} قليلًا.`; }
   else if(stab>STAB_MAX){ head='بدأت ثابتة ثم تمايلت'; body=`تشتّت طبقتك ${stab.toFixed(0)} سنت. ثبّت ضغط النفَس ولا ترخِ الشفاه قرب النهاية.`; }
   else { ok=true; cls='ok'; attempts++; head=`محاولة ناجحة (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبات ${stab.toFixed(0)} سنت على ${run.toFixed(1)} ثانية، والطبقة مضبوطة (${medC>=0?'+':''}${medC.toFixed(0)}). ${attempts<NEED?'أعد مرة أخرى بنفس الجودة.':''}`; }
+  registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1,success:ok,cents_off:+medC.toFixed(1),stability_cents:+stab.toFixed(1),sustained_sec:+run.toFixed(2),ts:new Date().toISOString()});
   $('resultZone').innerHTML=`<div class="stats">
       <div class="stat ${Math.abs(medC)<=TOL?'g':'w'}"><div class="v">${medC>=0?'+':''}${medC.toFixed(0)}</div><div class="k">سنت عن ${curDay.note}</div></div>
@@ -692,6 +764,7 @@ function finishDay(stats){
   saveProg();
   stopAll();
   $('doneSub').textContent=`نجمة اليوم ${toAr(curDay.id)} أُضيئت في سماء رحلتك.`;
+  setTimeout(dervishCelebrate, 400);
   $('doneStats').innerHTML = curDay.kind==='transition' ?
     `<div class="stat g"><div class="v">${stats.bestGapMs}</div><div class="k">أنظف انتقال (م.ث)</div></div>
      <div class="stat g"><div class="v">${stats.bestToOffset>=0?'+':''}${stats.bestToOffset.toFixed(0)}</div><div class="k">دقة الوصول (سنت)</div></div>
@@ -789,6 +862,7 @@ function scoreTransition(d){
   }
   else if(gap>0.45){ head='انتقال غير نظيف'; body=`ظهرت نغمة عابرة ${Math.round(gap*1000)} مللي ثانية بين دو وري (وميض كهرماني في الذيل). انتقل أسرع: افتح الثقب دفعة واحدة.`; }
   else { ok=true; cls='ok'; attempts++; head=`انتقال نظيف (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبتّ على دو، وقطعت المسافة إلى ري بنظافة (${Math.round(gap*1000)} مللي ثانية) ووصلت بدقة. ${attempts<NEED?'أعِد مرة أخرى.':''}`; }
+  registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1,success:ok,from_cents:fromM!=null?+fromM.toFixed(1):null,to_cents:toM!=null?+toM.toFixed(1):null,gap_ms:Math.round(gap*1000),ts:new Date().toISOString()});
   $('resultZone').innerHTML=`<div class="stats">
       <div class="stat ${reachedFrom?'g':'w'}"><div class="v">${fromM!=null?(fromM>=0?'+':'')+fromM.toFixed(0):'—'}</div><div class="k">دو (سنت)</div></div>
@@ -874,6 +948,7 @@ function scoreExchange(d){
     const faster = TR.beatSec<prevBeat;
     body=`أتقنت ${toAr(reps)} انتقالات متتالية، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية. ${attempts<NEED? (faster?`نرفع السرعة الآن — نبضة كل ${TR.beatSec.toFixed(2)} ث.`:'أنت عند أسرع سرعة — ثبّتها.') : ''}`; }
   $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · تبادل · النبضة كل ${TR.beatSec.toFixed(2)} ث`;
+  registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, beat_sec:prevBeat,
     holds:holds.map(h=>({i:h.i,med:h.med!=null?+h.med.toFixed(1):null,ok:h.ok})),
     maxGapMs:Math.round(maxGap*1000), ts:new Date().toISOString()});
