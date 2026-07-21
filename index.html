@@ -291,13 +291,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d4.2-exportfix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d4.3-mastery</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d4.2-exportfix';
+const APP_VERSION='d4.3-mastery';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -363,31 +363,31 @@ function dervishCelebrate(phaseDone){ showDervish(pick(phaseDone?DERVISH.phaseDo
    semis = semitones above the qarar (دو). playable long-tone days
    are built now; later days are stars awaiting their exercises. */
 const CURRICULUM=[
-  {id:1, note:'دو', lat:'C',  semis:0, kind:'longtone', targetSec:6, tol:20, stabMax:20, need:3, title:'نغمة القرار الطويلة', blurb:'اثبت على نغمة القرار ٦ ثوانٍ دون تمايل.'},
-  {id:2, note:'ري', lat:'D',  semis:2, kind:'longtone', targetSec:7, tol:20, stabMax:20, need:3, title:'نغمة ري الطويلة', blurb:'أضف نغمة ري (الثقب الأول)، واثبت ٧ ثوانٍ.'},
-  {id:3, note:'فا', lat:'F',  semis:5, kind:'longtone', targetSec:7, tol:20, stabMax:20, need:3, title:'نغمة فا الطويلة', blurb:'انتقل إلى فا، وثبّت النفَس ٧ ثوانٍ.'},
-  {id:4, note:'صول',lat:'G',  semis:7, kind:'longtone', targetSec:8, tol:20, stabMax:22, need:3, title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ثبّتها ٨ ثوانٍ.'},
+  {id:1, note:'دو', lat:'C',  semis:0, kind:'longtone', targetSec:8, tol:20, stabMax:15, need:7, title:'نغمة القرار الطويلة', blurb:'اثبت على نغمة القرار ٨ ثوانٍ بصوتٍ صافٍ لا يهتزّ.'},
+  {id:2, note:'ري', lat:'D',  semis:2, kind:'longtone', targetSec:9, tol:20, stabMax:15, need:7, title:'نغمة ري الطويلة', blurb:'أضف نغمة ري (الثقب الأول)، واثبت ٩ ثوانٍ بصوتٍ صافٍ.'},
+  {id:3, note:'فا', lat:'F',  semis:5, kind:'longtone', targetSec:9, tol:20, stabMax:15, need:7, title:'نغمة فا الطويلة', blurb:'انتقل إلى فا، وثبّت النفَس ٩ ثوانٍ دون اهتزاز.'},
+  {id:4, note:'صول',lat:'G',  semis:7, kind:'longtone', targetSec:10, tol:20, stabMax:16, need:7, title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ثبّتها ١٠ ثوانٍ بصوتٍ نقيّ.'},
   {id:5, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
-    tol:25, need:3, title:'الانتقال: دو ← ري', blurb:'ابدأ ثابتًا على دو، وعند الإشارة انتقل بنظافة إلى ري.'},
+    tol:25, need:7, title:'الانتقال: دو ← ري', blurb:'ابدأ ثابتًا على دو، وعند الإشارة انتقل بنظافة إلى ري.'},
   {id:6, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
-    tol:25, need:3, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: دو⇄ري مع المترونوم', blurb:'انتقل مع كل نبضة — دو، ري، دو، ري، دو.'},
+    tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: دو⇄ري مع المترونوم', blurb:'انتقل مع كل نبضة — دو، ري، دو، ري، دو.'},
   {id:7, note:'ري→فا', lat:'D→F', kind:'transition', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
-    tol:25, need:3, title:'الانتقال: ري ← فا', blurb:'ابدأ ثابتًا على ري، وانتقل بنظافة إلى فا.'},
+    tol:25, need:7, title:'الانتقال: ري ← فا', blurb:'ابدأ ثابتًا على ري، وانتقل بنظافة إلى فا.'},
   {id:8, note:'فا→صول', lat:'F→G', kind:'transition', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
-    tol:25, need:3, title:'الانتقال: فا ← صول', blurb:'ابدأ ثابتًا على فا، وانتقل بنظافة إلى صول.'},
+    tol:25, need:7, title:'الانتقال: فا ← صول', blurb:'ابدأ ثابتًا على فا، وانتقل بنظافة إلى صول.'},
   {id:9, note:'ري⇄فا', lat:'D⇄F', kind:'exchange', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
-    tol:25, need:3, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: ري⇄فا مع المترونوم', blurb:'انتقل مع كل نبضة — ري، فا، ري، فا، ري.'},
+    tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: ري⇄فا مع المترونوم', blurb:'انتقل مع كل نبضة — ري، فا، ري، فا، ري.'},
   {id:10, note:'فا⇄صول', lat:'F⇄G', kind:'exchange', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
-    tol:25, need:3, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: فا⇄صول مع المترونوم', blurb:'انتقل مع كل نبضة — فا، صول، فا، صول، فا.'},
-  {id:11, note:'دو', lat:'C', semis:0, kind:'longtone', targetSec:5, tol:20, stabMax:20, need:2, review:true,
+    tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: فا⇄صول مع المترونوم', blurb:'انتقل مع كل نبضة — فا، صول، فا، صول، فا.'},
+  {id:11, note:'دو', lat:'C', semis:0, kind:'longtone', targetSec:6, tol:20, stabMax:16, need:3, review:true,
     title:'مراجعة متباعدة: دو', blurb:'عُد إلى نغمة القرار الأولى بلا مساعدة — هل ما زالت راسخة؟'},
   {id:12, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
-    tol:25, need:2, beatSec:0.85, beatStart:0.85, beatMin:0.55, stepDown:0.07, stepUp:0.1, reps:4, consolidate:true,
+    tol:25, need:7, beatSec:0.85, beatStart:0.85, beatMin:0.55, stepDown:0.07, stepUp:0.1, reps:4, consolidate:true,
     title:'يوم تثبيت: دو⇄ري', blurb:'ثبّت ما أتقنته — بلا شرح جديد، تكرارٌ يرسّخ.'},
   {id:13, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:1, testMode:true, title:'يوم اختبار: دو ← ري', blurb:'محاولة واحدة، بلا تلميح افتتاحي. أرِني ما تتقنه فعلًا.'},
   {id:14, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
-    tol:25, need:3, beatSec:0.85, beatStart:0.85, beatMin:0.5, stepDown:0.08, stepUp:0.1, reps:4, phaseFinale:true,
+    tol:25, need:7, beatSec:0.85, beatStart:0.85, beatMin:0.5, stepDown:0.08, stepUp:0.1, reps:4, phaseFinale:true,
     title:'أداء تأسيسي', blurb:'اختم مرحلة تأسيس الصوت بأداء واحد متصل.'},
 ];
 // constellation coordinates (viewBox 320x430) — hand-placed winding path bottom→top
@@ -407,8 +407,8 @@ function saveProg(){ store.set('miran_prog', prog); }
 function saveCalib(){ store.set('miran_cal', calib); }
 /* Foundational pre-stage: breath before pitch. Pitch-agnostic — measures only
    how long a steady sound is sustained, over an ascending ladder of durations. */
-const BREATH={ id:'breath', kind:'breath', note:'✦', lat:'', rungs:[3,5,7,9],
-  title:'مرحلة النفَس', blurb:'قبل الطبقة: أصدر صوتًا ثابتًا وأطِل نفَسك — أيُّ نغمة، المهم الثبات والاستمرار.'};
+const BREATH={ id:'breath', kind:'breath', note:'✦', lat:'', rungs:[4,6,8,10,12], jitterMax:30,
+  title:'مرحلة النفَس', blurb:'قبل الطبقة: أصدر صوتًا ثابتًا صافيًا وأطِل نفَسك — أيُّ نغمة، المهم الثبات والصفاء والاستمرار.'};
 
 const CONCERT_A4=440;
 const neyConcertPitch=q=>{const a=q/Math.pow(2,3/12);return{impliedA4:a,centsOff:1200*Math.log2(a/CONCERT_A4)};};
@@ -820,6 +820,7 @@ function startAttempt(){
   };
 }
 function longestRun(v){ let best=0,cs=null,lo=null; for(const s of v){ if(s.on){if(cs==null)cs=s.t;lo=s.t;} else{if(cs!=null&&s.t-lo>0.15){best=Math.max(best,lo-cs);cs=null;}} } if(cs!=null)best=Math.max(best,(lo??cs)-cs); return best; }
+function longestRunWindow(v){ let best=0,bs=0,be=0,cs=null,lo=null; for(const s of v){ if(s.on){if(cs==null)cs=s.t;lo=s.t;} else{if(cs!=null&&s.t-lo>0.15){ if(lo-cs>best){best=lo-cs;bs=cs;be=lo;} cs=null; }} } if(cs!=null&&(lo-cs)>best){best=lo-cs;bs=cs;be=lo;} return {dur:best,start:bs,end:be}; }
 function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; stopMetro();
   $('btnRecLabel').textContent='ابدأ'; $('btnRec').classList.remove('recording');
   setupCanvas();
@@ -843,7 +844,8 @@ function score(d){
   if(run<TARGET_SEC-0.3){ head='نفَسك أقصر قليلًا'; body=`ثبتّ ${run.toFixed(1)} ثانية والهدف ${TARGET_SEC}. خذ نفسًا أعمق من البطن، وابدأ النفخ بهدوء.`; }
   else if(Math.abs(medC)>TOL){ const dir=medC>0?'أعلى':'أخفض'; head=`الطبقة مالت عن ${curDay.note}`; body=`نغمتك ${Math.abs(medC).toFixed(0)} سنت ${dir}. استمع للمثال ثم طابقه — ${medC>0?'خفّف ضغط النفخ':'زد ضغط النفخ'} قليلًا.`; }
   else if(stab>STAB_MAX){ head='بدأت ثابتة ثم تمايلت'; body=`تشتّت طبقتك ${stab.toFixed(0)} سنت. ثبّت ضغط النفَس ولا ترخِ الشفاه قرب النهاية.`; }
-  else { ok=true; cls='ok'; attempts++; head=`محاولة ناجحة (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبات ${stab.toFixed(0)} سنت على ${run.toFixed(1)} ثانية، والطبقة مضبوطة (${medC>=0?'+':''}${medC.toFixed(0)}). ${attempts<NEED?'أعد مرة أخرى بنفس الجودة.':''}`; }
+  else { ok=true; cls='ok'; attempts++; head=`محاولة ناجحة (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبات ${stab.toFixed(0)} سنت على ${run.toFixed(1)} ثانية، والطبقة مضبوطة (${medC>=0?'+':''}${medC.toFixed(0)}). ${attempts<NEED?'أعد بنفس الجودة — نحتاج '+toAr(NEED)+' متتالية.':''}`; }
+  if(!ok){ if(attempts>0){ body+=` — انقطعت سلسلة النجاح (كنت عند ${toAr(attempts)})، نبدأ العدّ من جديد.`; } attempts=0; }
   registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1,success:ok,cents_off:+medC.toFixed(1),stability_cents:+stab.toFixed(1),sustained_sec:+run.toFixed(2),ts:new Date().toISOString()});
   $('resultZone').innerHTML=`<div class="stats">
@@ -963,7 +965,8 @@ function scoreTransition(d){
     else { head='تجاوزت ري'; body=`ارتفعت فوق ري بـ${(toM-TR.span).toFixed(0)} سنت. خفّف ضغط النفخ قليلًا عند الوصول.`; }
   }
   else if(gap>0.45){ head='انتقال غير نظيف'; body=`ظهرت نغمة عابرة ${Math.round(gap*1000)} مللي ثانية بين دو وري (وميض كهرماني في الذيل). انتقل أسرع: افتح الثقب دفعة واحدة.`; }
-  else { ok=true; cls='ok'; attempts++; head=`انتقال نظيف (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبتّ على دو، وقطعت المسافة إلى ري بنظافة (${Math.round(gap*1000)} مللي ثانية) ووصلت بدقة. ${attempts<NEED?'أعِد مرة أخرى.':''}`; }
+  else { ok=true; cls='ok'; attempts++; head=`انتقال نظيف (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبتّ على دو، وقطعت المسافة إلى ري بنظافة (${Math.round(gap*1000)} مللي ثانية) ووصلت بدقة. ${attempts<NEED?'أعِد — نحتاج '+toAr(NEED)+' متتالية.':''}`; }
+  if(!ok){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; }
   registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1,success:ok,from_cents:fromM!=null?+fromM.toFixed(1):null,to_cents:toM!=null?+toM.toFixed(1):null,gap_ms:Math.round(gap*1000),ts:new Date().toISOString()});
   $('resultZone').innerHTML=`<div class="stats">
@@ -1050,6 +1053,7 @@ function scoreExchange(d){
     const faster = TR.beatSec<prevBeat;
     body=`أتقنت ${toAr(reps)} انتقالات متتالية، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية. ${attempts<NEED? (faster?`نرفع السرعة الآن — نبضة كل ${TR.beatSec.toFixed(2)} ث.`:'أنت عند أسرع سرعة — ثبّتها.') : ''}`; }
   $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · تبادل · النبضة كل ${TR.beatSec.toFixed(2)} ث`;
+  if(!ok){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; }
   registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, beat_sec:prevBeat,
     holds:holds.map(h=>({i:h.i,med:h.med!=null?+h.med.toFixed(1):null,ok:h.ok})),
@@ -1084,63 +1088,71 @@ function drawBreathIdle(){ drawBreathBg(); const {cx:mx,cy}=ORB;
   cx.fillText('خذ نفَسًا عميقًا من البطن، ثم أصدر صوتًا ثابتًا', mx, ORB.h-16);
   cx.font="600 14px 'IBM Plex Sans Arabic'"; cx.fillStyle='rgba(233,183,94,.85)';
   cx.fillText(`الهدف: ${breathTarget.toFixed(0)} ثوانٍ`, mx, 22); cx.textAlign='start'; }
-// reward: a disc that fills from grey to colour as the sustained sound grows
-function renderBreath(runSec, voicedNow){
+// reward: a disc that fills from grey to colour as the sustained sound grows; ring turns amber if the tone wobbles
+function renderBreath(runSec, voicedNow, steady){
   drawBreathBg(); const {cx:mx,cy}=ORB; const R=52; const frac=Math.min(1,runSec/breathTarget);
-  // base grey ring
   cx.strokeStyle='rgba(154,163,190,.25)'; cx.lineWidth=3; cx.beginPath(); cx.arc(mx,cy,R,0,7); cx.stroke();
-  // colour fill rising from the bottom of the disc
   cx.save(); cx.beginPath(); cx.arc(mx,cy,R-2,0,7); cx.clip();
   const fillTop=cy+R-(2*R)*frac; const grd=cx.createLinearGradient(0,cy+R,0,cy-R);
-  grd.addColorStop(0,'#6BC79A'); grd.addColorStop(1,'#E9B75E');
+  grd.addColorStop(0, steady?'#6BC79A':'#8a7d5a'); grd.addColorStop(1, steady?'#E9B75E':'#a98f52');
   cx.fillStyle=grd; cx.fillRect(mx-R,fillTop,2*R,cy+R-fillTop); cx.restore();
-  // progress ring
-  cx.strokeStyle=voicedNow?'#6BC79A':'#9AA3BE'; cx.lineWidth=3;
+  const ringCol = !voicedNow ? '#9AA3BE' : (steady ? '#6BC79A' : '#E39860');
+  cx.strokeStyle=ringCol; cx.lineWidth=3;
   cx.beginPath(); cx.arc(mx,cy,R,-Math.PI/2,-Math.PI/2+frac*2*Math.PI); cx.stroke();
-  if(frac>=1){ cx.strokeStyle='rgba(233,183,94,.5)'; cx.lineWidth=2; cx.beginPath(); cx.arc(mx,cy,R+8+Math.sin(performance.now()/200)*3,0,7); cx.stroke(); }
+  if(frac>=1 && steady){ cx.strokeStyle='rgba(233,183,94,.5)'; cx.lineWidth=2; cx.beginPath(); cx.arc(mx,cy,R+8+Math.sin(performance.now()/200)*3,0,7); cx.stroke(); }
   cx.fillStyle='#F1EAD6'; cx.font="600 18px 'IBM Plex Mono',monospace"; cx.textAlign='center';
   cx.fillText(runSec.toFixed(1)+'s', mx, cy+6);
-  cx.fillStyle=voicedNow?'#8fdcb4':'rgba(154,163,190,.7)'; cx.font="500 12px 'IBM Plex Sans Arabic'";
-  cx.fillText(voicedNow?'استمرّ…':'أصدر صوتًا', mx, ORB.h-14); cx.textAlign='start'; }
+  cx.fillStyle= !voicedNow?'rgba(154,163,190,.7)':(steady?'#8fdcb4':'#f0b98a'); cx.font="500 12px 'IBM Plex Sans Arabic'";
+  cx.fillText(!voicedNow?'أصدر صوتًا':(steady?'استمرّ… صوتٌ صافٍ':'صوتك يهتزّ — ثبّته'), mx, ORB.h-14); cx.textAlign='start'; }
 function startBreath(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
-  recData={t0:performance.now(),voiced:[]}; setupCanvas();
+  recData={t0:performance.now(),voiced:[],samp:[]}; setupCanvas();
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000;
     const voiced = !!(p.hz && p.clarity>=CLARITY); // ANY pitch counts
     recData.voiced.push({t:now,on:voiced});
+    if(voiced) recData.samp.push({t:now, hz:p.hz});
     const run=longestRun(recData.voiced);
-    renderBreath(run, voiced);
+    // live steadiness: jitter over the last ~1.2s of voiced samples
+    const recent=recData.samp.filter(s=>s.t>=now-1.2);
+    let steady=true;
+    if(recent.length>=6){ const med=median(recent.map(s=>s.hz)); const jit=std(recent.map(s=>1200*Math.log2(s.hz/med))); steady=jit<=BREATH.jitterMax; }
+    renderBreath(run, voiced, steady);
     $('sustainNum').textContent=run.toFixed(1); $('sustainBar').style.width=Math.min(100,(run/breathTarget)*100)+'%';
     if(run>=breathTarget+0.3) stopAttempt(); if(now>breathTarget+8) stopAttempt();
   };
 }
 function scoreBreath(d){
-  const run=longestRun(d.voiced); const ok=run>=breathTarget;
-  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, sustained_sec:+run.toFixed(2), target_sec:breathTarget, ts:new Date().toISOString()});
+  const w=longestRunWindow(d.voiced); const run=w.dur;
+  const inWin=(d.samp||[]).filter(s=>s.t>=w.start-0.05 && s.t<=w.end+0.05);
+  const medHz=inWin.length?median(inWin.map(s=>s.hz)):0;
+  const jitter=inWin.length>=6? std(inWin.map(s=>1200*Math.log2(s.hz/medHz))) : 999;
+  const longEnough = run>=breathTarget;
+  const steadyEnough = jitter<=BREATH.jitterMax;
+  const ok = longEnough && steadyEnough;
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, sustained_sec:+run.toFixed(2), target_sec:breathTarget, jitter_cents:+jitter.toFixed(1), ts:new Date().toISOString()});
   registerAttemptResult(ok);
   let head,body,cls;
   if(ok){
     cls='ok'; breathRung++; prog.foundation.rung=breathRung; saveProg();
     if(breathRung>=BREATH.rungs.length){
-      head='اكتمل النفَس!'; body=`أطلت نفَسك ${run.toFixed(1)} ثانية. أنت جاهز للنغمات الآن.`;
+      head='اكتمل النفَس!'; body=`أطلت نفَسك ${run.toFixed(1)} ثانية بصوتٍ صافٍ ثابت. أنت جاهز للنغمات الآن.`;
       $('resultZone').innerHTML=`<div class="msg ok"><div class="head">${head}</div>${body}</div>`;
       setTimeout(finishBreath,900); return;
     }
     breathTarget=BREATH.rungs[breathRung];
     head=`درجة مكتملة (${toAr(breathRung)}/${toAr(BREATH.rungs.length)})`;
-    body=`ثبتّ ${run.toFixed(1)} ثانية. الدرجة التالية: ${breathTarget.toFixed(0)} ثوانٍ.`;
+    body=`نفَسٌ ثابت وصافٍ ${run.toFixed(1)} ثانية (تذبذب ${jitter.toFixed(0)} سنت). الدرجة التالية: ${breathTarget.toFixed(0)} ثوانٍ.`;
     $('sessEyebrow').textContent=`مرحلة النفَس · الدرجة ${toAr(breathRung+1)}/${toAr(BREATH.rungs.length)}`;
     $('targetSec').textContent=breathTarget.toFixed(1);
-  } else {
-    cls='retry'; head='نفَسٌ أقصر قليلًا';
-    body=`ثبتّ ${run.toFixed(1)} ثانية والهدف ${breathTarget.toFixed(0)}. خذ نفَسًا أعمق من البطن، وأطلق الهواء ببطءٍ ثابت — لا تندفع.`;
-    $('resultZone').innerHTML=`<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
-  }
-  if(ok && breathRung<BREATH.rungs.length){
     $('resultZone').innerHTML=`<div class="msg ok"><div class="head">${head}</div>${body}</div>`;
-    // refresh pips
     $('pips').innerHTML=''; for(let i=0;i<BREATH.rungs.length;i++){const el=document.createElement('div');el.className='pip'+(i<breathRung?' done':'');$('pips').appendChild(el);}
+  } else {
+    cls='retry';
+    if(!longEnough && !steadyEnough){ head='أطِل وثبّت'; body=`ثبتّ ${run.toFixed(1)} ثانية (الهدف ${breathTarget.toFixed(0)})، وصوتك اهتزّ ${jitter.toFixed(0)} سنت. خذ نفَسًا أعمق، وأطلق الهواء ببطءٍ ثابت لا يتموّج.`; }
+    else if(!longEnough){ head='نفَسٌ أقصر قليلًا'; body=`صوتك كان صافيًا، لكنك ثبتّ ${run.toFixed(1)} ثانية والهدف ${breathTarget.toFixed(0)}. خذ نفَسًا أعمق من البطن وأطلقه أبطأ.`; }
+    else { head='صوتك يهتزّ'; body=`أطلت نفَسك ${run.toFixed(1)} ثانية، لكن الطبقة تموّجت ${jitter.toFixed(0)} سنت (الحدّ ${BREATH.jitterMax}). ثبّت ضغط النفَس ولا ترخِ شفتيك — نريد صوتًا صافيًا لا يتذبذب.`; }
+    $('resultZone').innerHTML=`<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
   }
 }
 function finishBreath(){
