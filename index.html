@@ -87,6 +87,10 @@
   .btn-primary:disabled{background:#20293f;color:var(--text-soft);box-shadow:none;border:1px dashed var(--hair-cool);cursor:not-allowed}
   .btn-ghost{background:rgba(233,183,94,.06);border:1px solid var(--hair);color:var(--gold)}
   .control-deck{display:flex;align-items:center;justify-content:center;gap:22px;margin:18px 0 4px}
+  .beat-light{position:absolute;top:-4px;left:-4px;width:12px;height:12px;border-radius:50%;
+    background:var(--hair-cool);pointer-events:none}
+  .beat-light.flash{animation:beatflash .25s ease-out}
+  @keyframes beatflash{0%{background:var(--jade);box-shadow:0 0 12px 4px var(--jade)}100%{background:var(--hair-cool);box-shadow:none}}
   .deck-side{width:52px;height:52px;border-radius:50%;background:rgba(233,183,94,.06);border:1px solid var(--hair);
     color:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
     transition:background .15s,border-color .15s}
@@ -107,14 +111,14 @@
 
   /* ===== CARD (calib + session shared) ===== */
   .card{background:rgba(23,33,58,.9);border:1px solid var(--hair);border-radius:20px;padding:22px 18px;
-    box-shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);margin-top:14px}
+    box-shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);margin-top:14px;position:relative}
   .back{background:none;border:none;color:var(--text-soft);font-size:.85rem;padding:6px 0;margin-top:8px;cursor:pointer}
   .step-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.2em;color:var(--gold);
     text-transform:uppercase;margin-bottom:8px;opacity:.85;position:relative}
-  .dervish-call{position:absolute;top:-4px;left:0;width:26px;height:26px;border-radius:50%;
+  .dervish-call{position:absolute;top:16px;left:16px;width:26px;height:26px;border-radius:50%;
     background:rgba(233,183,94,.1);border:1px solid var(--hair);color:var(--gold);font-family:'Amiri',serif;
     font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;
-    transition:background .15s,transform .15s}
+    transition:background .15s,transform .15s;z-index:2}
   .dervish-call:active{transform:scale(.9)}
   .dervish-bubble{max-height:0;overflow:hidden;opacity:0;transition:all .35s ease;
     background:rgba(233,183,94,.08);border:1px solid var(--hair);border-radius:14px;
@@ -260,6 +264,7 @@
         <label class="deck-side" id="metroChkWrap" title="نقر خفيف للنفَس">
           <input type="checkbox" id="metroChk">
           <span class="deck-icon">♩</span>
+          <span id="beatLight" class="beat-light"></span>
         </label>
         <button class="btn-rec-round" id="btnRec"><span id="btnRecLabel">ابدأ</span></button>
         <button class="deck-side" id="btnListen" title="استمع للمثال"><span class="deck-icon">🔊</span></button>
@@ -278,30 +283,38 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d3.1-dervish</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d3.3-guidefix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d3.1-dervish';
+const APP_VERSION='d3.3-guidefix';
 
 /* ================= الدرويش · voice-and-text companion ================= */
+/* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
+   browser TTS guess vowels and mispronounce; explicit tashkeel fixes most of it. */
 const DERVISH = {
-  introLongtone: ['استعدّ… ثبّت نفَسك على النغمة بهدوء، وابدأ حين ترتاح.'],
-  introTransition: ['اثبت على النغمة الأولى، وحين تسمع الإشارة انتقل بنعومة إلى الثانية.'],
-  introExchange: ['تابع النبضة بأذنك، وانتقل معها بلا تردّد — لا تسبقها ولا تتأخّر عنها.'],
-  fail2: ['خذ نفَسًا عميقًا من البطن، وأرخِ كتفيك قبل أن تعيد المحاولة.',
-          'استمع للمثال مرة أخرى قبل أن تعزف — طابق أذنك قبل نفَسك.'],
-  fail3: ['راقب زاوية القصبة على شفتك السفلى — أميلها قليلًا حتى يصفو الصوت.',
-          'أرخِ قبضتك على الناي — الشدّ الزائد يُتعب نفَسك بسرعة.'],
-  fail4: ['لا بأس عليك — خذ استراحة قصيرة، ثم عد بنفَسٍ جديد. القصبة تنتظرك.'],
-  celebrate: ['نجمة جديدة أضاءت في سماء رحلتك — القصبة بدأت تعرفك أكثر.',
-              'إتقانٌ حقيقي، لا حظّ عابر. أحسنت.']
+  introLongtone: ['اسْتَعِدَّ… ثَبِّتْ نَفَسَكَ عَلَى النَّغْمَةِ بِهُدُوءٍ، وَابْدَأْ حِينَ تَرْتَاحُ.'],
+  introTransition: ['اثْبُتْ عَلَى النَّغْمَةِ الْأُولَى، وَحِينَ تَسْمَعُ الْإِشَارَةَ انْتَقِلْ بِنُعُومَةٍ إِلَى الثَّانِيَةِ.'],
+  introExchange: ['تَابِعِ النَّبْضَةَ بِأُذُنِكَ، وَانْتَقِلْ مَعَهَا بِلَا تَرَدُّدٍ — لَا تَسْبِقْهَا وَلَا تَتَأَخَّرْ عَنْهَا.'],
+  fail2: ['خُذْ نَفَسًا عَمِيقًا مِنَ الْبَطْنِ، وَأَرْخِ كَتِفَيْكَ قَبْلَ أَنْ تُعِيدَ الْمُحَاوَلَةَ.',
+          'اسْتَمِعْ لِلْمِثَالِ مَرَّةً أُخْرَى قَبْلَ أَنْ تَعْزِفَ — طَابِقْ أُذُنَكَ قَبْلَ نَفَسِكَ.'],
+  fail3: ['رَاقِبْ زَاوِيَةَ الْقَصَبَةِ عَلَى شَفَتِكَ السُّفْلَى — أَمِلْهَا قَلِيلًا حَتَّى يَصْفُوَ الصَّوْتُ.',
+          'أَرْخِ قَبْضَتَكَ عَلَى النَّايِ — الشَّدُّ الزَّائِدُ يُتْعِبُ نَفَسَكَ بِسُرْعَةٍ.'],
+  fail4: ['لَا بَأْسَ عَلَيْكَ — خُذْ اسْتِرَاحَةً قَصِيرَةً، ثُمَّ عُدْ بِنَفَسٍ جَدِيدٍ. الْقَصَبَةُ تَنْتَظِرُكَ.'],
+  celebrate: ['نَجْمَةٌ جَدِيدَةٌ أَضَاءَتْ فِي سَمَاءِ رِحْلَتِكَ — الْقَصَبَةُ بَدَأَتْ تَعْرِفُكَ أَكْثَرَ.',
+              'إِتْقَانٌ حَقِيقِيٌّ، لَا حَظٌّ عَابِرٌ. أَحْسَنْتَ.']
 };
 let failStreak=0, _seenIntro=new Set(), _dervishTimer=null, _arVoice=null;
 if('speechSynthesis' in window){
-  const pick=()=>{ const vs=speechSynthesis.getVoices(); _arVoice=vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith('ar'))||null; };
+  const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith('ar'));
+    if(!vs.length){ _arVoice=null; return; }
+    // prefer exact Saudi locale, then higher-quality named engines, then any Arabic voice
+    _arVoice = vs.find(v=>v.lang.toLowerCase()==='ar-sa')
+      || vs.find(v=>/google|microsoft|natural/i.test(v.name))
+      || vs[0];
+  };
   pick(); speechSynthesis.onvoiceschanged=pick;
 }
 function dervishSpeak(text){
@@ -309,7 +322,7 @@ function dervishSpeak(text){
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
-    u.lang='ar-SA'; u.rate=0.95; u.pitch=1.0; if(_arVoice) u.voice=_arVoice;
+    u.lang='ar-SA'; u.rate=0.88; u.pitch=1.0; u.volume=1.0; if(_arVoice) u.voice=_arVoice;
     speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -653,29 +666,44 @@ function renderOrbitSilent(now){ drawOrbitBg(); const {cx:mx,cy}=ORB; const dt=M
 
 /* reference tone + metronome */
 let droneOsc=null;
+function tone(freq, startAt, dur, peakGain){
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='sine'; o.frequency.value=freq; g.gain.value=0.0001;
+  o.connect(g).connect(audioCtx.destination); o.start(startAt);
+  g.gain.setValueAtTime(0.0001,startAt);
+  g.gain.exponentialRampToValueAtTime(peakGain||0.16, startAt+0.08);
+  g.gain.exponentialRampToValueAtTime(0.0001, startAt+dur);
+  o.stop(startAt+dur+0.05);
+}
+let _listenPlaying=false;
 $('btnListen').addEventListener('click', async ()=>{
-  if(!targetHz) return; if(!audioCtx){await initAudio();}
-  if(droneOsc){ try{droneOsc.stop();}catch(e){} droneOsc=null; $('btnListen').innerHTML='<span class="deck-icon">🔊</span>'; return; }
-  droneOsc=audioCtx.createOscillator(); const g=audioCtx.createGain();
-  droneOsc.type='sine'; droneOsc.frequency.value=targetHz; g.gain.value=0.0001;
-  droneOsc.connect(g).connect(audioCtx.destination); droneOsc.start();
-  g.gain.exponentialRampToValueAtTime(0.12,audioCtx.currentTime+0.1); $('btnListen').innerHTML='<span class="deck-icon">⏹</span>';
-  setTimeout(()=>{ if(droneOsc){try{droneOsc.stop();}catch(e){}droneOsc=null;$('btnListen').innerHTML='<span class="deck-icon">🔊</span>';} },4000);
+  if(!audioCtx){await initAudio();} if(audioCtx.state==='suspended') await audioCtx.resume();
+  if(_listenPlaying) return;
+  const moving = curDay.kind==='transition' || curDay.kind==='exchange';
+  const hz = moving ? null : (curDay.kind==='longtone' ? dayTarget(curDay) : targetHz);
+  if(moving && !TR) return; if(!moving && !hz) return;
+  _listenPlaying=true; $('btnListen').innerHTML='<span class="deck-icon">⏹</span>';
+  const t0=audioCtx.currentTime;
+  if(moving){ tone(TR.fromHz, t0+0.05, 0.9); tone(TR.toHz, t0+1.15, 0.9); }
+  else { tone(hz, t0+0.05, 1.6); }
+  setTimeout(()=>{ _listenPlaying=false; $('btnListen').innerHTML='<span class="deck-icon">🔊</span>'; }, moving?2300:1900);
 });
 let metroTimer=null, nextBeatTime=0; const BEAT_SEC=1.0;
+function flashBeat(){ const el=$('beatLight'); if(!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
 function scheduleClick(at){ const o=audioCtx.createOscillator(),g=audioCtx.createGain();
   o.frequency.value=1600;g.gain.value=0.0001;o.connect(g).connect(audioCtx.destination);o.start(at);
-  g.gain.setValueAtTime(0.0001,at);g.gain.exponentialRampToValueAtTime(0.05,at+0.005);
-  g.gain.exponentialRampToValueAtTime(0.0001,at+0.06);o.stop(at+0.07); }
+  g.gain.setValueAtTime(0.0001,at);g.gain.exponentialRampToValueAtTime(0.22,at+0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001,at+0.09);o.stop(at+0.1);
+  const delayMs=Math.max(0,(at-audioCtx.currentTime)*1000); setTimeout(flashBeat, delayMs); }
 function metroSched(){ while(nextBeatTime<audioCtx.currentTime+0.12){ scheduleClick(nextBeatTime); nextBeatTime+=BEAT_SEC; } }
 function startMetro(){ nextBeatTime=audioCtx.currentTime+0.06; metroSched(); metroTimer=setInterval(metroSched,25); }
 function stopMetro(){ if(metroTimer){clearInterval(metroTimer);metroTimer=null;} }
 
 let counting=false;
-function playTick(freq){ if(!audioCtx)return; const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+function playTick(freq){ if(!audioCtx)return; flashBeat(); const o=audioCtx.createOscillator(),g=audioCtx.createGain();
   o.frequency.value=freq||1200; g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination);
-  const t=audioCtx.currentTime; o.start(t); g.gain.exponentialRampToValueAtTime(0.06,t+0.005);
-  g.gain.exponentialRampToValueAtTime(0.0001,t+0.08); o.stop(t+0.09); }
+  const t=audioCtx.currentTime; o.start(t); g.gain.exponentialRampToValueAtTime(0.22,t+0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+0.1); o.stop(t+0.11); }
 function drawCountdown(k){
   setupCanvas();
   const compact = curDay.kind==='longtone';
@@ -809,7 +837,7 @@ function drawTransitionIdle(){ drawTransitionBg(0); const {cx:mx}=ORB;
   cx.fillText('اضغط «ابدأ» ثم ابدأ على دو', mx, ORB.h-16); cx.textAlign='start'; }
 function cueChime(){ if(!audioCtx)return; const o=audioCtx.createOscillator(),g=audioCtx.createGain();
   o.frequency.value=880; g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination); o.start();
-  g.gain.exponentialRampToValueAtTime(0.14,audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.3); o.stop(audioCtx.currentTime+0.32); }
+  g.gain.exponentialRampToValueAtTime(0.28,audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.3); o.stop(audioCtx.currentTime+0.32); }
 
 function startTransition(){
   recording=true; $('btnRecLabel').textContent='إلغاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
