@@ -291,19 +291,20 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d3.4-controls</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d4.1-breath</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d3.4-controls';
+const APP_VERSION='d4.1-breath';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
    browser TTS guess vowels and mispronounce; explicit tashkeel fixes most of it. */
 const DERVISH = {
   introLongtone: ['اسْتَعِدَّ… ثَبِّتْ نَفَسَكَ عَلَى النَّغْمَةِ بِهُدُوءٍ، وَابْدَأْ حِينَ تَرْتَاحُ.'],
+  introBreath: ['قَبْلَ النَّغْمَةِ، النَّفَسُ. خُذْ شَهِيقًا عَمِيقًا مِنَ الْبَطْنِ، وَأَطْلِقْ صَوْتًا وَاحِدًا ثَابِتًا مَا اسْتَطَعْتَ — لَا تَهُمُّكَ الطَّبَقَةُ الْآنَ، بَلِ الِاسْتِمْرَارُ.'],
   introTransition: ['اثْبُتْ عَلَى النَّغْمَةِ الْأُولَى، وَحِينَ تَسْمَعُ الْإِشَارَةَ انْتَقِلْ بِنُعُومَةٍ إِلَى الثَّانِيَةِ.'],
   introExchange: ['تَابِعِ النَّبْضَةَ بِأُذُنِكَ، وَانْتَقِلْ مَعَهَا بِلَا تَرَدُّدٍ — لَا تَسْبِقْهَا وَلَا تَتَأَخَّرْ عَنْهَا.'],
   fail2: ['خُذْ نَفَسًا عَمِيقًا مِنَ الْبَطْنِ، وَأَرْخِ كَتِفَيْكَ قَبْلَ أَنْ تُعِيدَ الْمُحَاوَلَةَ.',
@@ -312,7 +313,8 @@ const DERVISH = {
           'أَرْخِ قَبْضَتَكَ عَلَى النَّايِ — الشَّدُّ الزَّائِدُ يُتْعِبُ نَفَسَكَ بِسُرْعَةٍ.'],
   fail4: ['لَا بَأْسَ عَلَيْكَ — خُذْ اسْتِرَاحَةً قَصِيرَةً، ثُمَّ عُدْ بِنَفَسٍ جَدِيدٍ. الْقَصَبَةُ تَنْتَظِرُكَ.'],
   celebrate: ['نَجْمَةٌ جَدِيدَةٌ أَضَاءَتْ فِي سَمَاءِ رِحْلَتِكَ — الْقَصَبَةُ بَدَأَتْ تَعْرِفُكَ أَكْثَرَ.',
-              'إِتْقَانٌ حَقِيقِيٌّ، لَا حَظٌّ عَابِرٌ. أَحْسَنْتَ.']
+              'إِتْقَانٌ حَقِيقِيٌّ، لَا حَظٌّ عَابِرٌ. أَحْسَنْتَ.'],
+  phaseDone: ['اكْتَمَلَتِ الْمَرْحَلَةُ الْأُولَى — تَأْسِيسُ الصَّوْتِ صَارَ مِلْكَكَ الْآنَ. الْإِيقَاعُ يَنْتَظِرُكَ فِي الْمَرْحَلَةِ الْقَادِمَةِ.']
 };
 let failStreak=0, _seenIntro=new Set(), _dervishTimer=null, _arVoice=null;
 if('speechSynthesis' in window){
@@ -343,7 +345,8 @@ function showDervish(text, opts){
 }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function dervishIntroFor(day){
-  const key = day.kind==='longtone'?'introLongtone' : day.kind==='transition'?'introTransition' : 'introExchange';
+  if(day.testMode) return; // "لا يقدّم شرحًا أثناء المحاولة الأولى" — assessment days get no head-start hint
+  const key = day.kind==='breath'?'introBreath' : day.kind==='longtone'?'introLongtone' : day.kind==='transition'?'introTransition' : 'introExchange';
   if(_seenIntro.has(day.id)) return; _seenIntro.add(day.id);
   setTimeout(()=>showDervish(pick(DERVISH[key])), 500);
 }
@@ -354,7 +357,7 @@ function registerAttemptResult(ok){
   else if(failStreak===3) showDervish(pick(DERVISH.fail3));
   else if(failStreak>=4){ showDervish(pick(DERVISH.fail4), {sticky:true}); failStreak=0; }
 }
-function dervishCelebrate(){ showDervish(pick(DERVISH.celebrate), {target:'doneDervishBubble', sticky:true}); }
+function dervishCelebrate(phaseDone){ showDervish(pick(phaseDone?DERVISH.phaseDone:DERVISH.celebrate), {target:'doneDervishBubble', sticky:true}); }
 
 /* ================= CURRICULUM (days as DATA) =================
    semis = semitones above the qarar (دو). playable long-tone days
@@ -376,10 +379,16 @@ const CURRICULUM=[
     tol:25, need:3, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: ري⇄فا مع المترونوم', blurb:'انتقل مع كل نبضة — ري، فا، ري، فا، ري.'},
   {id:10, note:'فا⇄صول', lat:'F⇄G', kind:'exchange', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
     tol:25, need:3, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: فا⇄صول مع المترونوم', blurb:'انتقل مع كل نبضة — فا، صول، فا، صول، فا.'},
-  {id:11,note:'—', lat:'',   semis:0, kind:'soon', title:'مراجعة متباعدة', blurb:'قريبًا.'},
-  {id:12,note:'—', lat:'',   semis:0, kind:'soon', title:'يوم تثبيت', blurb:'قريبًا.'},
-  {id:13,note:'—', lat:'',   semis:0, kind:'soon', title:'يوم اختبار', blurb:'قريبًا.'},
-  {id:14,note:'—', lat:'',   semis:0, kind:'soon', title:'أداء تأسيسي', blurb:'قريبًا.'},
+  {id:11, note:'دو', lat:'C', semis:0, kind:'longtone', targetSec:5, tol:20, stabMax:20, need:2, review:true,
+    title:'مراجعة متباعدة: دو', blurb:'عُد إلى نغمة القرار الأولى بلا مساعدة — هل ما زالت راسخة؟'},
+  {id:12, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+    tol:25, need:2, beatSec:0.85, beatStart:0.85, beatMin:0.55, stepDown:0.07, stepUp:0.1, reps:4, consolidate:true,
+    title:'يوم تثبيت: دو⇄ري', blurb:'ثبّت ما أتقنته — بلا شرح جديد، تكرارٌ يرسّخ.'},
+  {id:13, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+    tol:25, need:1, testMode:true, title:'يوم اختبار: دو ← ري', blurb:'محاولة واحدة، بلا تلميح افتتاحي. أرِني ما تتقنه فعلًا.'},
+  {id:14, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+    tol:25, need:3, beatSec:0.85, beatStart:0.85, beatMin:0.5, stepDown:0.08, stepUp:0.1, reps:4, phaseFinale:true,
+    title:'أداء تأسيسي', blurb:'اختم مرحلة تأسيس الصوت بأداء واحد متصل.'},
 ];
 // constellation coordinates (viewBox 320x430) — hand-placed winding path bottom→top
 const SKY=[[165,400],[110,368],[205,344],[135,306],[225,286],[95,258],[180,236],
@@ -393,14 +402,20 @@ const store={
 };
 let calib = store.get('miran_cal', null);          // {qararHz, concertA4, cents, ts}
 let prog  = store.get('miran_prog', {done:{}, streakDays:0, lastDate:null});
+prog.foundation = prog.foundation || {breath:false, rung:0};
 function saveProg(){ store.set('miran_prog', prog); }
 function saveCalib(){ store.set('miran_cal', calib); }
+/* Foundational pre-stage: breath before pitch. Pitch-agnostic — measures only
+   how long a steady sound is sustained, over an ascending ladder of durations. */
+const BREATH={ id:'breath', kind:'breath', note:'✦', lat:'', rungs:[3,5,7,9],
+  title:'مرحلة النفَس', blurb:'قبل الطبقة: أصدر صوتًا ثابتًا وأطِل نفَسك — أيُّ نغمة، المهم الثبات والاستمرار.'};
 
 const CONCERT_A4=440;
 const neyConcertPitch=q=>{const a=q/Math.pow(2,3/12);return{impliedA4:a,centsOff:1200*Math.log2(a/CONCERT_A4)};};
 const dayTarget=d=> calib ? calib.qararHz*Math.pow(2, d.semis/12) : null;   // Hz for a day's note
 function firstIncomplete(){ for(const d of CURRICULUM){ if(d.kind!=='soon' && !prog.done[d.id]) return d.id; } return CURRICULUM.length; }
 function isUnlocked(id){ // immediate unlock: any built day up to first-incomplete, plus completed ones
+  if(!prog.foundation.breath) return false; // breath stage gates the whole journey
   const fi=firstIncomplete(); return id<=fi && CURRICULUM.find(d=>d.id===id).kind!=='soon'; }
 
 /* ================= VIEW ROUTING ================= */
@@ -434,7 +449,18 @@ function renderHome(){
   $('sky').innerHTML=svg;
   $('sky').querySelectorAll('.st-tap').forEach(c=>c.addEventListener('click',()=>openDay(+c.dataset.day)));
 
-  // tonight card = first incomplete day
+  // tonight card = breath gateway first, then first incomplete day
+  if(!prog.foundation.breath){
+    const r=prog.foundation.rung||0;
+    $('tonightGlyph').textContent='✦';
+    $('tonightTitle').textContent=BREATH.title;
+    $('tonightBlurb').textContent=BREATH.blurb;
+    $('tonightLat').textContent=`الدرجة ${toAr(r+1)} / ${toAr(BREATH.rungs.length)} · قبل النغمات`;
+    $('tonightEyebrow').textContent='ابدأ من هنا · النفَس أولًا';
+    $('btnStart').textContent = r>0 ? 'تابع النفَس' : 'ابدأ النفَس';
+    $('btnStart').disabled=false; $('btnStart').style.opacity=1;
+    targetDayId='breath';
+  } else {
   const d=CURRICULUM[fi-1] || CURRICULUM[CURRICULUM.length-1];
   $('tonightGlyph').textContent=d.note;
   $('tonightTitle').textContent=d.title;
@@ -445,6 +471,7 @@ function renderHome(){
   $('btnStart').disabled = d.kind==='soon';
   $('btnStart').style.opacity = d.kind==='soon' ? .5 : 1;
   targetDayId=d.id;
+  }
 
   // ney tuning line
   if(calib){
@@ -461,6 +488,7 @@ const arNum='٠١٢٣٤٥٦٧٨٩';
 const toAr=n=>String(n).replace(/\d/g,d=>arNum[d]);
 
 function openDay(id){
+  if(id==='breath'){ openBreath(); return; }
   if(!isUnlocked(id)) return;
   targetDayId=id;
   if(!calib){ show('calib'); return; }
@@ -751,13 +779,13 @@ function drawCountdown(k){
   setupCanvas();
   const compact = curDay.kind==='longtone';
   const moving = curDay.kind==='transition' || curDay.kind==='exchange';
-  if(moving) drawTransitionBg(0); else if(compact) drawThreadBg(); else drawOrbitBg();
+  if(curDay.kind==='breath') drawBreathBg(); else if(moving) drawTransitionBg(0); else if(compact) drawThreadBg(); else drawOrbitBg();
   cx.fillStyle='rgba(233,183,94,.92)'; cx.font=(compact?"700 34px ":"700 66px ")+"'Aref Ruqaa',serif"; cx.textAlign='center';
   cx.fillText(toAr(k), ORB.cx, ORB.cy + (compact?10:24));
   if(!compact){
     cx.fillStyle='rgba(241,234,214,.8)'; cx.font="500 14px 'IBM Plex Sans Arabic'";
-    const note = moving ? 'دو' : curDay.note;
-    cx.fillText('استعدّ على '+note, ORB.cx, ORB.h-20);
+    const note = curDay.kind==='breath' ? 'خذ نفَسًا عميقًا' : (moving ? 'استعدّ على دو' : 'استعدّ على '+curDay.note);
+    cx.fillText(note, ORB.cx, ORB.h-20);
   }
   cx.textAlign='start';
 }
@@ -772,7 +800,7 @@ $('btnRec').addEventListener('click', async ()=>{
   if(counting) return;
   if(recording){ stopAttempt(); return; }
   if(!audioCtx){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ setupCanvas();drawOrbitBg(); cx.fillStyle='#f0b98a';cx.font="500 14px 'IBM Plex Sans Arabic'";cx.textAlign='center';cx.fillText('تعذّر الميكروفون — اسمح بالإذن',ORB.cx,ORB.cy);cx.textAlign='start'; return;} }
-  runCountdown(()=> curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : startAttempt());
+  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : startAttempt());
 });
 function startAttempt(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
@@ -795,7 +823,8 @@ function longestRun(v){ let best=0,cs=null,lo=null; for(const s of v){ if(s.on){
 function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; stopMetro();
   $('btnRecLabel').textContent='ابدأ'; $('btnRec').classList.remove('recording');
   setupCanvas();
-  if(curDay.kind==='transition'){ drawTransitionIdle(); scoreTransition(recData); }
+  if(curDay.kind==='breath'){ drawBreathIdle(); scoreBreath(recData); }
+  else if(curDay.kind==='transition'){ drawTransitionIdle(); scoreTransition(recData); }
   else if(curDay.kind==='exchange'){ drawTransitionIdle(); scoreExchange(recData); }
   else { drawThreadIdle(); score(recData); } }
 
@@ -834,8 +863,10 @@ function finishDay(stats){
     prog.streakDays=(prog.lastDate===y)?(prog.streakDays+1):1; prog.lastDate=today; }
   saveProg();
   stopAll();
-  $('doneSub').textContent=`نجمة اليوم ${toAr(curDay.id)} أُضيئت في سماء رحلتك.`;
-  setTimeout(dervishCelebrate, 400);
+  $('doneSub').textContent = curDay.id===14
+    ? 'اكتملت المرحلة الأولى — تأسيس الصوت — بأربع عشرة نجمة مُتقنة.'
+    : `نجمة اليوم ${toAr(curDay.id)} أُضيئت في سماء رحلتك.`;
+  setTimeout(()=>dervishCelebrate(curDay.id===14), 400);
   $('doneStats').innerHTML = curDay.kind==='transition' ?
     `<div class="stat g"><div class="v">${stats.bestGapMs}</div><div class="k">أنظف انتقال (م.ث)</div></div>
      <div class="stat g"><div class="v">${stats.bestToOffset>=0?'+':''}${stats.bestToOffset.toFixed(0)}</div><div class="k">دقة الوصول (سنت)</div></div>
@@ -1030,6 +1061,97 @@ function scoreExchange(d){
     </div><div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
   renderPips();
   if(attempts>=NEED) setTimeout(()=>finishDay({bestGapMs:Math.round(maxGap*1000), bestHoldsOk:holds.filter(h=>h.ok).length, fastestBeatSec:TR.beatSec}),900);
+}
+
+/* ================= BREATH (foundational, pitch-agnostic) ================= */
+let breathRung=0, breathTarget=3;
+function openBreath(){
+  curDay=BREATH; breathRung=prog.foundation.rung||0; breathTarget=BREATH.rungs[breathRung];
+  sessionLog={app:'miran', version:APP_VERSION, stage:'breath', rung:breathRung+1, target_sec:breathTarget, started:new Date().toISOString(), attempts:[]};
+  $('sessEyebrow').textContent=`مرحلة النفَس · الدرجة ${toAr(breathRung+1)}/${toAr(BREATH.rungs.length)}`;
+  $('sessGlyph').textContent='✦'; $('sessLat').textContent=''; $('targetHz').textContent='أيّ نغمة';
+  $('sustainLabel').textContent='مدة النفَس الثابت'; $('targetSec').textContent=breathTarget.toFixed(1);
+  $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
+  // pips reflect ladder rungs
+  $('pips').innerHTML=''; for(let i=0;i<BREATH.rungs.length;i++){const d=document.createElement('div');d.className='pip'+(i<breathRung?' done':'');$('pips').appendChild(d);}
+  dervishIntroFor(BREATH);
+  show('session'); setTimeout(()=>{setupCanvas();drawBreathIdle();},40);
+}
+function drawBreathBg(){ const {w,h}=ORB; cx.clearRect(0,0,w,h); cx.fillStyle='#0d1526'; cx.fillRect(0,0,w,h); }
+function drawBreathIdle(){ drawBreathBg(); const {cx:mx,cy}=ORB;
+  cx.strokeStyle='rgba(154,163,190,.35)'; cx.lineWidth=2; cx.beginPath(); cx.arc(mx,cy,42,0,7); cx.stroke();
+  cx.fillStyle='rgba(154,163,190,.8)'; cx.font="500 13px 'IBM Plex Sans Arabic'"; cx.textAlign='center';
+  cx.fillText('خذ نفَسًا عميقًا من البطن، ثم أصدر صوتًا ثابتًا', mx, ORB.h-16);
+  cx.font="600 14px 'IBM Plex Sans Arabic'"; cx.fillStyle='rgba(233,183,94,.85)';
+  cx.fillText(`الهدف: ${breathTarget.toFixed(0)} ثوانٍ`, mx, 22); cx.textAlign='start'; }
+// reward: a disc that fills from grey to colour as the sustained sound grows
+function renderBreath(runSec, voicedNow){
+  drawBreathBg(); const {cx:mx,cy}=ORB; const R=52; const frac=Math.min(1,runSec/breathTarget);
+  // base grey ring
+  cx.strokeStyle='rgba(154,163,190,.25)'; cx.lineWidth=3; cx.beginPath(); cx.arc(mx,cy,R,0,7); cx.stroke();
+  // colour fill rising from the bottom of the disc
+  cx.save(); cx.beginPath(); cx.arc(mx,cy,R-2,0,7); cx.clip();
+  const fillTop=cy+R-(2*R)*frac; const grd=cx.createLinearGradient(0,cy+R,0,cy-R);
+  grd.addColorStop(0,'#6BC79A'); grd.addColorStop(1,'#E9B75E');
+  cx.fillStyle=grd; cx.fillRect(mx-R,fillTop,2*R,cy+R-fillTop); cx.restore();
+  // progress ring
+  cx.strokeStyle=voicedNow?'#6BC79A':'#9AA3BE'; cx.lineWidth=3;
+  cx.beginPath(); cx.arc(mx,cy,R,-Math.PI/2,-Math.PI/2+frac*2*Math.PI); cx.stroke();
+  if(frac>=1){ cx.strokeStyle='rgba(233,183,94,.5)'; cx.lineWidth=2; cx.beginPath(); cx.arc(mx,cy,R+8+Math.sin(performance.now()/200)*3,0,7); cx.stroke(); }
+  cx.fillStyle='#F1EAD6'; cx.font="600 18px 'IBM Plex Mono',monospace"; cx.textAlign='center';
+  cx.fillText(runSec.toFixed(1)+'s', mx, cy+6);
+  cx.fillStyle=voicedNow?'#8fdcb4':'rgba(154,163,190,.7)'; cx.font="500 12px 'IBM Plex Sans Arabic'";
+  cx.fillText(voicedNow?'استمرّ…':'أصدر صوتًا', mx, ORB.h-14); cx.textAlign='start'; }
+function startBreath(){
+  recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
+  recData={t0:performance.now(),voiced:[]}; setupCanvas();
+  onFrame=(p)=>{
+    const now=(performance.now()-recData.t0)/1000;
+    const voiced = !!(p.hz && p.clarity>=CLARITY); // ANY pitch counts
+    recData.voiced.push({t:now,on:voiced});
+    const run=longestRun(recData.voiced);
+    renderBreath(run, voiced);
+    $('sustainNum').textContent=run.toFixed(1); $('sustainBar').style.width=Math.min(100,(run/breathTarget)*100)+'%';
+    if(run>=breathTarget+0.3) stopAttempt(); if(now>breathTarget+8) stopAttempt();
+  };
+}
+function scoreBreath(d){
+  const run=longestRun(d.voiced); const ok=run>=breathTarget;
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, sustained_sec:+run.toFixed(2), target_sec:breathTarget, ts:new Date().toISOString()});
+  registerAttemptResult(ok);
+  let head,body,cls;
+  if(ok){
+    cls='ok'; breathRung++; prog.foundation.rung=breathRung; saveProg();
+    if(breathRung>=BREATH.rungs.length){
+      head='اكتمل النفَس!'; body=`أطلت نفَسك ${run.toFixed(1)} ثانية. أنت جاهز للنغمات الآن.`;
+      $('resultZone').innerHTML=`<div class="msg ok"><div class="head">${head}</div>${body}</div>`;
+      setTimeout(finishBreath,900); return;
+    }
+    breathTarget=BREATH.rungs[breathRung];
+    head=`درجة مكتملة (${toAr(breathRung)}/${toAr(BREATH.rungs.length)})`;
+    body=`ثبتّ ${run.toFixed(1)} ثانية. الدرجة التالية: ${breathTarget.toFixed(0)} ثوانٍ.`;
+    $('sessEyebrow').textContent=`مرحلة النفَس · الدرجة ${toAr(breathRung+1)}/${toAr(BREATH.rungs.length)}`;
+    $('targetSec').textContent=breathTarget.toFixed(1);
+  } else {
+    cls='retry'; head='نفَسٌ أقصر قليلًا';
+    body=`ثبتّ ${run.toFixed(1)} ثانية والهدف ${breathTarget.toFixed(0)}. خذ نفَسًا أعمق من البطن، وأطلق الهواء ببطءٍ ثابت — لا تندفع.`;
+    $('resultZone').innerHTML=`<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
+  }
+  if(ok && breathRung<BREATH.rungs.length){
+    $('resultZone').innerHTML=`<div class="msg ok"><div class="head">${head}</div>${body}</div>`;
+    // refresh pips
+    $('pips').innerHTML=''; for(let i=0;i<BREATH.rungs.length;i++){const el=document.createElement('div');el.className='pip'+(i<breathRung?' done':'');$('pips').appendChild(el);}
+  }
+}
+function finishBreath(){
+  prog.foundation.breath=true; saveProg(); stopAll();
+  $('doneSub').textContent='اجتزت مرحلة النفَس — بوابة الرحلة فُتحت، والنغمات في انتظارك.';
+  $('doneStats').innerHTML=`
+    <div class="stat g"><div class="v">${BREATH.rungs[BREATH.rungs.length-1]}</div><div class="k">ثانية نفَس</div></div>
+    <div class="stat g"><div class="v">✦</div><div class="k">النفَس أُتقن</div></div>
+    <div class="stat g"><div class="v">${toAr(BREATH.rungs.length)}</div><div class="k">درجات</div></div>`;
+  setTimeout(()=>dervishCelebrate(false), 400);
+  show('done');
 }
 
 /* ================= EXPORT PROGRESS ================= */
