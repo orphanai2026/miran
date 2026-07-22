@@ -217,6 +217,7 @@
     <div class="epigraph">من نَفَسٍ واحدٍ يبدأ كلُّ لحن</div>
     <div class="phase-band" id="phaseBand">المرحلة الأولى · تأسيس الصوت</div>
     <div class="sky" id="sky"></div>
+    <p class="hint" style="margin:-4px 0 10px">اضغط أي نجمة ذهبية لإعادة تدريب ذلك اليوم متى شئت.</p>
 
     <div class="tonight">
       <div class="eyebrow" id="tonightEyebrow">تدريب اليوم</div>
@@ -233,6 +234,7 @@
 
     <div class="ney-tuning" id="neyTuning"></div>
     <button class="btn-ghost" id="btnExport" style="width:100%;margin-top:14px">↓ احفظ تقرير الرحلة (لأرسله لك)</button>
+    <button id="btnReset" style="width:100%;margin-top:10px;background:none;border:1px solid rgba(220,110,76,.35);color:var(--rose);font-size:.82rem;padding:10px">↺ تصفير التقدّم والبدء من جديد</button>
   </div>
 
   <!-- ============ CALIBRATION ============ -->
@@ -293,13 +295,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d4.10-voicesample</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d4.12-ladder1</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d4.10-voicesample';
+const APP_VERSION='d4.12-ladder1';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -396,10 +398,14 @@ function dervishCelebrate(phaseDone){
    semis = semitones above the qarar (دو). playable long-tone days
    are built now; later days are stars awaiting their exercises. */
 const CURRICULUM=[
-  {id:1, note:'دو', lat:'C',  semis:0, kind:'longtone', targetSec:8, tol:20, stabMax:15, need:7, title:'نغمة القرار الطويلة', blurb:'اثبت على نغمة القرار ٨ ثوانٍ بصوتٍ صافٍ لا يهتزّ.'},
-  {id:2, note:'ري', lat:'D',  semis:2, kind:'longtone', targetSec:9, tol:20, stabMax:15, need:7, title:'نغمة ري الطويلة', blurb:'أضف نغمة ري (الثقب الأول)، واثبت ٩ ثوانٍ بصوتٍ صافٍ.'},
-  {id:3, note:'فا', lat:'F',  semis:5, kind:'longtone', targetSec:9, tol:20, stabMax:15, need:7, title:'نغمة فا الطويلة', blurb:'انتقل إلى فا، وثبّت النفَس ٩ ثوانٍ دون اهتزاز.'},
-  {id:4, note:'صول',lat:'G',  semis:7, kind:'longtone', targetSec:10, tol:20, stabMax:16, need:7, title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ثبّتها ١٠ ثوانٍ بصوتٍ نقيّ.'},
+  {id:1, note:'دو', lat:'C',  semis:0, kind:'longtone', targetSec:8, tol:20, stabMax:15, need:7,
+    durLadder:[3,5,8], stabMult:[1.8,1.3,1], rungNeed:[2,2,7], title:'نغمة القرار الطويلة', blurb:'ابدأ بثلاث ثوانٍ فقط، وترتفع المدة تدريجيًا حتى ٨ ثوانٍ بصوتٍ صافٍ.'},
+  {id:2, note:'ري', lat:'D',  semis:2, kind:'longtone', targetSec:9, tol:20, stabMax:15, need:7,
+    durLadder:[4,6,9], stabMult:[1.7,1.3,1], rungNeed:[2,2,7], title:'نغمة ري الطويلة', blurb:'أضف نغمة ري (الثقب الأول)، وترتفع المدة تدريجيًا حتى ٩ ثوانٍ.'},
+  {id:3, note:'فا', lat:'F',  semis:5, kind:'longtone', targetSec:9, tol:20, stabMax:15, need:7,
+    durLadder:[4,6,9], stabMult:[1.7,1.3,1], rungNeed:[2,2,7], title:'نغمة فا الطويلة', blurb:'انتقل إلى فا، وترتفع المدة تدريجيًا حتى ٩ ثوانٍ دون اهتزاز.'},
+  {id:4, note:'صول',lat:'G',  semis:7, kind:'longtone', targetSec:10, tol:20, stabMax:16, need:7,
+    durLadder:[4,7,10], stabMult:[1.7,1.25,1], rungNeed:[2,2,7], title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ترتفع المدة تدريجيًا حتى ١٠ ثوانٍ بصوتٍ نقيّ.'},
   {id:5, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, title:'الانتقال: دو ← ري', blurb:'ابدأ ثابتًا على دو، وعند الإشارة انتقل بنظافة إلى ري.'},
   {id:6, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
@@ -699,10 +705,13 @@ function startSession(id){
     dervishIntroFor(curDay);
     return;
   }
-  targetHz=dayTarget(curDay); TARGET_SEC=curDay.targetSec; STAB_MAX=curDay.stabMax;
+  targetHz=dayTarget(curDay);
+  ltRung = curDay.durLadder ? 0 : -1;
+  if(curDay.durLadder){ TARGET_SEC=curDay.durLadder[0]; STAB_MAX=Math.round(curDay.stabMax*curDay.stabMult[0]); NEED=curDay.rungNeed[0]; }
+  else { TARGET_SEC=curDay.targetSec; STAB_MAX=curDay.stabMax; }
   sessionLog={app:'miran', version:APP_VERSION, day:id, note:curDay.lat, kind:curDay.kind,
     concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2), target_hz:+targetHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
-  $('sessEyebrow').textContent=`اليوم ${toAr(id)} · نغمة طويلة`;
+  $('sessEyebrow').textContent = curDay.durLadder ? `اليوم ${toAr(id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}` : `اليوم ${toAr(id)} · نغمة طويلة`;
   $('sessGlyph').textContent=curDay.note; $('sessLat').textContent=curDay.lat;
   $('targetHz').textContent=targetHz.toFixed(1)+' Hz'; $('targetSec').textContent=TARGET_SEC.toFixed(1);
   $('sustainLabel').textContent='ثبات النفَس على النغمة';
@@ -711,6 +720,7 @@ function startSession(id){
   renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawThreadIdle();},40);
   dervishIntroFor(curDay);
 }
+let ltRung=-1;
 function renderPips(){ $('pips').innerHTML=''; for(let i=0;i<NEED;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);} }
 
 function drawIdleBall(){ // dim resting ball at centre + hint
@@ -898,7 +908,20 @@ function score(d){
       <div class="stat ${run>=TARGET_SEC-0.3?'g':'b'}"><div class="v">${run.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
     </div><div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
   renderPips();
-  if(attempts>=NEED) setTimeout(()=>finishDay({bestStab:+stab.toFixed(1), bestCents:+medC.toFixed(1), bestSustainSec:+run.toFixed(2), target_hz:sessionLog.target_hz}),900);
+  if(attempts>=NEED){
+    if(ltRung>=0 && ltRung<curDay.durLadder.length-1){
+      setTimeout(()=>{
+        ltRung++; attempts=0;
+        TARGET_SEC=curDay.durLadder[ltRung]; STAB_MAX=Math.round(curDay.stabMax*curDay.stabMult[ltRung]); NEED=curDay.rungNeed[ltRung];
+        $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}`;
+        $('targetSec').textContent=TARGET_SEC.toFixed(1);
+        $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>الدرجة التالية: ${TARGET_SEC.toFixed(0)} ثوانٍ. أنت تتقدّم تدريجيًا نحو الهدف الكامل.</div>`;
+        renderPips();
+      },900);
+    } else {
+      setTimeout(()=>finishDay({bestStab:+stab.toFixed(1), bestCents:+medC.toFixed(1), bestSustainSec:+run.toFixed(2), target_hz:sessionLog.target_hz}),900);
+    }
+  }
 }
 function finishDay(stats){
   // record progress + streak — fields depend on exercise kind, never mislabeled
@@ -1234,6 +1257,17 @@ $('btnExport').addEventListener('click', ()=>{
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`miran-journey-${new Date().toISOString().slice(0,10)}.json`;
   document.body.appendChild(a); a.click(); a.remove();
+});
+
+$('btnReset').addEventListener('click', ()=>{
+  const sure = confirm('سيُصفَّر كل تقدّمك (كل النجوم المُتقنة، ومرحلة النفَس) وتعود لبداية الرحلة تمامًا.\nمعايرة نايك ستبقى كما هي (لن تحتاج إعادة معايرتها).\n\nهل أنت متأكد؟');
+  if(!sure) return;
+  const typed = prompt('اكتب "تصفير" للتأكيد النهائي:');
+  if(typed!=='تصفير'){ return; }
+  prog = {done:{}, streakDays:0, lastDate:null, foundation:{breath:false, rung:0}};
+  saveProg();
+  stopAll();
+  renderHome(); show('home');
 });
 
 /* ================= BOOT ================= */
