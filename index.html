@@ -291,13 +291,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d4.3-mastery</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d4.4-holdmax</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d4.3-mastery';
+const APP_VERSION='d4.4-holdmax';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -816,7 +816,9 @@ function startAttempt(){
     if(inTune) renderThread(cents, Math.abs(cents)<=TOL); else renderThreadSilent();
     const run=longestRun(recData.voiced); $('sustainNum').textContent=run.toFixed(1);
     $('sustainBar').style.width=Math.min(100,(run/TARGET_SEC)*100)+'%';
-    if(run>=TARGET_SEC+0.4) stopAttempt(); if(now>16) stopAttempt();
+    if(inTune) recData._lastVoiced=now;
+    const ended = recData._lastVoiced!=null && (now-recData._lastVoiced)>0.7 && run>=0.5;
+    if(ended) stopAttempt(); else if(recData._lastVoiced==null && now>6) stopAttempt(); else if(now>40) stopAttempt();
   };
 }
 function longestRun(v){ let best=0,cs=null,lo=null; for(const s of v){ if(s.on){if(cs==null)cs=s.t;lo=s.t;} else{if(cs!=null&&s.t-lo>0.15){best=Math.max(best,lo-cs);cs=null;}} } if(cs!=null)best=Math.max(best,(lo??cs)-cs); return best; }
@@ -1103,7 +1105,7 @@ function renderBreath(runSec, voicedNow, steady){
   cx.fillStyle='#F1EAD6'; cx.font="600 18px 'IBM Plex Mono',monospace"; cx.textAlign='center';
   cx.fillText(runSec.toFixed(1)+'s', mx, cy+6);
   cx.fillStyle= !voicedNow?'rgba(154,163,190,.7)':(steady?'#8fdcb4':'#f0b98a'); cx.font="500 12px 'IBM Plex Sans Arabic'";
-  cx.fillText(!voicedNow?'أصدر صوتًا':(steady?'استمرّ… صوتٌ صافٍ':'صوتك يهتزّ — ثبّته'), mx, ORB.h-14); cx.textAlign='start'; }
+  cx.fillText(!voicedNow?'أصدر صوتًا':(frac>=1?(steady?'تجاوزت الهدف — أطِل لأقصى نفَس!':'ثبّت صوتك'):(steady?'استمرّ… صوتٌ صافٍ':'صوتك يهتزّ — ثبّته')), mx, ORB.h-14); cx.textAlign='start'; }
 function startBreath(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
   recData={t0:performance.now(),voiced:[],samp:[]}; setupCanvas();
@@ -1119,7 +1121,9 @@ function startBreath(){
     if(recent.length>=6){ const med=median(recent.map(s=>s.hz)); const jit=std(recent.map(s=>1200*Math.log2(s.hz/med))); steady=jit<=BREATH.jitterMax; }
     renderBreath(run, voiced, steady);
     $('sustainNum').textContent=run.toFixed(1); $('sustainBar').style.width=Math.min(100,(run/breathTarget)*100)+'%';
-    if(run>=breathTarget+0.3) stopAttempt(); if(now>breathTarget+8) stopAttempt();
+    if(voiced) recData._lastVoiced=now;
+    const endedBlowing = recData._lastVoiced!=null && (now-recData._lastVoiced)>0.8 && run>=0.5;
+    if(endedBlowing) stopAttempt(); else if(recData._lastVoiced==null && now>6) stopAttempt(); else if(now>45) stopAttempt();
   };
 }
 function scoreBreath(d){
