@@ -308,13 +308,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d5.7-consistency</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d5.9-uipolish</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d5.7-consistency';
+const APP_VERSION='d5.9-uipolish';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1022,7 +1022,17 @@ function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; sto
   else if(curDay.kind==='exchange'){ drawTransitionIdle(); scoreExchange(recData); }
   else if(curDay.kind==='rhythm'){ drawRhythmIdle(); scoreRhythm(recData); }
   else if(curDay.kind==='rhythmdrop'){ drawRhythmIdle(); scoreRhythmDrop(recData); }
-  else { drawThreadIdle(); score(recData); } }
+  else { drawThreadIdle(); score(recData); }
+  $('sustainBar').style.width='0%'; $('sustainNum').textContent='0.0';
+  persistInProgress();
+}
+function persistInProgress(){
+  if(!curDay || !sessionLog) return;
+  prog.inProgress = prog.inProgress || {};
+  prog.inProgress[curDay.id] = { day:curDay.id, kind:curDay.kind, title:curDay.title,
+    attempts:sessionLog.attempts, updated:new Date().toISOString() };
+  saveProg();
+}
 
 $('btnDervish').addEventListener('click', ()=>{
   if(!curDay) return;
@@ -1068,6 +1078,7 @@ function finishDay(stats){
   // record progress + streak — fields depend on exercise kind, never mislabeled
   prog.done[curDay.id]=Object.assign({ts:new Date().toISOString(), kind:curDay.kind,
     attempts:sessionLog.attempts}, stats);
+  if(prog.inProgress) delete prog.inProgress[curDay.id]; // now fully recorded in prog.done, no need for the partial copy
   const today=new Date().toISOString().slice(0,10);
   if(prog.lastDate!==today){ const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
     prog.streakDays=(prog.lastDate===y)?(prog.streakDays+1):1; prog.lastDate=today; }
@@ -1407,7 +1418,7 @@ function scoreBreath(d){
   }
 }
 function finishBreath(){
-  prog.foundation.breath=true; saveProg(); stopAll();
+  prog.foundation.breath=true; if(prog.inProgress) delete prog.inProgress['breath']; saveProg(); stopAll();
   $('doneSub').textContent='اجتزت مرحلة النفَس — بوابة الرحلة فُتحت، والنغمات في انتظارك.';
   $('doneStats').innerHTML=`
     <div class="stat g"><div class="v">${BREATH.rungs[BREATH.rungs.length-1]}</div><div class="k">ثانية نفَس</div></div>
@@ -1595,7 +1606,8 @@ $('btnExport').addEventListener('click', ()=>{
                   breath_rung_reached: prog.foundation.rung||0, breath_rungs: BREATH.rungs },
     days_mastered: Object.keys(prog.done).length,
     streak_days: prog.streakDays,
-    progress: prog.done };
+    progress: prog.done,
+    in_progress: prog.inProgress || {} };
   const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`miran-journey-${new Date().toISOString().slice(0,10)}.json`;
