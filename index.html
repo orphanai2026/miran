@@ -250,6 +250,19 @@
     <button class="back" id="calibBack">→ رجوع</button>
   </div>
 
+  <div class="view" id="view-latcal">
+    <div class="card">
+      <div class="step-eyebrow">معايرة التأخير الشخصي · مرة واحدة</div>
+      <h2>عايِر توقيتك</h2>
+      <p class="lead">لكل عازف تأخير طبيعي بين قرار العزف ووصول الصوت (نفَس، استعداد، فيزياء الآلة). سنقيسه مرة واحدة لنُنصفك في كل تمارين الإيقاع القادمة — لن نظلمك بمقارنتك بصفر مطلق لا يخصّك.</p>
+      <p class="lead">اعزف نغمة قصيرة مع كل نبضة من المترونوم، ثماني مرات، بشكل طبيعي كما تعزف دائمًا.</p>
+      <canvas id="latcalCanvas" width="524" height="200" style="width:100%;height:200px;display:block;border-radius:16px;background:#0d1526;border:1px solid var(--hair-cool);margin:10px 0"></canvas>
+      <button class="btn-primary" id="btnLatCal">ابدأ المعايرة</button>
+      <div class="hint" id="latcalHint">استمع للنبضات الأربع الأولى بلا عزف لتستشعر السرعة، ثم عزف طبيعي مع كل نبضة.</div>
+    </div>
+    <button class="back" id="latcalBack">→ رجوع</button>
+  </div>
+
   <!-- ============ SESSION ============ -->
   <div class="view" id="view-session">
     <div class="card">
@@ -295,13 +308,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d5.0-rhythm</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d5.2-refaudio</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d5.0-rhythm';
+const APP_VERSION='d5.2-refaudio';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -443,10 +456,12 @@ const store={
   _m:{}
 };
 let calib = store.get('miran_cal', null);          // {qararHz, concertA4, cents, ts}
+let latencyCal = store.get('miran_latency', null);  // {ms, ts} — personal onset-latency offset for rhythm scoring
 let prog  = store.get('miran_prog', {done:{}, streakDays:0, lastDate:null});
 prog.foundation = prog.foundation || {breath:false, rung:0};
 function saveProg(){ store.set('miran_prog', prog); }
 function saveCalib(){ store.set('miran_cal', calib); }
+function saveLatencyCal(){ store.set('miran_latency', latencyCal); }
 /* Foundational pre-stage: breath before pitch. Pitch-agnostic — measures only
    how long a steady sound is sustained, over an ascending ladder of durations. */
 const BREATH={ id:'breath', kind:'breath', note:'✦', lat:'', rungs:[4,6,8,10,12], jitterMax:30,
@@ -536,6 +551,16 @@ function renderHome(){
       $('neyTuning').parentElement.insertBefore(a, $('neyTuning').nextSibling);
     }
   }
+  // latency calibration status/re-calibrate link
+  if(latencyCal){
+    let el=document.getElementById('reLatCal');
+    if(!el){ el=document.createElement('a'); el.id='reLatCal';
+      el.style.cssText='display:block;text-align:center;margin-top:8px;color:var(--gold);cursor:pointer;font-size:.8rem';
+      el.addEventListener('click',()=>show('latcal'));
+      $('neyTuning').parentElement.insertBefore(el, $('neyTuning').nextSibling);
+    }
+    el.textContent = `تأخيرك الشخصي: ${latencyCal.ms} م.ث · إعادة المعايرة`;
+  }
 }
 const arNum='٠١٢٣٤٥٦٧٨٩';
 const toAr=n=>String(n).replace(/\d/g,d=>arNum[d]);
@@ -545,11 +570,14 @@ function openDay(id){
   if(!isUnlocked(id)) return;
   targetDayId=id;
   if(!calib){ show('calib'); return; }
+  const day=CURRICULUM.find(d=>d.id===id);
+  if(day && day.kind==='rhythm' && !latencyCal){ show('latcal'); return; }
   startSession(id);
 }
 $('btnStart').addEventListener('click',()=>openDay(targetDayId));
 $('sessBack').addEventListener('click',()=>{ stopAll(); renderHome(); show('home'); });
 $('calibBack').addEventListener('click',()=>{ stopAll(); show('home'); });
+$('latcalBack').addEventListener('click',()=>{ stopAll(); show('home'); });
 $('doneNext').addEventListener('click',()=>{ renderHome(); show('home'); });
 
 /* ================= AUDIO + PITCH (validated engine) ================= */
@@ -606,6 +634,57 @@ $('btnCalib').addEventListener('click', async ()=>{
       const q=cloud.length?cloud[Math.floor(cloud.length/2)]:med;
       const cp=neyConcertPitch(q);
       calib={qararHz:q, concertA4:CONCERT_A4, cents:cp.centsOff, ts:new Date().toISOString()}; saveCalib();
+      renderHome(); show('home');
+    }
+  };
+});
+
+/* ---- personal onset-latency calibration ---- */
+const LATCAL_LEAD=4, LATCAL_BEATS=8, LATCAL_BEAT_SEC=0.9;
+function drawLatCal(beatTimes, hits, curIdx, nowSec){
+  const cvs=$('latcalCanvas'); const c2=cvs.getContext('2d');
+  const r=cvs.getBoundingClientRect(); if(r.width && cvs.width!==r.width*2){ const dpr=Math.min(2,window.devicePixelRatio||1); cvs.width=r.width*dpr; cvs.height=200*dpr; c2.setTransform(dpr,0,0,dpr,0,0); }
+  const w=r.width||440, h=200, cy=h/2;
+  c2.clearRect(0,0,w,h); c2.fillStyle='#0d1526'; c2.fillRect(0,0,w,h);
+  const n=beatTimes.length, pad=30, gap=(w-2*pad)/(n-1);
+  for(let i=0;i<n;i++){
+    const x=pad+i*gap; const lead=i<LATCAL_LEAD;
+    const state=hits[i]; const active=i===curIdx;
+    let col = lead?'rgba(154,163,190,.4)' : state!=null?'#6BC79A' : active?'rgba(233,183,94,.9)':'rgba(154,163,190,.35)';
+    if(active){ c2.strokeStyle='rgba(233,183,94,.5)'; c2.lineWidth=2; c2.beginPath(); c2.arc(x,cy,14,0,7); c2.stroke(); }
+    c2.fillStyle=col; c2.beginPath(); c2.arc(x,cy,7,0,7); c2.fill();
+  }
+  c2.fillStyle='rgba(241,234,214,.8)'; c2.font="500 13px 'IBM Plex Sans Arabic'"; c2.textAlign='center';
+  const phase = curIdx<LATCAL_LEAD ? 'استمع فقط…' : `اعزف مع النبضة ${toAr(Math.min(curIdx-LATCAL_LEAD+1,LATCAL_BEATS))}/${toAr(LATCAL_BEATS)}`;
+  c2.fillText(phase, w/2, 24); c2.textAlign='start';
+}
+$('btnLatCal').addEventListener('click', async ()=>{
+  $('btnLatCal').disabled=true; $('latcalHint').textContent='…جارٍ تشغيل الميكروفون';
+  try{ await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop(); }
+  catch(e){ $('btnLatCal').disabled=false; $('latcalHint').textContent='تعذّر الميكروفون — اسمح بالإذن'; return; }
+  $('latcalHint').textContent='استمع للنبضات الأربع، ثم اعزف مع كل نبضة بعدها.';
+  const total=LATCAL_LEAD+LATCAL_BEATS;
+  const beatTimes=Array.from({length:total},(_,i)=>i*LATCAL_BEAT_SEC);
+  const t0=performance.now(); const offsets=[]; const hits=new Array(total).fill(null);
+  let wasVoiced=false, lastBeatPlayed=-1;
+  onFrame=(p)=>{
+    const now=(performance.now()-t0)/1000;
+    const beatIdx=Math.min(Math.floor(now/LATCAL_BEAT_SEC+0.5), total-1);
+    if(beatIdx!==lastBeatPlayed && now>=beatIdx*LATCAL_BEAT_SEC-0.02){ lastBeatPlayed=beatIdx; playTick(beatIdx%4===0?1300:1100); }
+    const voiced=!!(p.hz && p.clarity>=CLARITY);
+    if(voiced && !wasVoiced && beatIdx>=LATCAL_LEAD){
+      let bi=-1,bd=Infinity;
+      beatTimes.forEach((bt,i)=>{ if(i>=LATCAL_LEAD && hits[i]==null){ const dd=Math.abs(now-bt); if(dd<bd){bd=dd;bi=i;} } });
+      if(bi>=0 && bd<=LATCAL_BEAT_SEC/2){ const offMs=(now-beatTimes[bi])*1000; hits[bi]=offMs; offsets.push(offMs); }
+    }
+    wasVoiced=voiced;
+    const curIdx=Math.min(Math.floor(now/LATCAL_BEAT_SEC), total-1);
+    drawLatCal(beatTimes, hits, curIdx, now);
+    if(now>=total*LATCAL_BEAT_SEC+0.6){
+      onFrame=null; $('btnLatCal').disabled=false;
+      if(offsets.length<5){ $('latcalHint').textContent='لم ألتقط نبضات كافية — أعد المحاولة، وحافظ على نغمة قصيرة عند كل نبضة.'; return; }
+      offsets.sort((a,b)=>a-b); const med=offsets[Math.floor(offsets.length/2)];
+      latencyCal={ms:Math.round(med), ts:new Date().toISOString()}; saveLatencyCal();
       renderHome(); show('home');
     }
   };
@@ -786,16 +865,34 @@ function tone(freq, startAt, dur, peakGain){
   g.gain.exponentialRampToValueAtTime(0.0001, startAt+dur);
   o.stop(startAt+dur+0.05);
 }
+/* ---- listening example: plays a REAL ney recording of the note when available
+   (demonstrates actual technique — attack, breath shape, timbre — not just pitch),
+   falling back to a synthesized sine tone if no recording exists for that note yet. ---- */
+function playNoteRef(noteLat, fallbackFreq, fallbackDur, onDone){
+  if(!noteLat){ tone(fallbackFreq, audioCtx.currentTime+0.02, fallbackDur); setTimeout(onDone, fallbackDur*1000+150); return; }
+  const a=new Audio(`ney-audio/note_${noteLat}.mp3`);
+  const useFallback=()=>{ tone(fallbackFreq, audioCtx.currentTime+0.02, fallbackDur); setTimeout(onDone, fallbackDur*1000+150); };
+  a.addEventListener('ended', onDone, {once:true});
+  a.addEventListener('error', useFallback, {once:true});
+  a.play().catch(useFallback);
+}
 /* ---- listening example: loops the target note/interval until stopped ---- */
 let _listenPlaying=false, _listenTimer=null;
 function scheduleListenCycle(){
   if(!_listenPlaying) return;
   const moving = curDay.kind==='transition' || curDay.kind==='exchange';
-  const t0=audioCtx.currentTime;
-  let cycleMs;
-  if(moving){ tone(TR.fromHz, t0+0.05, 0.9); tone(TR.toHz, t0+1.2, 0.9); cycleMs=2600; }
-  else { const hz = curDay.kind==='longtone' ? dayTarget(curDay) : targetHz; tone(hz, t0+0.05, 1.6); cycleMs=2200; }
-  _listenTimer=setTimeout(scheduleListenCycle, cycleMs);
+  if(moving){
+    playNoteRef(curDay.from.lat, TR.fromHz, 0.9, ()=>{
+      if(!_listenPlaying) return;
+      _listenTimer=setTimeout(()=>playNoteRef(curDay.to.lat, TR.toHz, 0.9, ()=>{
+        if(!_listenPlaying) return;
+        _listenTimer=setTimeout(scheduleListenCycle, 700);
+      }), 150);
+    });
+  } else {
+    const hz = curDay.kind==='longtone' ? dayTarget(curDay) : targetHz;
+    playNoteRef(curDay.lat, hz, 1.6, ()=>{ if(!_listenPlaying) return; _listenTimer=setTimeout(scheduleListenCycle, 600); });
+  }
 }
 $('btnListen').addEventListener('click', async ()=>{
   if(!audioCtx){await initAudio();} if(audioCtx.state==='suspended') await audioCtx.resume();
@@ -811,7 +908,7 @@ $('btnListen').addEventListener('click', async ()=>{
 });
 
 /* ---- metronome: cycles both → sound-only → light-only → off ---- */
-let metroMode='off'; // 'off' | 'both' | 'sound' | 'light'
+let metroMode='both'; // 'off' | 'both' | 'sound' | 'light' — on by default: passive rhythm exposure from day one
 const METRO_LABEL={off:'متوقّف', both:'صوت وضوء', sound:'صوت فقط', light:'ضوء فقط'};
 const METRO_ICON ={off:'♩', both:'🔊💡', sound:'🔊', light:'💡'};
 function updateMetroBtn(){
@@ -1321,7 +1418,7 @@ function startRhythm(){
       // assign to nearest beat if within half a beat and not already hit
       let bi=-1,bd=Infinity;
       beatTimes.forEach((bt,i)=>{ if(recData.hits[i]===undefined){ const dd=Math.abs(now-bt); if(dd<bd){bd=dd;bi=i;} } });
-      if(bi>=0 && bd<=beatSec/2){ const offMs=(now-beatTimes[bi])*1000; recData.hits[bi] = Math.abs(offMs)<=rhTolMs; }
+      if(bi>=0 && bd<=beatSec/2){ const offMs=(now-beatTimes[bi])*1000; const corrected=offMs-(latencyCal?latencyCal.ms:0); recData.hits[bi] = Math.abs(corrected)<=rhTolMs; }
     }
     recData.wasVoiced=voiced;
     const curIdx=Math.min(Math.floor(now/beatSec), nBeats);
@@ -1338,7 +1435,7 @@ function scoreRhythm(d){
   const missed=d.hits.filter(h=>h===undefined).length;
   const total=nBeats+1;
   const ok = hits>=total-1; // allow one miss/skip — new skill, some grace
-  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, hits, misses, missed_beats:missed, tol_ms:rhTolMs, ts:new Date().toISOString()});
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, hits, misses, missed_beats:missed, tol_ms:rhTolMs, latency_correction_ms:latencyCal?latencyCal.ms:0, ts:new Date().toISOString()});
   registerAttemptResult(ok);
   let head,body,cls;
   if(!ok){
@@ -1374,6 +1471,7 @@ function scoreRhythm(d){
 $('btnExport').addEventListener('click', ()=>{
   const report={ app:'miran', version:APP_VERSION, exported:new Date().toISOString(),
     ney_calibration: calib ? {qarar_hz:+calib.qararHz.toFixed(2), implied_concert_A4:+neyConcertPitch(calib.qararHz).impliedA4.toFixed(2), cents_from_440:+calib.cents.toFixed(1)} : null,
+    latency_calibration: latencyCal ? {personal_latency_ms: latencyCal.ms, ts: latencyCal.ts} : null,
     foundation: { breath_stage: prog.foundation.breath ? 'complete' : 'in-progress',
                   breath_rung_reached: prog.foundation.rung||0, breath_rungs: BREATH.rungs },
     days_mastered: Object.keys(prog.done).length,
