@@ -276,7 +276,7 @@
       <canvas id="orbit" width="524" height="300"></canvas>
       <div class="dervish-bubble" id="dervishBubble"></div>
       <div class="sustain">
-        <div class="lbl"><span id="sustainLabel">ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span> ث</span></div>
+        <div class="lbl"><span id="sustainLabel">ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span><span id="sustainUnit"> ث</span></span></div>
         <div class="bar"><i id="sustainBar"></i></div>
       </div>
       <div class="control-deck">
@@ -308,13 +308,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d5.9-uipolish</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d6.1-streakbar</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d5.9-uipolish';
+const APP_VERSION='d6.1-streakbar';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -420,13 +420,13 @@ const CURRICULUM=[
   {id:4, note:'صول',lat:'G',  semis:7, kind:'longtone', targetSec:10, tol:20, stabMax:16, need:7,
     durLadder:[4,7,10], stabMult:[1.7,1.25,1], rungNeed:[2,2,7], title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ترتفع المدة تدريجيًا حتى ١٠ ثوانٍ بصوتٍ نقيّ.'},
   {id:5, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
-    tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], rungNeed:[2,2,7], title:'الانتقال: دو ← ري', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى ري.'},
+    tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], holdFromLadder:[4.5,3.2,2.2], holdToLadder:[4.5,3.4,2.6], rungNeed:[2,2,7], title:'الانتقال: دو ← ري', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى ري.'},
   {id:6, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: دو⇄ري مع المترونوم', blurb:'انتقل مع كل نبضة — دو، ري، دو، ري، دو.'},
   {id:7, note:'ري→فا', lat:'D→F', kind:'transition', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
-    tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], rungNeed:[2,2,7], title:'الانتقال: ري ← فا', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى فا.'},
+    tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], holdFromLadder:[4.5,3.2,2.2], holdToLadder:[4.5,3.4,2.6], rungNeed:[2,2,7], title:'الانتقال: ري ← فا', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى فا.'},
   {id:8, note:'فا→صول', lat:'F→G', kind:'transition', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
-    tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], rungNeed:[2,2,7], title:'الانتقال: فا ← صول', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى صول.'},
+    tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], holdFromLadder:[4.5,3.2,2.2], holdToLadder:[4.5,3.4,2.6], rungNeed:[2,2,7], title:'الانتقال: فا ← صول', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى صول.'},
   {id:9, note:'ري⇄فا', lat:'D⇄F', kind:'exchange', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: ري⇄فا مع المترونوم', blurb:'انتقل مع كل نبضة — ري، فا، ري، فا، ري.'},
   {id:10, note:'فا⇄صول', lat:'F⇄G', kind:'exchange', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
@@ -616,7 +616,7 @@ function loop(ts){
     const p=detectPitch(buf.slice(),audioCtx.sampleRate); if(onFrame)onFrame(p); }
   rafId=requestAnimationFrame(loop);
 }
-function stopAll(){ onFrame=null; stopMetro(); if(droneOsc){try{droneOsc.stop();}catch(e){} droneOsc=null;} recording=false; }
+function stopAll(){ onFrame=null; stopMetro(); if(droneOsc){try{droneOsc.stop();}catch(e){} droneOsc=null;} recording=false; clearTimeout(_autoNextTimer); }
 
 /* ================= CALIBRATION ================= */
 $('btnCalib').addEventListener('click', async ()=>{
@@ -764,8 +764,9 @@ function startSession(id){
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
         span:(curDay.to.semis-curDay.from.semis)*100};
     trRung = curDay.tolLadder ? 0 : -1;
-    if(curDay.tolLadder){ TOL=curDay.tolLadder[0]; trGapMax=curDay.gapLadder[0]; NEED=curDay.rungNeed[0]; }
-    else { TOL=curDay.tol; trGapMax=0.45; }
+    if(curDay.tolLadder){ TOL=curDay.tolLadder[0]; trGapMax=curDay.gapLadder[0]; NEED=curDay.rungNeed[0];
+      TR_HOLD_FROM=curDay.holdFromLadder?curDay.holdFromLadder[0]:2.2; TR_HOLD_TO=curDay.holdToLadder?curDay.holdToLadder[0]:2.6; TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO; }
+    else { TOL=curDay.tol; trGapMax=0.45; TR_HOLD_FROM=2.2; TR_HOLD_TO=2.6; TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO; }
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'transition', pair:curDay.lat,
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
@@ -980,7 +981,14 @@ function drawCountdown(k){
   }
   cx.textAlign='start';
 }
+function restoreSustainLabel(){
+  $('sustainUnit').style.display=''; $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
+  if(curDay.kind==='breath'){ $('sustainLabel').textContent='مدة النفَس الثابت'; $('targetSec').textContent=breathTarget.toFixed(1); }
+  else if(curDay.kind==='longtone'){ $('sustainLabel').textContent='ثبات النفَس على النغمة'; $('targetSec').textContent=TARGET_SEC.toFixed(1); }
+  else { $('sustainLabel').textContent='تقدّم التمرين'; $('targetSec').textContent='—'; $('sustainUnit').style.display='none'; }
+}
 function runCountdown(cb){
+  restoreSustainLabel();
   counting=true; $('btnRecLabel').textContent='…'; let n=4; drawCountdown(n); playTick(1100);
   const iv=setInterval(()=>{ n--;
     if(n>=1){ drawCountdown(n); playTick(n===1?1650:1100); }
@@ -1023,8 +1031,25 @@ function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; sto
   else if(curDay.kind==='rhythm'){ drawRhythmIdle(); scoreRhythm(recData); }
   else if(curDay.kind==='rhythmdrop'){ drawRhythmIdle(); scoreRhythmDrop(recData); }
   else { drawThreadIdle(); score(recData); }
-  $('sustainBar').style.width='0%'; $('sustainNum').textContent='0.0';
+  const streakFrac = NEED>0 ? Math.min(1, attempts/NEED) : 0;
+  $('sustainBar').style.width=(streakFrac*100)+'%';
+  $('sustainNum').textContent=String(attempts);
+  $('targetSec').textContent=String(NEED);
+  $('sustainUnit').style.display='none';
+  $('sustainLabel').textContent='سلسلة الإتقان (محاولات متتالية)';
   persistInProgress();
+  scheduleAutoNext();
+}
+let _autoNextTimer=null;
+function scheduleAutoNext(){
+  clearTimeout(_autoNextTimer);
+  _autoNextTimer=setTimeout(()=>{
+    const activeView=document.querySelector('.view.active');
+    if(!activeView || activeView.id!=='view-session') return; // day finished, or user navigated away — nothing to continue
+    if(counting || recording) return; // already moving on (manual press or rung-advance race) — don't double-trigger
+    if(!curDay) return;
+    runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
+  }, 2400); // pause long enough to read the feedback message before the next count-in begins
 }
 function persistInProgress(){
   if(!curDay || !sessionLog) return;
@@ -1111,8 +1136,8 @@ function finishDay(stats){
 }
 
 /* ================= TRANSITION EXERCISE ================= */
-const TR_HOLD_FROM=2.2, TR_MOVE=0.35, TR_HOLD_TO=2.6; // seconds
-const TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO;
+let TR_HOLD_FROM=2.2, TR_MOVE=0.35, TR_HOLD_TO=2.6; // seconds — now rung-adjustable, see holdLadder
+let TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO;
 function yT(c){ const pad=34,h=ORB.h,min=-70,max=270; return pad+(1-(c-min)/(max-min))*(h-2*pad); }
 function activeTargetCents(now){ // gold ring travels from 0 (دو) to span (ري)
   if(now<TR_HOLD_FROM) return 0;
@@ -1208,6 +1233,7 @@ function scoreTransition(d){
       setTimeout(()=>{
         trRung++; attempts=0;
         TOL=curDay.tolLadder[trRung]; trGapMax=curDay.gapLadder[trRung]; NEED=curDay.rungNeed[trRung];
+        if(curDay.holdFromLadder){ TR_HOLD_FROM=curDay.holdFromLadder[trRung]; TR_HOLD_TO=curDay.holdToLadder[trRung]; TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO; }
         $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · انتقال · الدرجة ${toAr(trRung+1)}/${toAr(curDay.tolLadder.length)}`;
         $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>الهامش صار أضيق (±${TOL}¢) — تبدأ سلسلة الإتقان من جديد عند هذه الدرجة.</div>`;
         renderPips();
