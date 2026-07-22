@@ -117,10 +117,12 @@
   .back{background:none;border:none;color:var(--text-soft);font-size:.85rem;padding:6px 0;margin-top:8px;cursor:pointer}
   .step-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.2em;color:var(--gold);
     text-transform:uppercase;margin-bottom:8px;opacity:.85;position:relative}
-  .dervish-call{position:absolute;top:16px;left:16px;width:26px;height:26px;border-radius:50%;
-    background:rgba(233,183,94,.1);border:1px solid var(--hair);color:var(--gold);font-family:'Amiri',serif;
-    font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;
-    transition:background .15s,transform .15s;z-index:2}
+  .dervish-call{position:absolute;top:14px;left:14px;width:46px;height:46px;border-radius:50%;overflow:hidden;padding:0;
+    background:rgba(233,183,94,.1);border:1px solid var(--gold);color:var(--gold);font-family:'Amiri',serif;
+    font-weight:700;font-size:1.1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:transform .15s,box-shadow .15s;z-index:2;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+  .dervish-call:hover{box-shadow:0 0 14px rgba(233,183,94,.5)}
+  .dervish-call img{width:100%;height:100%;object-fit:cover;display:block}
   .dervish-call:active{transform:scale(.9)}
   .dervish-bubble{max-height:0;overflow:hidden;opacity:0;transition:all .35s ease;
     background:rgba(233,183,94,.08);border:1px solid var(--hair);border-radius:14px;
@@ -250,7 +252,7 @@
   <div class="view" id="view-session">
     <div class="card">
       <div class="step-eyebrow" id="sessEyebrow">اليوم ١ · نغمة طويلة</div>
-      <button class="dervish-call" id="btnDervish" title="استدعِ الدرويش">؟</button>
+      <button class="dervish-call" id="btnDervish" title="استدعِ الدرويش"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">؟</span><img src="dervish.png" alt="الدرويش" style="position:relative" onerror="this.remove()"></button>
       <div class="attempts" id="pips"></div>
       <div class="bignote">
         <span class="ar" id="sessGlyph">دو</span>
@@ -291,48 +293,58 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d4.4-holdmax</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d4.8-tashkeel</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d4.4-holdmax';
+const APP_VERSION='d4.8-tashkeel';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
    browser TTS guess vowels and mispronounce; explicit tashkeel fixes most of it. */
 const DERVISH = {
-  introLongtone: ['اسْتَعِدَّ… ثَبِّتْ نَفَسَكَ عَلَى النَّغْمَةِ بِهُدُوءٍ، وَابْدَأْ حِينَ تَرْتَاحُ.'],
-  introBreath: ['قَبْلَ النَّغْمَةِ، النَّفَسُ. خُذْ شَهِيقًا عَمِيقًا مِنَ الْبَطْنِ، وَأَطْلِقْ صَوْتًا وَاحِدًا ثَابِتًا مَا اسْتَطَعْتَ — لَا تَهُمُّكَ الطَّبَقَةُ الْآنَ، بَلِ الِاسْتِمْرَارُ.'],
-  introTransition: ['اثْبُتْ عَلَى النَّغْمَةِ الْأُولَى، وَحِينَ تَسْمَعُ الْإِشَارَةَ انْتَقِلْ بِنُعُومَةٍ إِلَى الثَّانِيَةِ.'],
-  introExchange: ['تَابِعِ النَّبْضَةَ بِأُذُنِكَ، وَانْتَقِلْ مَعَهَا بِلَا تَرَدُّدٍ — لَا تَسْبِقْهَا وَلَا تَتَأَخَّرْ عَنْهَا.'],
-  fail2: ['خُذْ نَفَسًا عَمِيقًا مِنَ الْبَطْنِ، وَأَرْخِ كَتِفَيْكَ قَبْلَ أَنْ تُعِيدَ الْمُحَاوَلَةَ.',
-          'اسْتَمِعْ لِلْمِثَالِ مَرَّةً أُخْرَى قَبْلَ أَنْ تَعْزِفَ — طَابِقْ أُذُنَكَ قَبْلَ نَفَسِكَ.'],
-  fail3: ['رَاقِبْ زَاوِيَةَ الْقَصَبَةِ عَلَى شَفَتِكَ السُّفْلَى — أَمِلْهَا قَلِيلًا حَتَّى يَصْفُوَ الصَّوْتُ.',
-          'أَرْخِ قَبْضَتَكَ عَلَى النَّايِ — الشَّدُّ الزَّائِدُ يُتْعِبُ نَفَسَكَ بِسُرْعَةٍ.'],
-  fail4: ['لَا بَأْسَ عَلَيْكَ — خُذْ اسْتِرَاحَةً قَصِيرَةً، ثُمَّ عُدْ بِنَفَسٍ جَدِيدٍ. الْقَصَبَةُ تَنْتَظِرُكَ.'],
-  celebrate: ['نَجْمَةٌ جَدِيدَةٌ أَضَاءَتْ فِي سَمَاءِ رِحْلَتِكَ — الْقَصَبَةُ بَدَأَتْ تَعْرِفُكَ أَكْثَرَ.',
-              'إِتْقَانٌ حَقِيقِيٌّ، لَا حَظٌّ عَابِرٌ. أَحْسَنْتَ.'],
-  phaseDone: ['اكْتَمَلَتِ الْمَرْحَلَةُ الْأُولَى — تَأْسِيسُ الصَّوْتِ صَارَ مِلْكَكَ الْآنَ. الْإِيقَاعُ يَنْتَظِرُكَ فِي الْمَرْحَلَةِ الْقَادِمَةِ.']
+  introLongtone: ['اسْتَعَدّ… ثَبَت نَفْسَك عَلَى النَّغْمَة بِهُدُوء، وَابْدَأْ حِين تَرْتَاح.'],
+  introBreath: ['قَبْلَ النَّغْمَة، النَّفْس. خُذْ شَهِيقا عَمِيقًا مِنْ الْبَطْنِ، وَأَطْلَق صَوْتًا وَاحِدًا ثَابِتًا مَا اسْتَطَعْت — لَا تُهْمَك الطَّبَقَةُ الْانَ، بَلْ الِاسْتِمْرَار.'],
+  introTransition: ['أَثْبَتَ عَلَى النَّغْمَة الْأُولَى، وَحِين تُسْمَع الْإِشَارَة انْتَقَل بِنُعُومَة إلَى الثَّانِيَةِ.'],
+  introExchange: ['تَابِع النَّبضه بِإِذْنِك، وَانْتَقَل مَعَهَا بِلَا تَرَدُّدٍ — لَا تَسْبِقَهَا وَلَا تَتَأَخَّرُ عَنْهَا.'],
+  fail2: ['خُذْ نَفْسًا عَمِيقًا مِنْ الْبَطْنِ، وَأَرَّخ كَتِفَيْك قَبْلَ أَنْ تُعِيدَ الْمُحَاوَلَة.',
+          'اسْتَمَع لِلْمِثَال مَرَّةً أُخْرَى قَبْلَ أَنْ تَعْزِف — طَابَق إذْنِك قَبْل نَفْسَك.'],
+  fail3: ['رَاقِبْ زَاوِيَة الْقَصَبَةِ عَلَى شَفَتَك السُّفْلَى — أَمَلِهَا قَلِيلًا حَتَّى يَصْفُوَ الصَّوْت.',
+          'أَرَّخ قَبْضَتِك عَلَى النَّأْيِ — الشَّدّ الزَّائِد يُتْعِب نَفْسَك بِسُرْعَةٍ.'],
+  fail4: ['لَا بَأْسَ عَلَيْك — خُذْ اسْتِرَاحَة قَصِيرَةٍ، ثُمَّ عَدَّ بِنَفْس جَدِيد. الْقَصَبَة تَنْتَظرك.'],
+  failBreath2: ['خُذْ الْهَوَاءِ مِنْ الْبَطْنِ لَا مِنْ الصَّدْرِ — ضَعْ يَدَك عَلَيْهَا وَأَشْعَر بِهَا تَنْتَفِخْ أَوَّلًا.',
+                'أَطْلَق الْهَوَاء بِبُطْء وَثَبَات — لَا تَدْفَعُهُ دَفْعَةً وَاحِدَةً فِي الْبِدَايَة.'],
+  failBreath3: ['الصَّوْت يَحْتَاج ثَبَاتًا لَا طُولًا فَقَطْ — تَخَيَّل خَيْطًا مُسْتَقِيمًا مِنْ الْهَوَاءِ لَا يَتَمَوَّج.',
+                'اسْتَرخ فِي كَتِفَيْك وَحَلَقك — التَّوَتُّرُ هُوَ مِنْ يُجْعَل الصَّوْت يَهْتَزّ.'],
+  failBreath4: ['لَا بَأْسَ عَلَيْك — خُذْ اسْتِرَاحَة قَصِيرَةٍ، ثُمَّ عَدَّ بِنَفْس جَدِيد. النَّفْس يَبْنِي بِالتَّكْرَارِ لَا بِالْعَجَلَة.'],
+  celebrate: ['نَجْمُه جَدِيدَة أَضَاءَتْ فِي سَمَاءِ رِحْلَتُك — الْقَصَبَة بَدَأَتْ تُعَرِّفُك أَكْثَر.',
+              'إتْقَان حَقِيقِيٍّ، لَا حَظَّ عَابِر. أَحْسَنْت.'],
+  phaseDone: ['اكْتَمَلَتْ الْمَرْحَلَةِ الْأُولَى — تَأْسِيس الصَّوْت صَار مِلْكِك الْان. الْإِيقَاع يَنْتَظِرُك فِي الْمَرْحَلَةِ الْقَادِمَة.']
 };
 let failStreak=0, _seenIntro=new Set(), _dervishTimer=null, _arVoice=null;
 if('speechSynthesis' in window){
-  const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith('ar'));
+  const pickVoice=()=>{ const all=speechSynthesis.getVoices(); const vs=all.filter(v=>v.lang&&v.lang.toLowerCase().startsWith('ar'));
     if(!vs.length){ _arVoice=null; return; }
-    // prefer exact Saudi locale, then higher-quality named engines, then any Arabic voice
-    _arVoice = vs.find(v=>v.lang.toLowerCase()==='ar-sa')
+    // Cloud/network voices (localService:false, e.g. Google's server TTS) sound far more
+    // natural than the device's built-in local engine (often robotic espeak-style on Android).
+    // Priority: exact ar-SA + cloud → any Arabic + cloud → exact ar-SA local → named quality engine → anything Arabic.
+    _arVoice = vs.find(v=>v.lang.toLowerCase()==='ar-sa' && v.localService===false)
+      || vs.find(v=>v.localService===false)
+      || vs.find(v=>v.lang.toLowerCase()==='ar-sa')
       || vs.find(v=>/google|microsoft|natural/i.test(v.name))
       || vs[0];
   };
-  pick(); speechSynthesis.onvoiceschanged=pick;
+  pickVoice(); speechSynthesis.onvoiceschanged=pickVoice;
+  window._miranListArabicVoices=()=>speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith('ar')).map(v=>({name:v.name,lang:v.lang,cloud:!v.localService}));
 }
 function dervishSpeak(text){
   if(!('speechSynthesis' in window)) return;
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
-    u.lang='ar-SA'; u.rate=0.88; u.pitch=1.0; u.volume=1.0; if(_arVoice) u.voice=_arVoice;
+    u.lang='ar-SA'; u.rate=0.85; u.pitch=1.0; u.volume=1.0; if(_arVoice) u.voice=_arVoice;
     speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -353,9 +365,13 @@ function dervishIntroFor(day){
 function registerAttemptResult(ok){
   if(ok){ failStreak=0; return; }
   failStreak++;
-  if(failStreak===2) showDervish(pick(DERVISH.fail2));
-  else if(failStreak===3) showDervish(pick(DERVISH.fail3));
-  else if(failStreak>=4){ showDervish(pick(DERVISH.fail4), {sticky:true}); failStreak=0; }
+  const isBreath = curDay && curDay.kind==='breath';
+  const b2 = isBreath?DERVISH.failBreath2:DERVISH.fail2;
+  const b3 = isBreath?DERVISH.failBreath3:DERVISH.fail3;
+  const b4 = isBreath?DERVISH.failBreath4:DERVISH.fail4;
+  if(failStreak===2) showDervish(pick(b2));
+  else if(failStreak===3) showDervish(pick(b3));
+  else if(failStreak>=4){ showDervish(pick(b4), {sticky:true}); failStreak=0; }
 }
 function dervishCelebrate(phaseDone){ showDervish(pick(phaseDone?DERVISH.phaseDone:DERVISH.celebrate), {target:'doneDervishBubble', sticky:true}); }
 
