@@ -308,13 +308,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d5.3-drop16</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d5.7-consistency</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d5.3-drop16';
+const APP_VERSION='d5.7-consistency';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -779,6 +779,7 @@ function startSession(id){
     return;
   }
   if(curDay.kind==='exchange'){
+    exHoldCount=0;
     TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
         span:(curDay.to.semis-curDay.from.semis)*100, beatSec:curDay.beatStart, reps:curDay.reps};
@@ -838,6 +839,7 @@ function startSession(id){
 }
 let ltRung=-1;
 let trRung=-1, trGapMax=0.45;
+let exHoldCount=0; // successes held at the current exchange tempo before speeding up (needs 2, per original spec)
 function renderPips(){ $('pips').innerHTML=''; for(let i=0;i<NEED;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);} }
 
 function drawIdleBall(){ // dim resting ball at centre + hint
@@ -886,8 +888,10 @@ function tone(freq, startAt, dur, peakGain){
 function playNoteRef(noteLat, fallbackFreq, fallbackDur, onDone){
   if(!noteLat){ tone(fallbackFreq, audioCtx.currentTime+0.02, fallbackDur); setTimeout(onDone, fallbackDur*1000+150); return; }
   const a=new Audio(`ney-audio/note_${noteLat}.mp3`);
-  const useFallback=()=>{ tone(fallbackFreq, audioCtx.currentTime+0.02, fallbackDur); setTimeout(onDone, fallbackDur*1000+150); };
-  a.addEventListener('ended', onDone, {once:true});
+  let fired=false;
+  const useFallback=()=>{ if(fired)return; fired=true; tone(fallbackFreq, audioCtx.currentTime+0.02, fallbackDur); setTimeout(onDone, fallbackDur*1000+150); };
+  const onEnded=()=>{ if(fired)return; fired=true; onDone(); };
+  a.addEventListener('ended', onEnded, {once:true});
   a.addEventListener('error', useFallback, {once:true});
   a.play().catch(useFallback);
 }
@@ -1052,7 +1056,7 @@ function score(d){
         TARGET_SEC=curDay.durLadder[ltRung]; STAB_MAX=Math.round(curDay.stabMax*curDay.stabMult[ltRung]); NEED=curDay.rungNeed[ltRung];
         $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}`;
         $('targetSec').textContent=TARGET_SEC.toFixed(1);
-        $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>الدرجة التالية: ${TARGET_SEC.toFixed(0)} ثوانٍ. أنت تتقدّم تدريجيًا نحو الهدف الكامل.</div>`;
+        $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>الدرجة التالية: ${TARGET_SEC.toFixed(0)} ثوانٍ. تبدأ سلسلة الإتقان من جديد عند هذه الدرجة.</div>`;
         renderPips();
       },900);
     } else {
@@ -1194,7 +1198,7 @@ function scoreTransition(d){
         trRung++; attempts=0;
         TOL=curDay.tolLadder[trRung]; trGapMax=curDay.gapLadder[trRung]; NEED=curDay.rungNeed[trRung];
         $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · انتقال · الدرجة ${toAr(trRung+1)}/${toAr(curDay.tolLadder.length)}`;
-        $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>الهامش صار أضيق (±${TOL}¢) — انتقالك يزداد دقة.</div>`;
+        $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>الهامش صار أضيق (±${TOL}¢) — تبدأ سلسلة الإتقان من جديد عند هذه الدرجة.</div>`;
         renderPips();
       },900);
     } else {
@@ -1274,11 +1278,22 @@ function scoreExchange(d){
     TR.beatSec = Math.min(curDay.beatStart, +(prevBeat+curDay.stepUp*0.5).toFixed(2));
   }
   else { ok=true; cls='ok'; attempts++; head=`تبادل نظيف (${toAr(attempts)}/${toAr(NEED)})`;
-    TR.beatSec = Math.max(curDay.beatMin, +(prevBeat-curDay.stepDown).toFixed(2));
-    const faster = TR.beatSec<prevBeat;
-    body=`أتقنت ${toAr(reps)} انتقالات متتالية، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية. ${attempts<NEED? (faster?`نرفع السرعة الآن — نبضة كل ${TR.beatSec.toFixed(2)} ث.`:'أنت عند أسرع سرعة — ثبّتها.') : ''}`; }
+    exHoldCount++;
+    let speedMsg='';
+    if(exHoldCount>=2){
+      const newBeat = Math.max(curDay.beatMin, +(prevBeat-curDay.stepDown).toFixed(2));
+      exHoldCount=0;
+      if(newBeat<prevBeat){
+        TR.beatSec=newBeat;
+        speedMsg=`نرفع السرعة الآن — نبضة كل ${TR.beatSec.toFixed(2)} ث. تبدأ سلسلة الإتقان من جديد عند هذه السرعة الجديدة.`;
+        attempts=0; // mastery streak resets — the 7-consecutive bar must be proven at the tempo you've actually settled at
+      } else {
+        speedMsg='أنت عند أسرع سرعة — أكمل نحو الإتقان الكامل هنا.';
+      }
+    } else if(attempts<NEED){ speedMsg='ثبّت هذه السرعة مرة أخرى قبل أن نُسرّع.'; }
+    body=`أتقنت ${toAr(reps)} انتقالات متتالية، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية. ${speedMsg}`; }
   $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · تبادل · النبضة كل ${TR.beatSec.toFixed(2)} ث`;
-  if(!ok){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; }
+  if(!ok){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; exHoldCount=0; }
   registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, beat_sec:prevBeat,
     holds:holds.map(h=>({i:h.i,med:h.med!=null?+h.med.toFixed(1):null,ok:h.ok})),
