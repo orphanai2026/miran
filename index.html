@@ -295,13 +295,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · <span class="v">الإصدار d4.12-ladder1</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · <span class="v">الإصدار d5.0-rhythm</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='d4.12-ladder1';
+const APP_VERSION='d5.0-rhythm';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -407,13 +407,13 @@ const CURRICULUM=[
   {id:4, note:'صول',lat:'G',  semis:7, kind:'longtone', targetSec:10, tol:20, stabMax:16, need:7,
     durLadder:[4,7,10], stabMult:[1.7,1.25,1], rungNeed:[2,2,7], title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ترتفع المدة تدريجيًا حتى ١٠ ثوانٍ بصوتٍ نقيّ.'},
   {id:5, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
-    tol:25, need:7, title:'الانتقال: دو ← ري', blurb:'ابدأ ثابتًا على دو، وعند الإشارة انتقل بنظافة إلى ري.'},
+    tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], rungNeed:[2,2,7], title:'الانتقال: دو ← ري', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى ري.'},
   {id:6, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: دو⇄ري مع المترونوم', blurb:'انتقل مع كل نبضة — دو، ري، دو، ري، دو.'},
   {id:7, note:'ري→فا', lat:'D→F', kind:'transition', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
-    tol:25, need:7, title:'الانتقال: ري ← فا', blurb:'ابدأ ثابتًا على ري، وانتقل بنظافة إلى فا.'},
+    tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], rungNeed:[2,2,7], title:'الانتقال: ري ← فا', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى فا.'},
   {id:8, note:'فا→صول', lat:'F→G', kind:'transition', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
-    tol:25, need:7, title:'الانتقال: فا ← صول', blurb:'ابدأ ثابتًا على فا، وانتقل بنظافة إلى صول.'},
+    tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], rungNeed:[2,2,7], title:'الانتقال: فا ← صول', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى صول.'},
   {id:9, note:'ري⇄فا', lat:'D⇄F', kind:'exchange', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: ري⇄فا مع المترونوم', blurb:'انتقل مع كل نبضة — ري، فا، ري، فا، ري.'},
   {id:10, note:'فا⇄صول', lat:'F⇄G', kind:'exchange', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
@@ -428,10 +428,13 @@ const CURRICULUM=[
   {id:14, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, beatSec:0.85, beatStart:0.85, beatMin:0.5, stepDown:0.08, stepUp:0.1, reps:4, phaseFinale:true,
     title:'أداء تأسيسي', blurb:'اختم مرحلة تأسيس الصوت بأداء واحد متصل.'},
+  {id:15, note:'♩', lat:'', kind:'rhythm', beats:8, beatSec:1.0,
+    tolLadder:[320,260,220], rungNeed:[2,2,7], need:7, phaseStart:true,
+    title:'الإيقاع: المتابعة مع النبضة', blurb:'اعزف نغمة قصيرة مع كل نبضة — الدقة في التوقيت لا الطبقة.'},
 ];
-// constellation coordinates (viewBox 320x430) — hand-placed winding path bottom→top
+// constellation coordinates (viewBox 320x460) — hand-placed winding path bottom→top
 const SKY=[[165,400],[110,368],[205,344],[135,306],[225,286],[95,258],[180,236],
-          [258,214],[130,190],[215,166],[92,146],[190,124],[262,100],[150,74]];
+          [258,214],[130,190],[215,166],[92,146],[190,124],[262,100],[150,74],[95,40]];
 
 /* ================= PERSISTENCE (localStorage, safe) ================= */
 const store={
@@ -464,8 +467,9 @@ function show(v){ document.querySelectorAll('.view').forEach(x=>x.classList.remo
 function renderHome(){
   const doneCount=Object.keys(prog.done).length;
   $('streakN').textContent=doneCount;
+  $('phaseBand').textContent = prog.done[14] ? 'المرحلة الثانية · الإيقاع والتوقيت' : 'المرحلة الأولى · تأسيس الصوت';
   // constellation
-  const W=320,H=430; let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة رحلة الأيام">`;
+  const W=320,H=460; let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة رحلة الأيام">`;
   const fi=firstIncomplete();
   // threads
   for(let i=0;i<SKY.length-1;i++){
@@ -677,10 +681,13 @@ function startSession(id){
     TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
         span:(curDay.to.semis-curDay.from.semis)*100};
+    trRung = curDay.tolLadder ? 0 : -1;
+    if(curDay.tolLadder){ TOL=curDay.tolLadder[0]; trGapMax=curDay.gapLadder[0]; NEED=curDay.rungNeed[0]; }
+    else { TOL=curDay.tol; trGapMax=0.45; }
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'transition', pair:curDay.lat,
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
-    $('sessEyebrow').textContent=`اليوم ${toAr(id)} · انتقال`;
+    $('sessEyebrow').textContent = curDay.tolLadder ? `اليوم ${toAr(id)} · انتقال · الدرجة ${toAr(trRung+1)}/${toAr(curDay.tolLadder.length)}` : `اليوم ${toAr(id)} · انتقال`;
     $('sessGlyph').textContent=curDay.from.note+' → '+curDay.to.note; $('sessLat').textContent=curDay.lat;
     $('targetHz').textContent=`${TR.fromHz.toFixed(0)} → ${TR.toHz.toFixed(0)} Hz`;
     $('sustainLabel').textContent='تقدّم التمرين';
@@ -705,6 +712,21 @@ function startSession(id){
     dervishIntroFor(curDay);
     return;
   }
+  if(curDay.kind==='rhythm'){
+    rhRung = curDay.tolLadder ? 0 : -1;
+    rhTolMs = curDay.tolLadder ? curDay.tolLadder[0] : 250;
+    NEED = curDay.tolLadder ? curDay.rungNeed[0] : curDay.need;
+    attempts=0;
+    sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythm', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
+    $('sessEyebrow').textContent = curDay.tolLadder ? `اليوم ${toAr(id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}` : `اليوم ${toAr(id)} · إيقاع`;
+    $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
+    $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
+    $('sustainLabel').textContent='تقدّم الدورة';
+    $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
+    renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawRhythmIdle();},40);
+    dervishIntroFor(curDay);
+    return;
+  }
   targetHz=dayTarget(curDay);
   ltRung = curDay.durLadder ? 0 : -1;
   if(curDay.durLadder){ TARGET_SEC=curDay.durLadder[0]; STAB_MAX=Math.round(curDay.stabMax*curDay.stabMult[0]); NEED=curDay.rungNeed[0]; }
@@ -721,6 +743,7 @@ function startSession(id){
   dervishIntroFor(curDay);
 }
 let ltRung=-1;
+let trRung=-1, trGapMax=0.45;
 function renderPips(){ $('pips').innerHTML=''; for(let i=0;i<NEED;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);} }
 
 function drawIdleBall(){ // dim resting ball at centre + hint
@@ -831,12 +854,12 @@ function drawCountdown(k){
   setupCanvas();
   const compact = curDay.kind==='longtone';
   const moving = curDay.kind==='transition' || curDay.kind==='exchange';
-  if(curDay.kind==='breath') drawBreathBg(); else if(moving) drawTransitionBg(0); else if(compact) drawThreadBg(); else drawOrbitBg();
+  if(curDay.kind==='breath') drawBreathBg(); else if(curDay.kind==='rhythm') drawRhythmBg(); else if(moving) drawTransitionBg(0); else if(compact) drawThreadBg(); else drawOrbitBg();
   cx.fillStyle='rgba(233,183,94,.92)'; cx.font=(compact?"700 34px ":"700 66px ")+"'Aref Ruqaa',serif"; cx.textAlign='center';
   cx.fillText(toAr(k), ORB.cx, ORB.cy + (compact?10:24));
   if(!compact){
     cx.fillStyle='rgba(241,234,214,.8)'; cx.font="500 14px 'IBM Plex Sans Arabic'";
-    const note = curDay.kind==='breath' ? 'خذ نفَسًا عميقًا' : (moving ? 'استعدّ على دو' : 'استعدّ على '+curDay.note);
+    const note = curDay.kind==='breath' ? 'خذ نفَسًا عميقًا' : curDay.kind==='rhythm' ? 'استعدّ للنبضة الأولى' : (moving ? 'استعدّ على دو' : 'استعدّ على '+curDay.note);
     cx.fillText(note, ORB.cx, ORB.h-20);
   }
   cx.textAlign='start';
@@ -852,7 +875,7 @@ $('btnRec').addEventListener('click', async ()=>{
   if(counting) return;
   if(recording){ stopAttempt(); return; }
   if(!audioCtx){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ setupCanvas();drawOrbitBg(); cx.fillStyle='#f0b98a';cx.font="500 14px 'IBM Plex Sans Arabic'";cx.textAlign='center';cx.fillText('تعذّر الميكروفون — اسمح بالإذن',ORB.cx,ORB.cy);cx.textAlign='start'; return;} }
-  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : startAttempt());
+  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : startAttempt());
 });
 function startAttempt(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
@@ -881,6 +904,7 @@ function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; sto
   if(curDay.kind==='breath'){ drawBreathIdle(); scoreBreath(recData); }
   else if(curDay.kind==='transition'){ drawTransitionIdle(); scoreTransition(recData); }
   else if(curDay.kind==='exchange'){ drawTransitionIdle(); scoreExchange(recData); }
+  else if(curDay.kind==='rhythm'){ drawRhythmIdle(); scoreRhythm(recData); }
   else { drawThreadIdle(); score(recData); } }
 
 $('btnDervish').addEventListener('click', ()=>{
@@ -943,6 +967,10 @@ function finishDay(stats){
     curDay.kind==='exchange' ?
     `<div class="stat g"><div class="v">${stats.bestGapMs}</div><div class="k">أنظف فجوة (م.ث)</div></div>
      <div class="stat g"><div class="v">${stats.bestHoldsOk}</div><div class="k">وقفات مضبوطة</div></div>
+     <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>` :
+    curDay.kind==='rhythm' ?
+    `<div class="stat g"><div class="v">${stats.bestHits}</div><div class="k">نبضات مضبوطة</div></div>
+     <div class="stat g"><div class="v">${stats.bestTolMs}</div><div class="k">أدق هامش (م.ث)</div></div>
      <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>` :
     `<div class="stat g"><div class="v">${stats.bestStab.toFixed(0)}</div><div class="k">أفضل ثبات (سنت)</div></div>
      <div class="stat g"><div class="v">${stats.bestSustainSec.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
@@ -1021,28 +1049,41 @@ function scoreTransition(d){
   const fromM=fromSeg.length?median(fromSeg):null, toM=toSeg.length?median(toSeg):null;
   const reachedFrom = fromM!=null && Math.abs(fromM-0)<=TOL;
   const reachedTo   = toM!=null && Math.abs(toM-TR.span)<=TOL;
+  const fromNote=curDay.from.note, toNote=curDay.to.note;
   // transition gap: voiced time in the cue window where off BOTH notes
   const winPts=d.voiced.filter(v=>v.t>=TR_HOLD_FROM-0.1 && v.t<=TR_HOLD_FROM+TR_MOVE+0.9);
   let gap=0; d.pts.filter(p=>p.t>=TR_HOLD_FROM-0.1 && p.t<=TR_HOLD_FROM+TR_MOVE+0.9)
     .forEach((p,i,arr)=>{ if(i>0 && Math.abs(p.c-0)>TOL && Math.abs(p.c-TR.span)>TOL) gap+=(p.t-arr[i-1].t); });
   let ok=false,head='',body='',cls='retry';
-  if(!reachedFrom){ head='ابدأ ثابتًا على دو'; body='لم أسمع دو ثابتة في البداية. اعزف دو واثبت لحظة قبل الإشارة.'; }
+  if(!reachedFrom){ head=`ابدأ ثابتًا على ${fromNote}`; body=`لم أسمع ${fromNote} ثابتة في البداية. اعزف ${fromNote} واثبت لحظة قبل الإشارة.`; }
   else if(!reachedTo){
-    if(toM==null||toM<TR.span-TOL){ head='لم تصل إلى ري'; body='افتح الثقب الأول كاملًا ودعِ النغمة تصعد إلى ري وتثبت.'; }
-    else { head='تجاوزت ري'; body=`ارتفعت فوق ري بـ${(toM-TR.span).toFixed(0)} سنت. خفّف ضغط النفخ قليلًا عند الوصول.`; }
+    if(toM==null||toM<TR.span-TOL){ head=`لم تصل إلى ${toNote}`; body=`دعِ النغمة تصعد إلى ${toNote} وتثبت.`; }
+    else { head=`تجاوزت ${toNote}`; body=`ارتفعت فوق ${toNote} بـ${(toM-TR.span).toFixed(0)} سنت. خفّف ضغط النفخ قليلًا عند الوصول.`; }
   }
-  else if(gap>0.45){ head='انتقال غير نظيف'; body=`ظهرت نغمة عابرة ${Math.round(gap*1000)} مللي ثانية بين دو وري (وميض كهرماني في الذيل). انتقل أسرع: افتح الثقب دفعة واحدة.`; }
-  else { ok=true; cls='ok'; attempts++; head=`انتقال نظيف (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبتّ على دو، وقطعت المسافة إلى ري بنظافة (${Math.round(gap*1000)} مللي ثانية) ووصلت بدقة. ${attempts<NEED?'أعِد — نحتاج '+toAr(NEED)+' متتالية.':''}`; }
+  else if(gap>trGapMax){ head='انتقال غير نظيف'; body=`ظهرت نغمة عابرة ${Math.round(gap*1000)} مللي ثانية بين ${fromNote} و${toNote} (وميض كهرماني في الذيل). انتقل أسرع: افتح الثقب دفعة واحدة.`; }
+  else { ok=true; cls='ok'; attempts++; head=`انتقال نظيف (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبتّ على ${fromNote}، وقطعت المسافة إلى ${toNote} بنظافة (${Math.round(gap*1000)} مللي ثانية) ووصلت بدقة. ${attempts<NEED?'أعِد — نحتاج '+toAr(NEED)+' متتالية.':''}`; }
   if(!ok){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; }
   registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1,success:ok,from_cents:fromM!=null?+fromM.toFixed(1):null,to_cents:toM!=null?+toM.toFixed(1):null,gap_ms:Math.round(gap*1000),ts:new Date().toISOString()});
   $('resultZone').innerHTML=`<div class="stats">
-      <div class="stat ${reachedFrom?'g':'w'}"><div class="v">${fromM!=null?(fromM>=0?'+':'')+fromM.toFixed(0):'—'}</div><div class="k">دو (سنت)</div></div>
-      <div class="stat ${reachedTo?'g':'w'}"><div class="v">${toM!=null?(toM-TR.span>=0?'+':'')+(toM-TR.span).toFixed(0):'—'}</div><div class="k">ري (انحراف)</div></div>
-      <div class="stat ${gap<=0.45?'g':'b'}"><div class="v">${Math.round(gap*1000)}</div><div class="k">فجوة الانتقال (م.ث)</div></div>
+      <div class="stat ${reachedFrom?'g':'w'}"><div class="v">${fromM!=null?(fromM>=0?'+':'')+fromM.toFixed(0):'—'}</div><div class="k">${fromNote} (سنت)</div></div>
+      <div class="stat ${reachedTo?'g':'w'}"><div class="v">${toM!=null?(toM-TR.span>=0?'+':'')+(toM-TR.span).toFixed(0):'—'}</div><div class="k">${toNote} (انحراف)</div></div>
+      <div class="stat ${gap<=trGapMax?'g':'b'}"><div class="v">${Math.round(gap*1000)}</div><div class="k">فجوة الانتقال (م.ث)</div></div>
     </div><div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
   renderPips();
-  if(attempts>=NEED) setTimeout(()=>finishDay({bestGapMs:Math.round(gap*1000), bestToOffset:toM!=null?+(toM-TR.span).toFixed(1):0}),900);
+  if(attempts>=NEED){
+    if(trRung>=0 && trRung<curDay.tolLadder.length-1){
+      setTimeout(()=>{
+        trRung++; attempts=0;
+        TOL=curDay.tolLadder[trRung]; trGapMax=curDay.gapLadder[trRung]; NEED=curDay.rungNeed[trRung];
+        $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · انتقال · الدرجة ${toAr(trRung+1)}/${toAr(curDay.tolLadder.length)}`;
+        $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>الهامش صار أضيق (±${TOL}¢) — انتقالك يزداد دقة.</div>`;
+        renderPips();
+      },900);
+    } else {
+      setTimeout(()=>finishDay({bestGapMs:Math.round(gap*1000), bestToOffset:toM!=null?+(toM-TR.span).toFixed(1):0}),900);
+    }
+  }
 }
 
 /* ================= EXCHANGE EXERCISE (repeated دو⇄ري with strict metronome) ================= */
@@ -1242,6 +1283,91 @@ function finishBreath(){
     <div class="stat g"><div class="v">${toAr(BREATH.rungs.length)}</div><div class="k">درجات</div></div>`;
   setTimeout(()=>dervishCelebrate(false), 400);
   show('done');
+}
+
+/* ================= RHYTHM (Phase 2 pilot — onset timing, pitch-agnostic) ================= */
+let rhRung=-1, rhTolMs=250;
+function drawRhythmBg(){ const {w,h}=ORB; cx.clearRect(0,0,w,h); cx.fillStyle='#0d1526'; cx.fillRect(0,0,w,h); }
+function drawRhythmIdle(){ drawRhythmBg(); const {cx:mx,cy}=ORB;
+  cx.fillStyle='rgba(154,163,190,.8)'; cx.font="500 13px 'IBM Plex Sans Arabic'"; cx.textAlign='center';
+  cx.fillText('اعزف نغمة قصيرة بالضبط مع كل نبضة', mx, cy);
+  cx.fillText('اضغط «ابدأ» ثم انتظر النبضات', mx, ORB.h-16); cx.textAlign='start'; }
+function renderRhythmBeats(beats, hits, curBeatIdx){
+  drawRhythmBg(); const {w,cy}=ORB; const n=beats.length; const pad=36; const gap=(w-2*pad)/(n-1);
+  for(let i=0;i<n;i++){
+    const x=pad+i*gap; const state=hits[i]; // undefined=pending, true=hit, false=miss
+    const active=i===curBeatIdx;
+    let col = state===true?'#6BC79A' : state===false?'#E39860' : active?'rgba(233,183,94,.9)':'rgba(154,163,190,.35)';
+    if(active && state===undefined){ cx.strokeStyle='rgba(233,183,94,.5)'; cx.lineWidth=2; cx.beginPath(); cx.arc(x,cy,14,0,7); cx.stroke(); }
+    cx.fillStyle=col; cx.beginPath(); cx.arc(x,cy,8,0,7); cx.fill();
+  }
+  cx.fillStyle='rgba(241,234,214,.8)'; cx.font="500 13px 'IBM Plex Sans Arabic'"; cx.textAlign='center';
+  cx.fillText(`النبضة ${toAr(Math.min(curBeatIdx+1,n))} / ${toAr(n)}`, ORB.cx, 26); cx.textAlign='start';
+}
+function startRhythm(){
+  recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
+  const beatSec=curDay.beatSec, nBeats=curDay.beats;
+  const beatTimes=Array.from({length:nBeats+1},(_,i)=>i*beatSec);
+  recData={t0:performance.now(), onsets:[], hits:new Array(nBeats+1).fill(undefined), wasVoiced:false, lastBeatPlayed:-1};
+  setupCanvas();
+  const END=nBeats*beatSec+0.7;
+  onFrame=(p)=>{
+    const now=(performance.now()-recData.t0)/1000;
+    const beatIdx=Math.min(Math.floor(now/beatSec+0.5), nBeats);
+    if(beatIdx!==recData.lastBeatPlayed && now>=beatIdx*beatSec-0.02){ recData.lastBeatPlayed=beatIdx; playTick(beatIdx%4===0?1300:1100); }
+    const voiced = !!(p.hz && p.clarity>=CLARITY);
+    if(voiced && !recData.wasVoiced){ // rising edge = onset
+      recData.onsets.push(now);
+      // assign to nearest beat if within half a beat and not already hit
+      let bi=-1,bd=Infinity;
+      beatTimes.forEach((bt,i)=>{ if(recData.hits[i]===undefined){ const dd=Math.abs(now-bt); if(dd<bd){bd=dd;bi=i;} } });
+      if(bi>=0 && bd<=beatSec/2){ const offMs=(now-beatTimes[bi])*1000; recData.hits[bi] = Math.abs(offMs)<=rhTolMs; }
+    }
+    recData.wasVoiced=voiced;
+    const curIdx=Math.min(Math.floor(now/beatSec), nBeats);
+    renderRhythmBeats(beatTimes, recData.hits, curIdx);
+    $('sustainNum').textContent=Math.min(now,END).toFixed(1);
+    $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
+    if(now>=END) stopAttempt();
+  };
+}
+function scoreRhythm(d){
+  const nBeats=curDay.beats;
+  const hits=d.hits.filter(h=>h===true).length;
+  const misses=d.hits.filter(h=>h===false).length;
+  const missed=d.hits.filter(h=>h===undefined).length;
+  const total=nBeats+1;
+  const ok = hits>=total-1; // allow one miss/skip — new skill, some grace
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, hits, misses, missed_beats:missed, tol_ms:rhTolMs, ts:new Date().toISOString()});
+  registerAttemptResult(ok);
+  let head,body,cls;
+  if(!ok){
+    cls='retry'; attempts=0;
+    head = missed>1 ? 'فاتتك عدّة نبضات' : 'التوقيت يحتاج دقة أكبر';
+    body = missed>1 ? `لم تعزف عند ${toAr(missed)} نبضات. حافظ على نغمة قصيرة عند كل نقطة.`
+      : `أصبت ${toAr(hits)} من ${toAr(total)} نبضات ضمن هامش ${rhTolMs} م.ث. استمع للنقر وتوقّع اللحظة قبل وصولها بقليل.`;
+  } else {
+    cls='ok'; attempts++; head=`إيقاع دقيق (${toAr(attempts)}/${toAr(NEED)})`;
+    body=`أصبت ${toAr(hits)} من ${toAr(total)} نبضات. ${attempts<NEED?'أعِد — نحتاج '+toAr(NEED)+' متتالية.':''}`;
+  }
+  $('resultZone').innerHTML=`<div class="stats">
+      <div class="stat g"><div class="v">${hits}/${total}</div><div class="k">نبضات مضبوطة</div></div>
+      <div class="stat b"><div class="v">${rhTolMs}</div><div class="k">هامش التوقيت (م.ث)</div></div>
+      <div class="stat g"><div class="v">${toAr(curDay.beats)}</div><div class="k">نبضات الدورة</div></div>
+    </div><div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
+  renderPips();
+  if(attempts>=NEED){
+    if(rhRung>=0 && rhRung<curDay.tolLadder.length-1){
+      setTimeout(()=>{
+        rhRung++; attempts=0; rhTolMs=curDay.tolLadder[rhRung]; NEED=curDay.rungNeed[rhRung];
+        $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}`;
+        $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>هامش التوقيت صار أضيق (±${rhTolMs} م.ث).</div>`;
+        renderPips();
+      },900);
+    } else {
+      setTimeout(()=>finishDay({bestHits:hits, bestTolMs:rhTolMs}),900);
+    }
+  }
 }
 
 /* ================= EXPORT PROGRESS ================= */
