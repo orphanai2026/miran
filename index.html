@@ -274,7 +274,7 @@
       <p class="lead">اعزف نغمة قصيرة مع كل نبضة من المترونوم، ثماني مرات، بشكل طبيعي كما تعزف دائمًا.</p>
       <canvas id="latcalCanvas" width="524" height="200" style="width:100%;height:200px;display:block;border-radius:16px;background:#0d1526;border:1px solid var(--hair-cool);margin:10px 0"></canvas>
       <button class="btn-primary" id="btnLatCal">ابدأ المعايرة</button>
-      <div class="hint" id="latcalHint">استمع للنبضات الأربع الأولى بلا عزف لتستشعر السرعة، ثم عزف طبيعي مع كل نبضة.</div>
+      <div class="hint" id="latcalHint">استمع للنبضات الأربع الأولى بلا عزف لتستشعر السرعة، ثم اعزف بشكل طبيعي مع كل نبضة.</div>
     </div>
     <button class="back" id="latcalBack">→ رجوع</button>
   </div>
@@ -324,35 +324,35 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r1.0-raneen</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r1.2-audiofix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r1.0-raneen';
+const APP_VERSION='r1.2-audiofix';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
    browser TTS guess vowels and mispronounce; explicit tashkeel fixes most of it. */
 const DERVISH = {
-  introLongtone: ['اسْتَعَدّ… ثَبَت نَفْسَك عَلَى النَّغْمَة بِهُدُوء، وَابْدَأْ حِين تَرْتَاح.'],
-  introBreath: ['قَبْلَ النَّغْمَة، النَّفْس. خُذْ شَهِيقا عَمِيقًا مِنْ الْبَطْنِ، وَأَطْلَق صَوْتًا وَاحِدًا ثَابِتًا مَا اسْتَطَعْت — لَا تُهْمَك الطَّبَقَةُ الْانَ، بَلْ الِاسْتِمْرَار.'],
-  introTransition: ['أَثْبَتَ عَلَى النَّغْمَة الْأُولَى، وَحِين تُسْمَع الْإِشَارَة انْتَقَل بِنُعُومَة إلَى الثَّانِيَةِ.'],
-  introExchange: ['تَابِع النَّبضه بِإِذْنِك، وَانْتَقَل مَعَهَا بِلَا تَرَدُّدٍ — لَا تَسْبِقَهَا وَلَا تَتَأَخَّرُ عَنْهَا.'],
-  fail2: ['خُذْ نَفْسًا عَمِيقًا مِنْ الْبَطْنِ، وَأَرَّخ كَتِفَيْك قَبْلَ أَنْ تُعِيدَ الْمُحَاوَلَة.',
-          'اسْتَمَع لِلْمِثَال مَرَّةً أُخْرَى قَبْلَ أَنْ تَعْزِف — طَابَق إذْنِك قَبْل نَفْسَك.'],
-  fail3: ['رَاقِبْ زَاوِيَة الْقَصَبَةِ عَلَى شَفَتَك السُّفْلَى — أَمَلِهَا قَلِيلًا حَتَّى يَصْفُوَ الصَّوْت.',
-          'أَرَّخ قَبْضَتِك عَلَى النَّأْيِ — الشَّدّ الزَّائِد يُتْعِب نَفْسَك بِسُرْعَةٍ.'],
-  fail4: ['لَا بَأْسَ عَلَيْك — خُذْ اسْتِرَاحَة قَصِيرَةٍ، ثُمَّ عَدَّ بِنَفْس جَدِيد. الْقَصَبَة تَنْتَظرك.'],
-  failBreath2: ['خُذْ الْهَوَاءِ مِنْ الْبَطْنِ لَا مِنْ الصَّدْرِ — ضَعْ يَدَك عَلَيْهَا وَأَشْعَر بِهَا تَنْتَفِخْ أَوَّلًا.',
-                'أَطْلَق الْهَوَاء بِبُطْء وَثَبَات — لَا تَدْفَعُهُ دَفْعَةً وَاحِدَةً فِي الْبِدَايَة.'],
-  failBreath3: ['الصَّوْت يَحْتَاج ثَبَاتًا لَا طُولًا فَقَطْ — تَخَيَّل خَيْطًا مُسْتَقِيمًا مِنْ الْهَوَاءِ لَا يَتَمَوَّج.',
-                'اسْتَرخ فِي كَتِفَيْك وَحَلَقك — التَّوَتُّرُ هُوَ مِنْ يُجْعَل الصَّوْت يَهْتَزّ.'],
-  failBreath4: ['لَا بَأْسَ عَلَيْك — خُذْ اسْتِرَاحَة قَصِيرَةٍ، ثُمَّ عَدَّ بِنَفْس جَدِيد. النَّفْس يَبْنِي بِالتَّكْرَارِ لَا بِالْعَجَلَة.'],
-  celebrate: ['نَجْمُه جَدِيدَة أَضَاءَتْ فِي سَمَاءِ رِحْلَتُك — الْقَصَبَة بَدَأَتْ تُعَرِّفُك أَكْثَر.',
-              'إتْقَان حَقِيقِيٍّ، لَا حَظَّ عَابِر. أَحْسَنْت.'],
-  phaseDone: ['اكْتَمَلَتْ الْمَرْحَلَةِ الْأُولَى — تَأْسِيس الصَّوْت صَار مِلْكِك الْان. الْإِيقَاع يَنْتَظِرُك فِي الْمَرْحَلَةِ الْقَادِمَة.']
+  introLongtone: ['اسْتَعِدَّ… ثَبِّتْ نَفَسَكَ عَلَى النَّغْمَةِ بِهُدُوءٍ، وَابْدَأْ حِينَ تَرْتَاحُ.'],
+  introBreath: ['قَبْلَ النَّغْمَةِ، النَّفَسُ. خُذْ شَهِيقًا عَمِيقًا مِنَ الْبَطْنِ، وَأَطْلِقْ صَوْتًا وَاحِدًا ثَابِتًا مَا اسْتَطَعْتَ — لَا تَهُمُّكَ الطَّبَقَةُ الْآنَ، بَلِ الِاسْتِمْرَارُ.'],
+  introTransition: ['اثْبُتْ عَلَى النَّغْمَةِ الْأُولَى، وَحِينَ تَسْمَعُ الْإِشَارَةَ انْتَقِلْ بِنُعُومَةٍ إِلَى الثَّانِيَةِ.'],
+  introExchange: ['تَابِعِ النَّبْضَةَ بِأُذُنِكَ، وَانْتَقِلْ مَعَهَا بِلَا تَرَدُّدٍ — لَا تَسْبِقْهَا وَلَا تَتَأَخَّرْ عَنْهَا.'],
+  fail2: ['خُذْ نَفَسًا عَمِيقًا مِنَ الْبَطْنِ، وَأَرْخِ كَتِفَيْكَ قَبْلَ أَنْ تُعِيدَ الْمُحَاوَلَةَ.',
+          'اسْتَمِعْ لِلْمِثَالِ مَرَّةً أُخْرَى قَبْلَ أَنْ تَعْزِفَ — طَابِقْ أُذُنَكَ قَبْلَ نَفَسِكَ.'],
+  fail3: ['رَاقِبْ زَاوِيَةَ الْقَصَبَةِ عَلَى شَفَتِكَ السُّفْلَى — أَمِلْهَا قَلِيلًا حَتَّى يَصْفُوَ الصَّوْتُ.',
+          'أَرْخِ قَبْضَتَكَ عَلَى النَّايِ — الشَّدُّ الزَّائِدُ يُتْعِبُ نَفَسَكَ بِسُرْعَةٍ.'],
+  fail4: ['لَا بَأْسَ عَلَيْكَ — خُذْ اسْتِرَاحَةً قَصِيرَةً، ثُمَّ عُدْ بِنَفَسٍ جَدِيدٍ. الْقَصَبَةُ تَنْتَظِرُكَ.'],
+  failBreath2: ['خُذِ الْهَوَاءَ مِنَ الْبَطْنِ لَا مِنَ الصَّدْرِ — ضَعْ يَدَكَ عَلَيْهَا وَاشْعُرْ بِهَا تَنْتَفِخُ أَوَّلًا.',
+                'أَطْلِقِ الْهَوَاءَ بِبُطْءٍ وَثَبَاتٍ — لَا تَدْفَعْهُ دَفْعَةً وَاحِدَةً فِي الْبِدَايَةِ.'],
+  failBreath3: ['الصَّوْتُ يَحْتَاجُ ثَبَاتًا لَا طُولًا فَقَطْ — تَخَيَّلْ خَيْطًا مُسْتَقِيمًا مِنَ الْهَوَاءِ لَا يَتَمَوَّجُ.',
+                'اسْتَرْخِ فِي كَتِفَيْكَ وَحَلْقِكَ — التَّوَتُّرُ هُوَ مَنْ يَجْعَلُ الصَّوْتَ يَهْتَزُّ.'],
+  failBreath4: ['لَا بَأْسَ عَلَيْكَ — خُذْ اسْتِرَاحَةً قَصِيرَةً، ثُمَّ عُدْ بِنَفَسٍ جَدِيدٍ. النَّفَسُ يُبْنَى بِالتَّكْرَارِ لَا بِالْعَجَلَةِ.'],
+  celebrate: ['نَجْمَةٌ جَدِيدَةٌ أَضَاءَتْ فِي سَمَاءِ رِحْلَتِكَ — الْقَصَبَةُ بَدَأَتْ تَعْرِفُكَ أَكْثَرَ.',
+              'إِتْقَانٌ حَقِيقِيٌّ، لَا حَظٌّ عَابِرٌ. أَحْسَنْتَ.'],
+  phaseDone: ['اكْتَمَلَتِ الْمَرْحَلَةُ الْأُولَى — تَأْسِيسُ الصَّوْتِ صَارَ مِلْكَكَ الْآنَ. الْإِيقَاعُ يَنْتَظِرُكَ فِي الْمَرْحَلَةِ الْقَادِمَةِ.']
 };
 let failStreak=0, _seenIntro=new Set(), _dervishTimer=null, _arVoice=null;
 if('speechSynthesis' in window){
@@ -637,9 +637,17 @@ function detectPitch(x, sr){
   return {hz:sr/(ch+sh), clarity:mx};
 }
 const centsBetween=(f,ref)=>1200*Math.log2(f/ref);
-async function initAudio(){
-  if(audioCtx) return;
-  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+/* Output and capture are separate concerns: playing an example or a metronome
+   click needs only an AudioContext, NOT microphone permission. Keeping them
+   apart means the listen/metronome controls work before the mic is granted. */
+function ensureOutput(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+async function initAudio(){          // full duplex — adds mic capture on top of output
+  ensureOutput();
+  if(analyser) return;               // capture already wired (retry-safe if a past attempt failed)
   micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
   const src=audioCtx.createMediaStreamSource(micStream);
   analyser=audioCtx.createAnalyser(); analyser.fftSize=2048; src.connect(analyser);
@@ -851,7 +859,7 @@ function startSession(id){
     $('targetHz').textContent=`${TR.fromHz.toFixed(0)} → ${TR.toHz.toFixed(0)} Hz`;
     $('sustainLabel').textContent='تقدّم التمرين';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
-    renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawTransitionIdle();},40);
+    renderPips(); syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawTransitionIdle();},40);
     dervishIntroFor(curDay);
     return;
   }
@@ -868,7 +876,7 @@ function startSession(id){
     $('targetHz').textContent=`${TR.fromHz.toFixed(0)} ⇄ ${TR.toHz.toFixed(0)} Hz`;
     $('sustainLabel').textContent='تقدّم التمرين';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
-    renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawTransitionIdle();},40);
+    renderPips(); syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawTransitionIdle();},40);
     dervishIntroFor(curDay);
     return;
   }
@@ -883,7 +891,7 @@ function startSession(id){
     $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
     $('sustainLabel').textContent='تقدّم الدورة';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
-    renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawRhythmIdle();},40);
+    renderPips(); syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawRhythmIdle();},40);
     dervishIntroFor(curDay);
     return;
   }
@@ -895,7 +903,7 @@ function startSession(id){
     $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
     $('sustainLabel').textContent='تقدّم الدورة';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
-    renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawRhythmIdle();},40);
+    renderPips(); syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawRhythmIdle();},40);
     dervishIntroFor(curDay);
     return;
   }
@@ -911,7 +919,7 @@ function startSession(id){
   $('sustainLabel').textContent='ثبات النفَس على النغمة';
   $('resultZone').innerHTML='';
   $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
-  renderPips(); show('session'); setTimeout(()=>{setupCanvas();drawThreadIdle();},40);
+  renderPips(); syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawThreadIdle();},40);
   dervishIntroFor(curDay);
 }
 let ltRung=-1;
@@ -976,6 +984,22 @@ function playNoteRef(noteLat, fallbackFreq, fallbackDur, onDone){
 let _listenPlaying=false, _listenTimer=null;
 function scheduleListenCycle(){
   if(!_listenPlaying) return;
+  // rhythm days: the example is the BEAT PATTERN, not a pitch
+  if(curDay.kind==='rhythm'||curDay.kind==='rhythmdrop'){
+    const n=curDay.beats, b=curDay.beatSec;
+    const drop = curDay.kind==='rhythmdrop' ? rdDrop : new Set();
+    for(let i=0;i<=n;i++){
+      if(drop.has(i)) continue;                       // silent beats stay silent in the demo too
+      const at=audioCtx.currentTime+0.08+i*b;
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.frequency.value=i%4===0?1300:1100; g.gain.value=0.0001;
+      o.connect(g).connect(audioCtx.destination); o.start(at);
+      g.gain.setValueAtTime(0.0001,at); g.gain.exponentialRampToValueAtTime(.2,at+.005);
+      g.gain.exponentialRampToValueAtTime(0.0001,at+.09); o.stop(at+.1);
+    }
+    _listenTimer=setTimeout(scheduleListenCycle,(n*b+1.1)*1000);
+    return;
+  }
   const moving = curDay.kind==='transition' || curDay.kind==='exchange';
   if(moving){
     playNoteRef(curDay.from.lat, TR.fromHz, 0.9, ()=>{
@@ -987,32 +1011,48 @@ function scheduleListenCycle(){
     });
   } else {
     const hz = curDay.kind==='longtone' ? dayTarget(curDay) : targetHz;
+    if(!hz){ stopListen(); return; }
     playNoteRef(curDay.lat, hz, 1.6, ()=>{ if(!_listenPlaying) return; _listenTimer=setTimeout(scheduleListenCycle, 600); });
   }
 }
 $('btnListen').addEventListener('click', async ()=>{
-  if(!audioCtx){await initAudio();} if(audioCtx.state==='suspended') await audioCtx.resume();
-  if(_listenPlaying){
-    _listenPlaying=false; clearTimeout(_listenTimer);
-    $('btnListen').innerHTML='<span class="deck-icon">🔊</span>'; $('btnListen').classList.remove('playing');
-    return;
-  }
-  const moving = curDay.kind==='transition' || curDay.kind==='exchange';
-  if(moving && !TR) return; if(!moving && curDay.kind==='longtone' && !dayTarget(curDay)) return;
+  ensureOutput();                                  // no microphone needed to hear an example
+  if(_listenPlaying){ stopListen(); return; }
+  if(!listenAvailable()) return;
   _listenPlaying=true; $('btnListen').innerHTML='<span class="deck-icon">⏸</span>'; $('btnListen').classList.add('playing');
   scheduleListenCycle();
 });
+function stopListen(){ _listenPlaying=false; clearTimeout(_listenTimer);
+  $('btnListen').innerHTML='<span class="deck-icon">🔊</span>'; $('btnListen').classList.remove('playing'); }
+/* which days actually HAVE an example to hear */
+function listenAvailable(){
+  if(!curDay) return false;
+  if(curDay.kind==='breath') return false;                 // pitch-agnostic AND beat-free: nothing to demo
+  if(curDay.kind==='rhythm'||curDay.kind==='rhythmdrop') return true;  // the beat pattern is the example
+  if(curDay.kind==='transition'||curDay.kind==='exchange') return !!TR;
+  return !!(curDay.kind==='longtone' ? dayTarget(curDay) : targetHz);
+}
+/* show/hide + relabel the listen control for the day being opened */
+function syncListenBtn(){
+  const wrap=$('btnListen').parentElement, lbl=wrap.querySelector('.deck-label');
+  const on=listenAvailable(); wrap.style.display = on?'':'none';
+  if(!on){ stopListen(); return; }
+  const beat = curDay.kind==='rhythm'||curDay.kind==='rhythmdrop';
+  lbl.textContent = beat ? 'استمع للإيقاع' : 'استمع للمثال';
+  $('btnListen').title = beat ? 'استمع لنمط النبضات' : 'استمع للمثال بتكرار';
+}
 
 /* ---- metronome: cycles both → sound-only → light-only → off ---- */
 let metroMode='both'; // 'off' | 'both' | 'sound' | 'light' — on by default: passive rhythm exposure from day one
 const METRO_LABEL={off:'متوقّف', both:'صوت وضوء', sound:'صوت فقط', light:'ضوء فقط'};
-const METRO_ICON ={off:'♩', both:'🔊💡', sound:'🔊', light:'💡'};
+const METRO_ICON ={off:'♩', both:'♩', sound:'♩', light:'♩'}; // one identity; the label states the mode
 function updateMetroBtn(){
   $('metroIcon').textContent=METRO_ICON[metroMode];
   $('metroLabel').textContent=METRO_LABEL[metroMode];
   $('btnMetro').classList.toggle('active', metroMode!=='off');
 }
 $('btnMetro').addEventListener('click', ()=>{
+  ensureOutput();
   metroMode = metroMode==='off'?'both' : metroMode==='both'?'sound' : metroMode==='sound'?'light' : 'off';
   updateMetroBtn();
   if(metroMode==='off') stopMetro(); else if(!metroTimer && recording) startMetro();
@@ -1443,7 +1483,7 @@ function openBreath(review){
   // pips reflect ladder rungs
   $('pips').innerHTML=''; for(let i=0;i<BREATH.rungs.length;i++){const d=document.createElement('div');d.className='pip'+(i<breathRung?' done':'');$('pips').appendChild(d);}
   dervishIntroFor(BREATH);
-  show('session'); setTimeout(()=>{setupCanvas();drawBreathIdle();},40);
+  syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawBreathIdle();},40);
 }
 let _breathReview=false;
 function drawBreathBg(){ const {w,h}=ORB; cx.clearRect(0,0,w,h); groundBg(); }
