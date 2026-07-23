@@ -144,9 +144,16 @@
   .bignote .lat{font-family:var(--f-data);font-size:.78rem;color:var(--live);direction:ltr;display:inline-block}
   .bignote .hz{font-family:var(--f-data);font-size:.6rem;color:var(--muted);direction:ltr;display:inline-block}
 
+  .stage-frame{position:relative;border-radius:20px;padding:2px;margin-bottom:11px;
+    background:linear-gradient(160deg,rgba(79,227,193,.5),rgba(74,59,122,.35) 45%,rgba(230,184,92,.28));
+    box-shadow:0 0 0 1px rgba(255,255,255,.03),0 18px 46px rgba(0,0,0,.5)}
+  .stage-frame::before{content:'';position:absolute;inset:-14px;border-radius:32px;z-index:-1;
+    background:radial-gradient(60% 60% at 50% 40%,rgba(79,227,193,.22),transparent 70%);
+    filter:blur(10px);opacity:.8;animation:stageBreathe 4.4s ease-in-out infinite}
+  @keyframes stageBreathe{0%,100%{opacity:.55;transform:scale(.97)}50%{opacity:1;transform:scale(1.03)}}
   canvas#orbit{width:100%;height:300px;display:block;border-radius:18px;
     background:radial-gradient(78% 60% at 50% 46%,#12102c,#08081a);
-    border:1px solid var(--hair);margin-bottom:11px}
+    border:1px solid rgba(79,227,193,.16)}
 
   .dervish-bubble{max-height:0;overflow:hidden;opacity:0;transition:all .38s ease;
     font-family:var(--f-body);font-size:.85rem;line-height:2;color:var(--bone)}
@@ -289,7 +296,7 @@
         <span class="ar" id="sessGlyph">دو</span>
         <span class="meta"><span class="lat" id="sessLat">C</span><br><span class="hz" id="targetHz">—</span></span>
       </div>
-      <canvas id="orbit" width="524" height="300"></canvas>
+      <div class="stage-frame"><canvas id="orbit" width="524" height="300"></canvas></div>
       <div class="dervish-bubble" id="dervishBubble"></div>
       <div class="sustain">
         <div class="lbl"><span id="sustainLabel">ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span><span id="sustainUnit"> ث</span></span></div>
@@ -324,13 +331,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r1.2-audiofix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r1.5-resonance</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r1.2-audiofix';
+const APP_VERSION='r1.5-resonance';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -658,7 +665,11 @@ function loop(ts){
     const p=detectPitch(buf.slice(),audioCtx.sampleRate); if(onFrame)onFrame(p); }
   rafId=requestAnimationFrame(loop);
 }
-function stopAll(){ onFrame=null; stopMetro(); if(droneOsc){try{droneOsc.stop();}catch(e){} droneOsc=null;} recording=false; clearTimeout(_autoNextTimer); }
+function stopAll(){ onFrame=null; stopMetro(); if(droneOsc){try{droneOsc.stop();}catch(e){} droneOsc=null;}
+  recording=false; clearTimeout(_autoNextTimer);
+  if(_countdownIv){ clearInterval(_countdownIv); _countdownIv=null; }
+  counting=false; $('btnRecLabel').textContent='ابدأ'; $('btnRec').classList.remove('recording');
+  if(typeof stopListen==='function') stopListen(); }
 
 /* ================= CALIBRATION ================= */
 $('btnCalib').addEventListener('click', async ()=>{
@@ -774,10 +785,10 @@ function drawOrbitBg(){ groundBg(); const {cx:mx,cy}=ORB; const R=82;
    perfect circle; a wavering one draws a lobed wave. Radius = pitch
    deviation from target, so drifting sharp pushes the ring outward.
    ═══════════════════════════════════════════════════════════════════ */
-let _thread=[]; const THREAD_N=110;
-const RES_R=82, RES_PX=0.86;                    // target radius, px per cent
+let _thread=[]; let _threadStep=0; const THREAD_N=110;
+const RES_R=70, RES_PX=0.62;                    // target radius, px per cent — sized with headroom for the glow
 const resRad=c=>RES_R+Math.max(-ORB_RANGE,Math.min(ORB_RANGE,c))*RES_PX;
-const resAng=i=>(-Math.PI/2)+(i/(THREAD_N-1))*Math.PI*2;
+const resAng=slot=>(-Math.PI/2)+(slot/THREAD_N)*Math.PI*2;
 
 function drawThreadBg(){ groundBg(); const {cx:mx,cy}=ORB;
   sacredRings(RES_R);
@@ -806,7 +817,8 @@ function _resDraw(){
   if(pts.length>1){
     for(let i=1;i<pts.length;i++){
       if(pts[i].mute||pts[i-1].mute) continue;
-      const a0=resAng(i-1), a1=resAng(i), r0=resRad(pts[i-1].c), r1=resRad(pts[i].c);
+      if(pts[i].slot<pts[i-1].slot) continue;        // lap wrapped — don't draw a chord across the seam
+      const a0=pts[i-1].ang, a1=pts[i].ang, r0=resRad(pts[i-1].c), r1=resRad(pts[i].c);
       const fade=.25+.75*(i/pts.length);
       cx.globalAlpha=fade; cx.strokeStyle=pts[i].ok?C.live:C.breath; cx.lineWidth=2.3; cx.lineJoin='round';
       cx.beginPath(); cx.moveTo(mx+Math.cos(a0)*r0, cy+Math.sin(a0)*r0);
@@ -816,25 +828,29 @@ function _resDraw(){
   }
   return {mx,cy};
 }
+function _pushThread(entry){
+  entry.slot=_threadStep%THREAD_N; entry.ang=resAng(entry.slot); _threadStep++;
+  _thread.push(entry); if(_thread.length>THREAD_N)_thread.shift();
+}
 function renderThread(cents, inTune){
-  _thread.push({c:cents, ok:inTune&&Math.abs(cents)<=TOL}); if(_thread.length>THREAD_N)_thread.shift();
+  _pushThread({c:cents, ok:inTune&&Math.abs(cents)<=TOL});
   const {mx,cy}=_resDraw();
   const head=_thread[_thread.length-1];
-  const a=resAng(_thread.length-1), r=resRad(head.c);
-  const hx=mx+Math.cos(a)*r, hy=cy+Math.sin(a)*r;
+  const r=resRad(head.c);
+  const hx=mx+Math.cos(head.ang)*r, hy=cy+Math.sin(head.ang)*r;
   const col=head.ok?C.live:C.breath;
-  const g=cx.createRadialGradient(hx,hy,1,hx,hy,17);
+  const g=cx.createRadialGradient(hx,hy,1,hx,hy,15);
   g.addColorStop(0, head.ok?'rgba(79,227,193,.6)':'rgba(255,179,71,.55)'); g.addColorStop(1,'rgba(0,0,0,0)');
-  cx.fillStyle=g; cx.beginPath(); cx.arc(hx,hy,17,0,7); cx.fill();
+  cx.fillStyle=g; cx.beginPath(); cx.arc(hx,hy,15,0,7); cx.fill();
   cx.fillStyle=col; cx.beginPath(); cx.arc(hx,hy,5.6,0,7); cx.fill();
-  // centre: live cents readout, the one number that matters
+  // centre: live cents readout, the one number that matters — always inside the ring, never touched by the trail
   cx.textAlign='center';
   cx.fillStyle=head.ok?C.live:C.breath; cx.font="500 25px 'IBM Plex Mono',monospace";
   cx.fillText((cents>=0?'+':'')+cents.toFixed(0), mx, cy+4);
   cx.fillStyle=C.muted; cx.font="500 10px Cairo,sans-serif"; cx.fillText('سنت', mx, cy+20);
   cx.textAlign='start';
 }
-function renderThreadSilent(){ _thread.push({c:0, ok:false, mute:true}); if(_thread.length>THREAD_N)_thread.shift();
+function renderThreadSilent(){ _pushThread({c:0, ok:false, mute:true});
   const {mx,cy}=_resDraw();
   cx.textAlign='center'; cx.fillStyle=C.muted; cx.font="500 12.5px Cairo,sans-serif";
   cx.fillText('لا أسمع صوتًا', mx, cy+5); cx.textAlign='start'; }
@@ -981,9 +997,9 @@ function playNoteRef(noteLat, fallbackFreq, fallbackDur, onDone){
   a.play().catch(useFallback);
 }
 /* ---- listening example: loops the target note/interval until stopped ---- */
-let _listenPlaying=false, _listenTimer=null;
-function scheduleListenCycle(){
-  if(!_listenPlaying) return;
+let _listenPlaying=false, _listenTimer=null, _listenGen=0;
+function scheduleListenCycle(gen){
+  if(!_listenPlaying || gen!==_listenGen) return;   // this chain belongs to an earlier day/click — abandon it
   // rhythm days: the example is the BEAT PATTERN, not a pitch
   if(curDay.kind==='rhythm'||curDay.kind==='rhythmdrop'){
     const n=curDay.beats, b=curDay.beatSec;
@@ -997,32 +1013,35 @@ function scheduleListenCycle(){
       g.gain.setValueAtTime(0.0001,at); g.gain.exponentialRampToValueAtTime(.2,at+.005);
       g.gain.exponentialRampToValueAtTime(0.0001,at+.09); o.stop(at+.1);
     }
-    _listenTimer=setTimeout(scheduleListenCycle,(n*b+1.1)*1000);
+    _listenTimer=setTimeout(()=>scheduleListenCycle(gen),(n*b+1.1)*1000);
     return;
   }
   const moving = curDay.kind==='transition' || curDay.kind==='exchange';
   if(moving){
     playNoteRef(curDay.from.lat, TR.fromHz, 0.9, ()=>{
-      if(!_listenPlaying) return;
-      _listenTimer=setTimeout(()=>playNoteRef(curDay.to.lat, TR.toHz, 0.9, ()=>{
-        if(!_listenPlaying) return;
-        _listenTimer=setTimeout(scheduleListenCycle, 700);
-      }), 150);
+      if(!_listenPlaying || gen!==_listenGen) return;
+      _listenTimer=setTimeout(()=>{
+        if(!_listenPlaying || gen!==_listenGen) return;
+        playNoteRef(curDay.to.lat, TR.toHz, 0.9, ()=>{
+          if(!_listenPlaying || gen!==_listenGen) return;
+          _listenTimer=setTimeout(()=>scheduleListenCycle(gen), 700);
+        });
+      }, 150);
     });
   } else {
     const hz = curDay.kind==='longtone' ? dayTarget(curDay) : targetHz;
     if(!hz){ stopListen(); return; }
-    playNoteRef(curDay.lat, hz, 1.6, ()=>{ if(!_listenPlaying) return; _listenTimer=setTimeout(scheduleListenCycle, 600); });
+    playNoteRef(curDay.lat, hz, 1.6, ()=>{ if(!_listenPlaying || gen!==_listenGen) return; _listenTimer=setTimeout(()=>scheduleListenCycle(gen), 600); });
   }
 }
 $('btnListen').addEventListener('click', async ()=>{
   ensureOutput();                                  // no microphone needed to hear an example
   if(_listenPlaying){ stopListen(); return; }
   if(!listenAvailable()) return;
-  _listenPlaying=true; $('btnListen').innerHTML='<span class="deck-icon">⏸</span>'; $('btnListen').classList.add('playing');
-  scheduleListenCycle();
+  _listenPlaying=true; _listenGen++; $('btnListen').innerHTML='<span class="deck-icon">⏸</span>'; $('btnListen').classList.add('playing');
+  scheduleListenCycle(_listenGen);
 });
-function stopListen(){ _listenPlaying=false; clearTimeout(_listenTimer);
+function stopListen(){ _listenPlaying=false; _listenGen++; clearTimeout(_listenTimer);
   $('btnListen').innerHTML='<span class="deck-icon">🔊</span>'; $('btnListen').classList.remove('playing'); }
 /* which days actually HAVE an example to hear */
 function listenAvailable(){
@@ -1069,7 +1088,9 @@ function scheduleClick(at){
     g.gain.setValueAtTime(0.0001,at);g.gain.exponentialRampToValueAtTime(0.22,at+0.005);
     g.gain.exponentialRampToValueAtTime(0.0001,at+0.09);o.stop(at+0.1);
   }
-  const delayMs=Math.max(0,(at-audioCtx.currentTime)*1000); setTimeout(flashBeat, delayMs);
+  if(metroMode==='both'||metroMode==='light'){
+    const delayMs=Math.max(0,(at-audioCtx.currentTime)*1000); setTimeout(flashBeat, delayMs);
+  }
 }
 function metroSched(){ while(nextBeatTime<audioCtx.currentTime+0.12){ scheduleClick(nextBeatTime); nextBeatTime+=BEAT_SEC; } }
 function startMetro(){ if(metroMode==='off')return; nextBeatTime=audioCtx.currentTime+0.06; metroSched(); metroTimer=setInterval(metroSched,25); }
@@ -1103,23 +1124,29 @@ function restoreSustainLabel(){
   else if(curDay.kind==='longtone'){ $('sustainLabel').textContent='ثبات النفَس على النغمة'; $('targetSec').textContent=TARGET_SEC.toFixed(1); }
   else { $('sustainLabel').textContent='تقدّم التمرين'; $('targetSec').textContent='—'; $('sustainUnit').style.display='none'; }
 }
+function stopDervishVoice(){
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  if(_dervishAudio){ try{_dervishAudio.pause();}catch(e){} }
+}
+let _countdownIv=null;
 function runCountdown(cb){
+  stopDervishVoice();                 // never let guidance speech bleed into the count-in cue
   restoreSustainLabel();
   counting=true; $('btnRecLabel').textContent='…'; let n=4; drawCountdown(n); playTick(1100);
-  const iv=setInterval(()=>{ n--;
+  _countdownIv=setInterval(()=>{ n--;
     if(n>=1){ drawCountdown(n); playTick(n===1?1650:1100); }
-    else { clearInterval(iv); counting=false; cb(); }
+    else { clearInterval(_countdownIv); _countdownIv=null; counting=false; cb(); }
   },1000);
 }
 $('btnRec').addEventListener('click', async ()=>{
   if(counting) return;
   if(recording){ stopAttempt(); return; }
-  if(!audioCtx){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ setupCanvas();drawOrbitBg(); cx.fillStyle='#ffcf9a';cx.font="500 14px Cairo,sans-serif";cx.textAlign='center';cx.fillText('تعذّر الميكروفون — اسمح بالإذن',ORB.cx,ORB.cy);cx.textAlign='start'; return;} }
+  if(!analyser){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ setupCanvas();drawOrbitBg(); cx.fillStyle='#ffcf9a';cx.font="500 14px Cairo,sans-serif";cx.textAlign='center';cx.fillText('تعذّر الميكروفون — اسمح بالإذن',ORB.cx,ORB.cy);cx.textAlign='start'; return;} }
   runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
 });
 function startAttempt(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
-  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); _thread=[]; _lastTs=0;
+  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); _thread=[]; _threadStep=0; _lastTs=0;
   if(metroMode!=='off') startMetro();
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000; const nowS=performance.now()/1000;
