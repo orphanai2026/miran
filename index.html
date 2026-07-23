@@ -290,7 +290,7 @@
   <div class="view" id="view-session">
     <div class="card">
       <div class="step-eyebrow" id="sessEyebrow">اليوم ١ · نغمة طويلة</div>
-      <button class="dervish-call" id="btnDervish" title="استدعِ الدرويش"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">؟</span><img src="dervish.png" alt="الدرويش" style="position:relative" onerror="this.remove()"></button>
+      <button class="dervish-call" id="btnDervish" title="استدعِ الدرويش"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">؟</span><img src="dervish.png" alt="الدرويش" style="position:relative" onerror="console.warn('[مِران] تعذّر تحميل صورة الدرويش من:', this.src, '— سيظهر الرمز الاحتياطي «؟» بدلًا منها.'); this.remove()"></button>
       <div class="attempts" id="pips"></div>
       <div class="bignote">
         <span class="ar" id="sessGlyph">دو</span>
@@ -331,13 +331,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r1.5-resonance</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r1.6-imgdebug</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r1.5-resonance';
+const APP_VERSION='r1.6-imgdebug';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
