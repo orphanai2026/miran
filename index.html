@@ -384,13 +384,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r2.5-patterndx</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r2.6-voicewait</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r2.5-patterndx';
+const APP_VERSION='r2.6-voicewait';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -439,24 +439,30 @@ function setIntroBlocking(on){
   if(on) _introSafety=setTimeout(()=>setIntroBlocking(false), 12000); // safety net: never lock the button forever
 }
 $('btnSkipIntro').addEventListener('click', ()=>{ stopDervishVoice(); setIntroBlocking(false); });
+let _dervishSpeaking=false;
 function dervishSpeak(text, onEnd){
-  if(!('speechSynthesis' in window)){ if(onEnd) onEnd(); return; }
+  const done=()=>{ _dervishSpeaking=false; if(onEnd) onEnd(); };
+  if(!('speechSynthesis' in window)){ done(); return; }
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
     u.lang='ar-SA'; u.rate=0.85; u.pitch=1.0; u.volume=1.0; if(_arVoice) u.voice=_arVoice;
-    if(onEnd){ u.onend=onEnd; u.onerror=onEnd; }
+    u.onend=done; u.onerror=done;
+    _dervishSpeaking=true;
     speechSynthesis.speak(u);
-  }catch(e){ if(onEnd) onEnd(); }
+  }catch(e){ done(); }
 }
 let _dervishAudio=null;
 function dervishPlayAudio(key, onFail, onEnd){
-  if(!key) return onFail();
+  const failWrap=()=>{ _dervishSpeaking=false; onFail(); };
+  const endWrap=()=>{ _dervishSpeaking=false; if(onEnd) onEnd(); };
+  if(!key) return failWrap();
   const a = new Audio(`dervish-audio/${key}.mp3`);
   _dervishAudio = a;
-  a.addEventListener('error', onFail, {once:true});
-  if(onEnd) a.addEventListener('ended', onEnd, {once:true});
-  a.play().catch(onFail);
+  a.addEventListener('error', failWrap, {once:true});
+  a.addEventListener('ended', endWrap, {once:true});
+  _dervishSpeaking=true;
+  a.play().catch(failWrap);
 }
 function showDervish(text, opts){
   opts=opts||{}; const el=$(opts.target||'dervishBubble'); if(!el) return;
@@ -1209,6 +1215,7 @@ function restoreSustainLabel(){
 function stopDervishVoice(){
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
   if(_dervishAudio){ try{_dervishAudio.pause();}catch(e){} }
+  _dervishSpeaking=false;
 }
 let _countdownIv=null;
 function runCountdown(cb){
@@ -1265,16 +1272,20 @@ function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; sto
   persistInProgress();
   scheduleAutoNext();
 }
-let _autoNextTimer=null;
+let _autoNextTimer=null, _autoNextWaited=0;
 function scheduleAutoNext(){
-  clearTimeout(_autoNextTimer);
-  _autoNextTimer=setTimeout(()=>{
-    const activeView=document.querySelector('.view.active');
-    if(!activeView || activeView.id!=='view-session') return; // day finished, or user navigated away — nothing to continue
-    if(counting || recording) return; // already moving on (manual press or rung-advance race) — don't double-trigger
-    if(!curDay) return;
-    runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
-  }, 2400); // pause long enough to read the feedback message before the next count-in begins
+  clearTimeout(_autoNextTimer); _autoNextWaited=0;
+  _autoNextTimer=setTimeout(_autoNextTick, 2400); // pause long enough to read the feedback message before the next count-in begins
+}
+function _autoNextTick(){
+  const activeView=document.querySelector('.view.active');
+  if(!activeView || activeView.id!=='view-session') return; // day finished, or user navigated away — nothing to continue
+  if(counting || recording) return; // already moving on (manual press or rung-advance race) — don't double-trigger
+  if(!curDay) return;
+  if(_dervishSpeaking && _autoNextWaited<9000){ // let the Dervish finish talking — recheck shortly, capped so we never stall forever
+    _autoNextWaited+=400; _autoNextTimer=setTimeout(_autoNextTick, 400); return;
+  }
+  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
 }
 function persistInProgress(){
   if(!curDay || !sessionLog) return;
