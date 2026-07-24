@@ -384,13 +384,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r2.4-lipangle</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r2.5-patterndx</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r2.4-lipangle';
+const APP_VERSION='r2.5-patterndx';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -958,7 +958,7 @@ function startSession(id){
     return;
   }
   if(curDay.kind==='exchange'){
-    exHoldCount=0;
+    exHoldCount=0; _failPattern=[];
     TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
         span:(curDay.to.semis-curDay.from.semis)*100, beatSec:curDay.beatStart, reps:curDay.reps};
@@ -1528,6 +1528,17 @@ function startExchange(){
     if(now>=END) stopAttempt();
   };
 }
+/* ── adaptive pattern diagnosis: if the SAME hold keeps failing the SAME way,
+   name that pattern specifically instead of repeating a generic message ── */
+let _failPattern=[];
+function checkFailPattern(sig){
+  _failPattern.push(sig); if(_failPattern.length>4) _failPattern.shift();
+  if(_failPattern.length>=3){
+    const last3=_failPattern.slice(-3);
+    if(last3.every(s=>s.hold===last3[0].hold && s.dir===last3[0].dir)) return last3[0];
+  }
+  return null;
+}
 function scoreExchange(d){
   const b=TR.beatSec, slide=Math.min(0.25*b,0.18), reps=TR.reps, lead=EX_LEAD_BEATS*b;
   const noteAt=i=>(i%2===0?0:TR.span);
@@ -1551,14 +1562,27 @@ function scoreExchange(d){
   const prevBeat=b;
   if(missed.length){
     const m=missed[0];
-    head = m.med==null ? 'فاتتك إحدى الوقفات' : 'انحراف في إحدى النغمات';
-    body = m.med==null ? `لم أسمعك ثابتًا عند الوقفة رقم ${toAr(m.i+1)}. حافظ على العزف مع كل نبضة.`
-      : `عند الوقفة ${toAr(m.i+1)} انحرفت الطبقة ${Math.abs(m.med-noteAt(m.i)).toFixed(0)} سنت. تابع المترونوم بدقة أكبر.`;
+    const dir = m.med==null ? 'missing' : (m.med>noteAt(m.i) ? 'sharp' : 'flat');
+    const pattern = checkFailPattern({hold:m.i, dir});
+    if(pattern && pattern.hold===reps && pattern.dir==='sharp'){
+      head='نمط متكرّر: النغمة الأخيرة ترتفع'; _failPattern=[];
+      body=`لاحظت أن نغمتك الأخيرة في كل دورة ترتفع باستمرار — هذا يحدث غالبًا من إرهاق النفَس بحلول نهاية التكرار. خذ نفَسًا أعمق وأهدأ قبل أن تبدأ الدورة كلها، ولا تدفع الهواء أقوى كلما اقتربت من النهاية.`;
+      showDervish(body, {sticky:true});
+    } else if(pattern){
+      head='نمط متكرّر يستحق انتباهك'; _failPattern=[];
+      const dirAr = pattern.dir==='sharp'?'ترتفع':(pattern.dir==='flat'?'تنخفض':'تغيب');
+      body=`الوقفة رقم ${toAr(pattern.hold+1)} تحديدًا ${dirAr} بتكرار في محاولاتك الأخيرة. ركّز عليها وحدها للحظة قبل إعادة الدورة كاملة.`;
+      showDervish(body, {sticky:true});
+    } else {
+      head = m.med==null ? 'فاتتك إحدى الوقفات' : 'انحراف في إحدى النغمات';
+      body = m.med==null ? `لم أسمعك ثابتًا عند الوقفة رقم ${toAr(m.i+1)}. حافظ على العزف مع كل نبضة.`
+        : `عند الوقفة ${toAr(m.i+1)} انحرفت الطبقة ${Math.abs(m.med-noteAt(m.i)).toFixed(0)} سنت. تابع المترونوم بدقة أكبر.`;
+    }
     TR.beatSec = Math.min(curDay.beatStart, +(prevBeat+curDay.stepUp).toFixed(2));
   } else if(maxGap>0.4){ head='بعض الانتقالات غير نظيفة'; body=`أطول فجوة بين نغمتين ${Math.round(maxGap*1000)} مللي ثانية. انتقل أسرع مع كل نبضة.`;
     TR.beatSec = Math.min(curDay.beatStart, +(prevBeat+curDay.stepUp*0.5).toFixed(2));
   }
-  else { ok=true; cls='ok'; attempts++; head=`تبادل نظيف (${toAr(attempts)}/${toAr(NEED)})`;
+  else { ok=true; cls='ok'; attempts++; _failPattern=[]; head=`تبادل نظيف (${toAr(attempts)}/${toAr(NEED)})`;
     exHoldCount++;
     let speedMsg='';
     if(exHoldCount>=2){
