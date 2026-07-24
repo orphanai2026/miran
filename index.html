@@ -272,17 +272,7 @@
     <div class="card">
       <div class="step-eyebrow">١ · وضع القصبة على الشفة</div>
       <h2 style="font-size:1.35rem">لا تُنفخ داخل الفتحة</h2>
-      <svg width="100%" height="150" viewBox="0 0 300 150" style="margin:6px 0 10px">
-        <defs><filter id="gg"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-        <ellipse cx="150" cy="95" rx="70" ry="30" fill="rgba(237,232,245,.06)" stroke="rgba(237,232,245,.15)"/>
-        <text x="150" y="99" text-anchor="middle" font-family="Cairo,sans-serif" font-size="11" fill="var(--muted)">الوجه من الأمام</text>
-        <line x1="70" y1="40" x2="150" y2="82" stroke="var(--gold)" stroke-width="6" stroke-linecap="round" filter="url(#gg)"/>
-        <circle cx="150" cy="82" r="5" fill="var(--live)" filter="url(#gg)"/>
-        <text x="150" y="66" text-anchor="middle" font-family="Cairo,sans-serif" font-weight="600" font-size="11" fill="var(--live)">زاوية الفم — لا وسطه</text>
-        <text x="66" y="30" text-anchor="middle" font-family="Cairo,sans-serif" font-size="10" fill="var(--gold)">القصبة</text>
-        <path d="M150 82 L170 130" stroke="rgba(237,232,245,.25)" stroke-width="1" stroke-dasharray="2 4"/>
-        <text x="196" y="128" text-anchor="middle" font-family="Cairo,sans-serif" font-size="10" fill="var(--muted)">زاوية ~٤٥°</text>
-      </svg>
+      <img class="guide-photo" src="lip-angle.jpg" alt="وضع القصبة الصحيح على الشفة وزاوية الميل" onerror="this.remove()">
       <p class="lead" style="margin-bottom:6px">توضع <b style="color:var(--gold)">حافة فتحة الناي</b> على <b style="color:var(--gold)">حافة شفتك السفلى</b>، عند <b style="color:var(--gold)">زاوية فمك</b> — لا في مركزه ولا داخل فمك.</p>
       <p class="lead" style="margin-bottom:6px">أمِل الناي بزاوية قريبة من <b style="color:var(--gold)">٤٥ درجة</b>، وانفخ الهواء بهدوء وبطء إلى أسفل عبر الحافة — لا في اتجاه الفتحة مباشرة.</p>
       <p class="lead" style="margin-bottom:6px">اتجاه الميل (يمينًا أو يسارًا) <b style="color:var(--live)">يرتبط مباشرة باختيار يدك العليا</b> في القسم الثالث أدناه: تيار الهواء ينطلق من منتصف شفتيك نحو الحافة الداخلية للقصبة، بميلٍ نحو الجهة التي تُمسك فيها اليد العليا. اختر الميل الذي يشعرك بثبات أكثر، والزم نفس الاتجاه دائمًا.</p>
@@ -394,13 +384,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r2.3-imgpathfix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r2.4-lipangle</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r2.3-imgpathfix';
+const APP_VERSION='r2.4-lipangle';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
