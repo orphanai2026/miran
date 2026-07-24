@@ -331,13 +331,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r1.6-imgdebug</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r1.8-pickup</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r1.6-imgdebug';
+const APP_VERSION='r1.8-pickup';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -855,6 +855,13 @@ function renderThreadSilent(){ _pushThread({c:0, ok:false, mute:true});
   cx.textAlign='center'; cx.fillStyle=C.muted; cx.font="500 12.5px Cairo,sans-serif";
   cx.fillText('لا أسمع صوتًا', mx, cy+5); cx.textAlign='start'; }
 
+function restoreStreak(){
+  const rec = prog.inProgress && prog.inProgress[curDay.id];
+  if(!rec || !rec.attempts || !rec.attempts.length) return 0;
+  let c=0;
+  for(let i=rec.attempts.length-1;i>=0;i--){ if(rec.attempts[i].success) c++; else break; }
+  return Math.min(c, NEED);
+}
 function startSession(id){
   curDay=CURRICULUM[id-1];
   if(curDay.kind==='soon') return;
@@ -867,6 +874,7 @@ function startSession(id){
     if(curDay.tolLadder){ TOL=curDay.tolLadder[0]; trGapMax=curDay.gapLadder[0]; NEED=curDay.rungNeed[0];
       TR_HOLD_FROM=curDay.holdFromLadder?curDay.holdFromLadder[0]:2.2; TR_HOLD_TO=curDay.holdToLadder?curDay.holdToLadder[0]:2.6; TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO; }
     else { TOL=curDay.tol; trGapMax=0.45; TR_HOLD_FROM=2.2; TR_HOLD_TO=2.6; TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO; }
+    attempts=restoreStreak();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'transition', pair:curDay.lat,
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
@@ -884,6 +892,9 @@ function startSession(id){
     TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
         span:(curDay.to.semis-curDay.from.semis)*100, beatSec:curDay.beatStart, reps:curDay.reps};
+    attempts=restoreStreak();
+    { const rec=prog.inProgress&&prog.inProgress[curDay.id];
+      if(rec&&rec.attempts&&rec.attempts.length){ const lastBS=rec.attempts[rec.attempts.length-1].beat_sec; if(lastBS) TR.beatSec=lastBS; } }
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'exchange', pair:curDay.lat,
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), beat_sec_start:TR.beatSec, started:new Date().toISOString(), attempts:[]};
@@ -900,7 +911,7 @@ function startSession(id){
     rhRung = curDay.tolLadder ? 0 : -1;
     rhTolMs = curDay.tolLadder ? curDay.tolLadder[0] : 250;
     NEED = curDay.tolLadder ? curDay.rungNeed[0] : curDay.need;
-    attempts=0;
+    attempts=restoreStreak();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythm', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent = curDay.tolLadder ? `اليوم ${toAr(id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}` : `اليوم ${toAr(id)} · إيقاع`;
     $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
@@ -912,7 +923,7 @@ function startSession(id){
     return;
   }
   if(curDay.kind==='rhythmdrop'){
-    rdRung=0; rdDrop=new Set(curDay.dropLadder[0]); NEED=curDay.rungNeed[0]; attempts=0;
+    rdRung=0; rdDrop=new Set(curDay.dropLadder[0]); NEED=curDay.rungNeed[0]; attempts=restoreStreak();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythmdrop', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent=`اليوم ${toAr(id)} · إيقاع · حذف · الدرجة ${toAr(rdRung+1)}/${toAr(curDay.dropLadder.length)}`;
     $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
@@ -927,6 +938,7 @@ function startSession(id){
   ltRung = curDay.durLadder ? 0 : -1;
   if(curDay.durLadder){ TARGET_SEC=curDay.durLadder[0]; STAB_MAX=Math.round(curDay.stabMax*curDay.stabMult[0]); NEED=curDay.rungNeed[0]; }
   else { TARGET_SEC=curDay.targetSec; STAB_MAX=curDay.stabMax; }
+  attempts=restoreStreak();
   sessionLog={app:'miran', version:APP_VERSION, day:id, note:curDay.lat, kind:curDay.kind,
     concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2), target_hz:+targetHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
   $('sessEyebrow').textContent = curDay.durLadder ? `اليوم ${toAr(id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}` : `اليوم ${toAr(id)} · نغمة طويلة`;
@@ -1396,10 +1408,15 @@ function scoreTransition(d){
   }
 }
 
-/* ================= EXCHANGE EXERCISE (repeated دو⇄ري with strict metronome) ================= */
-const TR_EX_TAIL=0.6, EX_LEAD=1.3; // settle time on دو before the metronome pattern begins
+/* ================= EXCHANGE EXERCISE (repeated دو⇄ري with strict metronome) =================
+   Entry sync: instead of a fixed silent settle, the lead-in is TWO PICKUP BEATS at the
+   exercise's own tempo (like a conductor's count-in) — so the player's internal pulse
+   carries straight from the pickup into beat 0 at the real tempo, instead of jumping from
+   an unrelated fixed pause into a possibly much faster/slower pattern. */
+const TR_EX_TAIL=0.6, EX_LEAD_BEATS=2;
 function activeTargetCentsExchange(now0){
-  const now=Math.max(0, now0-EX_LEAD);
+  const lead=EX_LEAD_BEATS*TR.beatSec;
+  const now=Math.max(0, now0-lead);
   const b=TR.beatSec, slide=Math.min(0.25*b,0.18), reps=TR.reps;
   let idx=Math.floor(now/b); if(idx>reps) idx=reps;
   const noteAt=i=>(i%2===0?0:TR.span);
@@ -1410,14 +1427,18 @@ function activeTargetCentsExchange(now0){
 }
 function startExchange(){
   recording=true; $('btnRecLabel').textContent='إلغاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
-  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); recData._lastBeat=-2; recData._goCued=false;
-  const b=TR.beatSec, reps=TR.reps, END=EX_LEAD+reps*b+TR_EX_TAIL;
+  recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); recData._lastBeat=-99; recData._goCued=false; recData._lastPickup=-1;
+  const b=TR.beatSec, reps=TR.reps, lead=EX_LEAD_BEATS*b, END=lead+reps*b+TR_EX_TAIL;
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000;
-    if(!recData._goCued && now>=EX_LEAD){ recData._goCued=true; cueChime(); }
-    const now2=Math.max(0,now-EX_LEAD);
+    // pickup beats: same tick, same tempo as the real pattern — sets the player's clock BEFORE beat 0
+    if(now<lead){
+      const pIdx=Math.floor(now/b);
+      if(pIdx!==recData._lastPickup && now>=pIdx*b-0.02){ recData._lastPickup=pIdx; playTick(1100); }
+    } else if(!recData._goCued){ recData._goCued=true; cueChime(); }
+    const now2=Math.max(0,now-lead);
     const beatIdx=Math.min(Math.floor(now2/b), reps);
-    if(now>=EX_LEAD && beatIdx!==recData._lastBeat){ recData._lastBeat=beatIdx; playTick(beatIdx%2===0?1200:1500); }
+    if(now>=lead && beatIdx!==recData._lastBeat){ recData._lastBeat=beatIdx; playTick(beatIdx%2===0?1200:1500); }
     const {ay}=drawTransitionBg(now, activeTargetCentsExchange);
     const inTune=p.hz && p.clarity>=CLARITY; let c=null;
     if(inTune){ c=centsBetween(p.hz,TR.fromHz); while(c-100>600)c-=1200; while(c-100<-600)c+=1200; recData.pts.push({t:now,c}); }
@@ -1429,7 +1450,8 @@ function startExchange(){
       cx.fillStyle='rgba(255,255,255,.85)'; cx.beginPath(); cx.arc(ORB.cx-3,py-3,3,0,7); cx.fill();
     } else { cx.fillStyle='rgba(155,146,184,.5)'; cx.beginPath(); cx.arc(ORB.cx,ay,7,0,7); cx.fill(); }
     cx.fillStyle='rgba(237,232,245,.85)'; cx.font="600 14px Cairo,sans-serif"; cx.textAlign='center';
-    const hint = now<EX_LEAD ? 'اثبت على دو' : `النبضة ${toAr(Math.min(beatIdx+1,reps+1))} / ${toAr(reps+1)}`;
+    const beatsLeft = Math.max(0, EX_LEAD_BEATS - Math.floor(now/b));
+    const hint = now<lead ? `استعد على دو… ${toAr(beatsLeft)}` : `النبضة ${toAr(Math.min(beatIdx+1,reps+1))} / ${toAr(reps+1)}`;
     cx.fillText(hint, ORB.cx, 22); cx.textAlign='start';
     $('sustainNum').textContent=Math.min(now,END).toFixed(1);
     $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
@@ -1437,19 +1459,19 @@ function startExchange(){
   };
 }
 function scoreExchange(d){
-  const b=TR.beatSec, slide=Math.min(0.25*b,0.18), reps=TR.reps;
+  const b=TR.beatSec, slide=Math.min(0.25*b,0.18), reps=TR.reps, lead=EX_LEAD_BEATS*b;
   const noteAt=i=>(i%2===0?0:TR.span);
   const holds=[];
   for(let i=0;i<=reps;i++){
-    const start=EX_LEAD+i*b+(i===0?0.15:slide+0.05);
-    const end=(i<reps)?EX_LEAD+(i+1)*b-slide-0.05:EX_LEAD+i*b+TR_EX_TAIL-0.05;
+    const start=lead+i*b+(i===0?0.15:slide+0.05);
+    const end=(i<reps)?lead+(i+1)*b-slide-0.05:lead+i*b+TR_EX_TAIL-0.05;
     const seg=d.pts.filter(p=>p.t>=start&&p.t<end).map(p=>p.c);
     const med=seg.length?median(seg):null;
     holds.push({i, med, ok: med!=null && Math.abs(med-noteAt(i))<=TOL});
   }
   let maxGap=0;
   for(let i=0;i<reps;i++){
-    const wStart=EX_LEAD+(i+1)*b-slide-0.05, wEnd=EX_LEAD+(i+1)*b+slide+0.15;
+    const wStart=lead+(i+1)*b-slide-0.05, wEnd=lead+(i+1)*b+slide+0.15;
     const seg=d.pts.filter(p=>p.t>=wStart&&p.t<=wEnd);
     let gap=0; seg.forEach((p,idx,arr)=>{ if(idx>0){ const offBoth=Math.abs(p.c-noteAt(i))>TOL && Math.abs(p.c-noteAt(i+1))>TOL; if(offBoth) gap+=(p.t-arr[idx-1].t); } });
     maxGap=Math.max(maxGap,gap);
