@@ -298,6 +298,9 @@
       </div>
       <div class="stage-frame"><canvas id="orbit" width="524" height="300"></canvas></div>
       <div class="dervish-bubble" id="dervishBubble"></div>
+      <button id="btnSkipIntro" style="display:none;width:100%;margin:-4px 0 11px;padding:9px;border-radius:100px;
+        border:1px solid rgba(230,184,92,.4);background:rgba(230,184,92,.08);color:#F0D08A;
+        font-family:'Cairo',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer">⏭ تجاوز الإرشاد وابدأ الآن</button>
       <div class="sustain">
         <div class="lbl"><span id="sustainLabel">ثبات النفَس على النغمة</span><span class="t"><span id="sustainNum">0.0</span> / <span id="targetSec">6.0</span><span id="sustainUnit"> ث</span></span></div>
         <div class="bar"><i id="sustainBar"></i></div>
@@ -331,13 +334,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r1.8-pickup</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r1.9-guidedgate</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r1.8-pickup';
+const APP_VERSION='r1.9-guidedgate';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -377,31 +380,44 @@ if('speechSynthesis' in window){
   pickVoice(); speechSynthesis.onvoiceschanged=pickVoice;
   window._miranListArabicVoices=()=>speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith('ar')).map(v=>({name:v.name,lang:v.lang,cloud:!v.localService}));
 }
-function dervishSpeak(text){
-  if(!('speechSynthesis' in window)) return;
+let _introBlocking=false, _introSafety=null;
+function setIntroBlocking(on){
+  _introBlocking=on;
+  $('btnRec').disabled=on; $('btnRec').style.opacity=on?.45:1;
+  $('btnSkipIntro').style.display=on?'':'none';
+  clearTimeout(_introSafety);
+  if(on) _introSafety=setTimeout(()=>setIntroBlocking(false), 12000); // safety net: never lock the button forever
+}
+$('btnSkipIntro').addEventListener('click', ()=>{ stopDervishVoice(); setIntroBlocking(false); });
+function dervishSpeak(text, onEnd){
+  if(!('speechSynthesis' in window)){ if(onEnd) onEnd(); return; }
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
     u.lang='ar-SA'; u.rate=0.85; u.pitch=1.0; u.volume=1.0; if(_arVoice) u.voice=_arVoice;
+    if(onEnd){ u.onend=onEnd; u.onerror=onEnd; }
     speechSynthesis.speak(u);
-  }catch(e){}
+  }catch(e){ if(onEnd) onEnd(); }
 }
 let _dervishAudio=null;
-function dervishPlayAudio(key, onFail){
+function dervishPlayAudio(key, onFail, onEnd){
   if(!key) return onFail();
   const a = new Audio(`dervish-audio/${key}.mp3`);
   _dervishAudio = a;
   a.addEventListener('error', onFail, {once:true});
+  if(onEnd) a.addEventListener('ended', onEnd, {once:true});
   a.play().catch(onFail);
 }
 function showDervish(text, opts){
   opts=opts||{}; const el=$(opts.target||'dervishBubble'); if(!el) return;
   el.textContent=text; el.classList.add('show');
   if(_dervishAudio){ try{_dervishAudio.pause();}catch(e){} }
+  if(opts.blocking) setIntroBlocking(true);
+  const finish=()=>{ if(opts.blocking) setIntroBlocking(false); };
   if(opts.speak!==false){
-    if(opts.audioKey) dervishPlayAudio(opts.audioKey, ()=>dervishSpeak(text));
-    else dervishSpeak(text);
-  }
+    if(opts.audioKey) dervishPlayAudio(opts.audioKey, ()=>dervishSpeak(text, finish), finish);
+    else dervishSpeak(text, finish);
+  } else finish();
   clearTimeout(_dervishTimer);
   if(!opts.sticky) _dervishTimer=setTimeout(()=>el.classList.remove('show'), 6000);
 }
@@ -411,7 +427,8 @@ function dervishIntroFor(day){
   const key = day.kind==='breath'?'introBreath' : day.kind==='longtone'?'introLongtone' : day.kind==='transition'?'introTransition' : 'introExchange';
   if(_seenIntro.has(day.id)) return; _seenIntro.add(day.id);
   const audioKeyMap={introLongtone:'intro_longtone', introBreath:'intro_breath', introTransition:'intro_transition', introExchange:'intro_exchange'};
-  setTimeout(()=>showDervish(DERVISH[key][0], {audioKey:audioKeyMap[key]}), 500);
+  setIntroBlocking(true); // block starting the instant we know guidance is coming, not just once the bubble appears
+  setTimeout(()=>showDervish(DERVISH[key][0], {audioKey:audioKeyMap[key], blocking:true}), 500);
 }
 function registerAttemptResult(ok){
   if(ok){ failStreak=0; return; }
@@ -669,7 +686,8 @@ function stopAll(){ onFrame=null; stopMetro(); if(droneOsc){try{droneOsc.stop();
   recording=false; clearTimeout(_autoNextTimer);
   if(_countdownIv){ clearInterval(_countdownIv); _countdownIv=null; }
   counting=false; $('btnRecLabel').textContent='ابدأ'; $('btnRec').classList.remove('recording');
-  if(typeof stopListen==='function') stopListen(); }
+  if(typeof stopListen==='function') stopListen();
+  if(typeof setIntroBlocking==='function') setIntroBlocking(false); }
 
 /* ================= CALIBRATION ================= */
 $('btnCalib').addEventListener('click', async ()=>{
