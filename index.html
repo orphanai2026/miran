@@ -193,8 +193,8 @@
     transform:translateY(-1px)}
   .admin-ic{width:28px;height:28px;flex:none;border-radius:9px;display:flex;align-items:center;
     justify-content:center;font-size:.92rem;color:rgb(var(--ac));background:rgba(var(--ac),.1)}
-  .admin-lbl{font-family:var(--f-head);font-weight:600;font-size:.7rem;color:var(--bone);
-    text-align:center;line-height:1.35}
+  .admin-lbl{font-family:var(--f-head);font-weight:600;font-size:.62rem;color:var(--bone);
+    text-align:center;line-height:1.35;white-space:nowrap}
   .admin-tile.gold{--ac:230,184,92} .admin-tile.rose{--ac:220,110,76} .admin-tile.live{--ac:79,227,193}
 
   .ney-tuning{margin-top:15px;font-family:var(--f-head);font-weight:500;font-size:.76rem;
@@ -389,15 +389,15 @@
     <div class="admin-row3">
       <button class="admin-tile gold" id="btnGuide">
         <div class="admin-ic">✎</div>
-        <div class="admin-lbl">دليل<br>الوضعية</div>
+        <div class="admin-lbl">دليل الوضعية</div>
       </button>
       <button class="admin-tile live" id="btnExport">
         <div class="admin-ic">↓</div>
-        <div class="admin-lbl">تقرير<br>الرحلة</div>
+        <div class="admin-lbl">تقرير الرحلة</div>
       </button>
       <button class="admin-tile rose" id="btnReset">
         <div class="admin-ic">↺</div>
-        <div class="admin-lbl">تصفير<br>التقدّم</div>
+        <div class="admin-lbl">تصفير التقدّم</div>
       </button>
     </div>
 
@@ -528,13 +528,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r3.9-tilespacing</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r4.0-onelinelbl</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r3.9-tilespacing';
+const APP_VERSION='r4.0-onelinelbl';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
