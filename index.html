@@ -523,13 +523,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r3.6-pausebtn</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r3.7-patternall</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r3.6-pausebtn';
+const APP_VERSION='r3.7-patternall';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1323,7 +1323,7 @@ function startSession(id){
     if(curDay.tolLadder){ TOL=curDay.tolLadder[0]; trGapMax=curDay.gapLadder[0]; NEED=curDay.rungNeed[0];
       TR_HOLD_FROM=curDay.holdFromLadder?curDay.holdFromLadder[0]:2.2; TR_HOLD_TO=curDay.holdToLadder?curDay.holdToLadder[0]:2.6; TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO; }
     else { TOL=curDay.tol; trGapMax=0.45; TR_HOLD_FROM=2.2; TR_HOLD_TO=2.6; TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO; }
-    attempts=restoreStreak();
+    attempts=restoreStreak(); _failPattern=[];
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'transition', pair:curDay.lat,
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
@@ -1341,7 +1341,7 @@ function startSession(id){
     TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
         span:(curDay.to.semis-curDay.from.semis)*100, beatSec:curDay.beatStart, reps:curDay.reps};
-    attempts=restoreStreak();
+    attempts=restoreStreak(); _failPattern=[];
     { const rec=prog.inProgress&&prog.inProgress[curDay.id];
       if(rec&&rec.attempts&&rec.attempts.length){ const lastBS=rec.attempts[rec.attempts.length-1].beat_sec; if(lastBS) TR.beatSec=lastBS; } }
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'exchange', pair:curDay.lat,
@@ -1360,7 +1360,7 @@ function startSession(id){
     rhRung = curDay.tolLadder ? 0 : -1;
     rhTolMs = curDay.tolLadder ? curDay.tolLadder[0] : 250;
     NEED = curDay.tolLadder ? curDay.rungNeed[0] : curDay.need;
-    attempts=restoreStreak();
+    attempts=restoreStreak(); _failPattern=[];
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythm', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent = curDay.tolLadder ? `اليوم ${toAr(id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}` : `اليوم ${toAr(id)} · إيقاع`;
     $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
@@ -1372,7 +1372,7 @@ function startSession(id){
     return;
   }
   if(curDay.kind==='rhythmdrop'){
-    rdRung=0; rdDrop=new Set(curDay.dropLadder[0]); NEED=curDay.rungNeed[0]; attempts=restoreStreak();
+    rdRung=0; rdDrop=new Set(curDay.dropLadder[0]); NEED=curDay.rungNeed[0]; attempts=restoreStreak(); _failPattern=[];
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythmdrop', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent=`اليوم ${toAr(id)} · إيقاع · حذف · الدرجة ${toAr(rdRung+1)}/${toAr(curDay.dropLadder.length)}`;
     $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
@@ -1387,7 +1387,7 @@ function startSession(id){
   ltRung = curDay.durLadder ? 0 : -1;
   if(curDay.durLadder){ TARGET_SEC=curDay.durLadder[0]; STAB_MAX=Math.round(curDay.stabMax*curDay.stabMult[0]); NEED=curDay.rungNeed[0]; }
   else { TARGET_SEC=curDay.targetSec; STAB_MAX=curDay.stabMax; }
-  attempts=restoreStreak();
+  attempts=restoreStreak(); _failPattern=[];
   sessionLog={app:'miran', version:APP_VERSION, day:id, note:curDay.lat, kind:curDay.kind,
     concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2), target_hz:+targetHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
   $('sessEyebrow').textContent = curDay.durLadder ? `اليوم ${toAr(id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}` : `اليوم ${toAr(id)} · نغمة طويلة`;
@@ -1719,10 +1719,26 @@ function score(d){
   const run=longestRun(d.voiced); const all=d.pts.map(p=>p.c); const medC=median(all);
   const cs=all.filter(c=>Math.abs(c-medC)<80); const stab=std(cs);
   let ok=false,head='',body='',cls='retry';
-  if(run<TARGET_SEC-0.3){ head='نفَسك أقصر قليلًا'; body=`ثبتّ ${run.toFixed(1)} ثانية والهدف ${TARGET_SEC}. خذ نفسًا أعمق من البطن، وابدأ النفخ بهدوء.`; }
-  else if(Math.abs(medC)>TOL){ const dir=medC>0?'أعلى':'أخفض'; head=`الطبقة مالت عن ${curDay.note}`; body=`نغمتك ${Math.abs(medC).toFixed(0)} سنت ${dir}. استمع للمثال ثم طابقه — ${medC>0?'خفّف ضغط النفخ':'زد ضغط النفخ'} قليلًا.`; }
-  else if(stab>STAB_MAX){ head='بدأت ثابتة ثم تمايلت'; body=`تشتّت طبقتك ${stab.toFixed(0)} سنت. ثبّت ضغط النفَس ولا ترخِ الشفاه قرب النهاية.`; }
-  else { ok=true; cls='ok'; attempts++; head=`محاولة ناجحة (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبات ${stab.toFixed(0)} سنت على ${run.toFixed(1)} ثانية، والطبقة مضبوطة (${medC>=0?'+':''}${medC.toFixed(0)}). ${attempts<NEED?'أعد بنفس الجودة — نحتاج '+toAr(NEED)+' متتالية.':''}`; }
+  if(run<TARGET_SEC-0.3){
+    const pattern=checkFailPattern({k:curDay.id,r:'short'});
+    if(pattern){ head='نمط متكرّر: النفَس يقصر دائمًا'; _failPattern=[];
+      body='نفَسك ينتهي مبكرًا في كل محاولاتك الأخيرة — هذا غالبًا لأنك تدفع الهواء بقوة في البداية فينفد سريعًا. خذ نفَسًا أعمق من البطن، وابدأ النفخة بلطف أكبر لتُوزّع الهواء على كامل المدة.'; }
+    else { head='نفَسك أقصر قليلًا'; body=`ثبتّ ${run.toFixed(1)} ثانية والهدف ${TARGET_SEC}. خذ نفسًا أعمق من البطن، وابدأ النفخ بهدوء.`; }
+  }
+  else if(Math.abs(medC)>TOL){
+    const dir=medC>0?'أعلى':'أخفض';
+    const pattern=checkFailPattern({k:curDay.id,r:'pitch',dir});
+    if(pattern){ head=`نمط متكرّر: طبقتك دائمًا ${dir}`; _failPattern=[];
+      body=`نغمتك ${dir} من ${curDay.note} بتكرار — هذا ليس صدفة. ${medC>0?'خفّف ضغط نفخك تدريجيًّا حتى تسمعها تنخفض للمكان الصحيح':'زد ضغط نفخك قليلًا وتحقّق من زاوية القصبة على شفتك'}.`; }
+    else { head=`الطبقة مالت عن ${curDay.note}`; body=`نغمتك ${Math.abs(medC).toFixed(0)} سنت ${dir}. استمع للمثال ثم طابقه — ${medC>0?'خفّف ضغط النفخ':'زد ضغط النفخ'} قليلًا.`; }
+  }
+  else if(stab>STAB_MAX){
+    const pattern=checkFailPattern({k:curDay.id,r:'unstable'});
+    if(pattern){ head='نمط متكرّر: نغمتك تبدأ ثابتة ثم تهتزّ'; _failPattern=[];
+      body='التذبذب يتكرّر رغم أن طبقتك صحيحة في البداية — هذا غالبًا توتّر في كتفيك أو رقبتك يتسرّب لنفَسك مع الوقت. أرخِ جسدك تمامًا قبل النفخة التالية، وتحقّق أنك لا تشدّ فكّك.'; }
+    else { head='بدأت ثابتة ثم تمايلت'; body=`تشتّت طبقتك ${stab.toFixed(0)} سنت. ثبّت ضغط النفَس ولا ترخِ الشفاه قرب النهاية.`; }
+  }
+  else { ok=true; cls='ok'; attempts++; _failPattern=[]; head=`محاولة ناجحة (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبات ${stab.toFixed(0)} سنت على ${run.toFixed(1)} ثانية، والطبقة مضبوطة (${medC>=0?'+':''}${medC.toFixed(0)}). ${attempts<NEED?'أعد بنفس الجودة — نحتاج '+toAr(NEED)+' متتالية.':''}`; }
   if(!ok){ if(attempts>0){ body+=` — انقطعت سلسلة النجاح (كنت عند ${toAr(attempts)})، نبدأ العدّ من جديد.`; } attempts=0; }
   registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1,success:ok,cents_off:+medC.toFixed(1),stability_cents:+stab.toFixed(1),sustained_sec:+run.toFixed(2),ts:new Date().toISOString()});
@@ -1906,13 +1922,33 @@ function scoreTransition(d){
   let gap=0; d.pts.filter(p=>p.t>=TR_HOLD_FROM-0.1 && p.t<=TR_HOLD_FROM+TR_MOVE+0.9)
     .forEach((p,i,arr)=>{ if(i>0 && Math.abs(p.c-0)>TOL && Math.abs(p.c-TR.span)>TOL) gap+=(p.t-arr[i-1].t); });
   let ok=false,head='',body='',cls='retry';
-  if(!reachedFrom){ head=`ابدأ ثابتًا على ${fromNote}`; body=`لم أسمع ${fromNote} ثابتة في البداية. اعزف ${fromNote} واثبت لحظة قبل الإشارة.`; }
-  else if(!reachedTo){
-    if(toM==null||toM<TR.span-TOL){ head=`لم تصل إلى ${toNote}`; body=`دعِ النغمة تصعد إلى ${toNote} وتثبت.`; }
-    else { head=`تجاوزت ${toNote}`; body=`ارتفعت فوق ${toNote} بـ${(toM-TR.span).toFixed(0)} سنت. خفّف ضغط النفخ قليلًا عند الوصول.`; }
+  if(!reachedFrom){
+    const pattern=checkFailPattern({k:curDay.id,r:'from-missed'});
+    if(pattern){ head=`نمط متكرّر: لا تثبت على ${fromNote}`; _failPattern=[];
+      body=`نغمة البداية ${fromNote} تفوتك بتكرار — تأكّد أنك مستقرّ عليها تمامًا قبل أن تبدأ المحاولة، لا في لحظة الضغط على «ابدأ».`; }
+    else { head=`ابدأ ثابتًا على ${fromNote}`; body=`لم أسمع ${fromNote} ثابتة في البداية. اعزف ${fromNote} واثبت لحظة قبل الإشارة.`; }
   }
-  else if(gap>trGapMax){ head='انتقال غير نظيف'; body=`ظهرت نغمة عابرة ${Math.round(gap*1000)} مللي ثانية بين ${fromNote} و${toNote} (وميض كهرماني في الذيل). انتقل أسرع: افتح الثقب دفعة واحدة.`; }
-  else { ok=true; cls='ok'; attempts++; head=`انتقال نظيف (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبتّ على ${fromNote}، وقطعت المسافة إلى ${toNote} بنظافة (${Math.round(gap*1000)} مللي ثانية) ووصلت بدقة. ${attempts<NEED?'أعِد — نحتاج '+toAr(NEED)+' متتالية.':''}`; }
+  else if(!reachedTo){
+    if(toM==null||toM<TR.span-TOL){
+      const pattern=checkFailPattern({k:curDay.id,r:'to-under'});
+      if(pattern){ head=`نمط متكرّر: لا تصل إلى ${toNote}`; _failPattern=[];
+        body=`طبقتك تتوقّف قبل ${toNote} بتكرار — قد تكون تفتح الثقب جزئيًّا لا كاملًا. تأكّد من فتح الثقب المطلوب دفعة واحدة وبثقة.`; }
+      else { head=`لم تصل إلى ${toNote}`; body=`دعِ النغمة تصعد إلى ${toNote} وتثبت.`; }
+    }
+    else {
+      const pattern=checkFailPattern({k:curDay.id,r:'to-over'});
+      if(pattern){ head=`نمط متكرّر: تتجاوز ${toNote} دائمًا`; _failPattern=[];
+        body=`طبقتك ترتفع فوق ${toNote} بتكرار — نفخك يقوى أكثر مما يلزم عند الانتقال. خفّف ضغط النفخ تحديدًا في لحظة الوصول، لا طوال المحاولة.`; }
+      else { head=`تجاوزت ${toNote}`; body=`ارتفعت فوق ${toNote} بـ${(toM-TR.span).toFixed(0)} سنت. خفّف ضغط النفخ قليلًا عند الوصول.`; }
+    }
+  }
+  else if(gap>trGapMax){
+    const pattern=checkFailPattern({k:curDay.id,r:'gap'});
+    if(pattern){ head='نمط متكرّر: انتقالك بطيء دائمًا'; _failPattern=[];
+      body=`نغمة عابرة تظهر بين ${fromNote} و${toNote} في كل محاولاتك الأخيرة — انتقالك تدريجي لا فوري. تدرّب على فتح/إغلاق الثقب بحركة إصبع واحدة حاسمة، لا انزلاقًا تدريجيًّا.`; }
+    else { head='انتقال غير نظيف'; body=`ظهرت نغمة عابرة ${Math.round(gap*1000)} مللي ثانية بين ${fromNote} و${toNote} (وميض كهرماني في الذيل). انتقل أسرع: افتح الثقب دفعة واحدة.`; }
+  }
+  else { ok=true; cls='ok'; attempts++; _failPattern=[]; head=`انتقال نظيف (${toAr(attempts)}/${toAr(NEED)})`; body=`ثبتّ على ${fromNote}، وقطعت المسافة إلى ${toNote} بنظافة (${Math.round(gap*1000)} مللي ثانية) ووصلت بدقة. ${attempts<NEED?'أعِد — نحتاج '+toAr(NEED)+' متتالية.':''}`; }
   if(!ok){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; }
   registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1,success:ok,from_cents:fromM!=null?+fromM.toFixed(1):null,to_cents:toM!=null?+toM.toFixed(1):null,gap_ms:Math.round(gap*1000),ts:new Date().toISOString()});
@@ -1991,14 +2027,17 @@ function startExchange(){
     if(now>=END) stopAttempt();
   };
 }
-/* ── adaptive pattern diagnosis: if the SAME hold keeps failing the SAME way,
-   name that pattern specifically instead of repeating a generic message ── */
+/* ── adaptive pattern diagnosis: if the SAME failure signature repeats,
+   name that pattern specifically instead of repeating a generic message.
+   Works for ANY signature shape via structural comparison, so every
+   exercise kind (long-tone, transition, exchange, rhythm) can share it. ── */
 let _failPattern=[];
 function checkFailPattern(sig){
   _failPattern.push(sig); if(_failPattern.length>4) _failPattern.shift();
   if(_failPattern.length>=3){
     const last3=_failPattern.slice(-3);
-    if(last3.every(s=>s.hold===last3[0].hold && s.dir===last3[0].dir)) return last3[0];
+    const k0=JSON.stringify(last3[0]);
+    if(last3.every(s=>JSON.stringify(s)===k0)) return last3[0];
   }
   return null;
 }
@@ -2300,11 +2339,18 @@ function scoreRhythm(d){
   let head,body,cls;
   if(!ok){
     cls='retry'; attempts=0;
-    head = missed>1 ? 'فاتتك عدّة نبضات' : 'التوقيت يحتاج دقة أكبر';
-    body = missed>1 ? `لم تعزف عند ${toAr(missed)} نبضات. حافظ على نغمة قصيرة عند كل نقطة.`
-      : `أصبت ${toAr(hits)} من ${toAr(total)} نبضات ضمن هامش ${rhTolMs} م.ث. استمع للنقر وتوقّع اللحظة قبل وصولها بقليل.`;
+    const badIdx = d.hits.findIndex(h=>h!==true); // the first beat that failed this attempt
+    const pattern = badIdx>=0 ? checkFailPattern({k:curDay.id,r:'beat',i:badIdx}) : null;
+    if(pattern){
+      head=`نمط متكرّر: النبضة رقم ${toAr(pattern.i+1)} تفوتك دائمًا`; _failPattern=[];
+      body=`نفس النبضة تفوتك في محاولاتك الأخيرة — استمع للنقرات القليلة قبلها وتوقّع لحظتها بدل انتظار سماعها.`;
+    } else {
+      head = missed>1 ? 'فاتتك عدّة نبضات' : 'التوقيت يحتاج دقة أكبر';
+      body = missed>1 ? `لم تعزف عند ${toAr(missed)} نبضات. حافظ على نغمة قصيرة عند كل نقطة.`
+        : `أصبت ${toAr(hits)} من ${toAr(total)} نبضات ضمن هامش ${rhTolMs} م.ث. استمع للنقر وتوقّع اللحظة قبل وصولها بقليل.`;
+    }
   } else {
-    cls='ok'; attempts++; head=`إيقاع دقيق (${toAr(attempts)}/${toAr(NEED)})`;
+    cls='ok'; attempts++; _failPattern=[]; head=`إيقاع دقيق (${toAr(attempts)}/${toAr(NEED)})`;
     body=`أصبت ${toAr(hits)} من ${toAr(total)} نبضات. ${attempts<NEED?'أعِد — نحتاج '+toAr(NEED)+' متتالية.':''}`;
   }
   $('resultZone').innerHTML=`<div class="stats">
@@ -2368,12 +2414,19 @@ function scoreRhythmDrop(d){
   let head,body,cls;
   if(!ok){
     cls='retry'; attempts=0;
-    head = droppedHits<rdDrop.size ? 'فقدت الإيقاع عند الصمت' : 'التوقيت يحتاج دقة أكبر';
-    body = droppedHits<rdDrop.size
-      ? `أصبت ${toAr(droppedHits)} من ${toAr(rdDrop.size)} نبضات صامتة فقط. لا تنتظر الصوت — دَعِ النبضات المسموعة السابقة ترشدك.`
-      : `أصبت ${toAr(hits)} من ${toAr(total)} نبضات. استمر بنفس السرعة الداخلية حتى مع غياب النقر.`;
+    const failReason = droppedHits<rdDrop.size ? 'silent' : 'audible';
+    const pattern = checkFailPattern({k:curDay.id, rung:rdRung, r:failReason});
+    if(pattern && failReason==='silent'){
+      head='نمط متكرّر: تفقد الإيقاع عند الصمت دائمًا'; _failPattern=[];
+      body='في كل محاولاتك الأخيرة، تفوتك النبضات الصامتة تحديدًا لا المسموعة — هذا يعني أنك ما زلت تعتمد على سماع النقر لا على إحساسك الداخلي بالزمن. جرّب أن تُنشئ صوتًا في ذهنك يواصل العدّ حتى في الصمت.';
+    } else {
+      head = droppedHits<rdDrop.size ? 'فقدت الإيقاع عند الصمت' : 'التوقيت يحتاج دقة أكبر';
+      body = droppedHits<rdDrop.size
+        ? `أصبت ${toAr(droppedHits)} من ${toAr(rdDrop.size)} نبضات صامتة فقط. لا تنتظر الصوت — دَعِ النبضات المسموعة السابقة ترشدك.`
+        : `أصبت ${toAr(hits)} من ${toAr(total)} نبضات. استمر بنفس السرعة الداخلية حتى مع غياب النقر.`;
+    }
   } else {
-    cls='ok'; attempts++; head=`إيقاع داخلي ثابت (${toAr(attempts)}/${toAr(NEED)})`;
+    cls='ok'; attempts++; _failPattern=[]; head=`إيقاع داخلي ثابت (${toAr(attempts)}/${toAr(NEED)})`;
     body=`أصبت ${toAr(hits)} من ${toAr(total)} نبضة، منها ${toAr(droppedHits)} من ${toAr(rdDrop.size)} نبضة صامتة. ${attempts<NEED?'أعِد — نحتاج '+toAr(NEED)+' متتالية.':''}`;
   }
   $('resultZone').innerHTML=`<div class="stats">
