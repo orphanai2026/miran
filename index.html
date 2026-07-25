@@ -384,13 +384,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r2.6-voicewait</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r3.0-reedanatomy</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r2.6-voicewait';
+const APP_VERSION='r3.0-reedanatomy';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -506,6 +506,64 @@ function dervishCelebrate(phaseDone){
 /* ================= CURRICULUM (days as DATA) =================
    semis = semitones above the qarar (دو). playable long-tone days
    are built now; later days are stars awaiting their exercises. */
+
+/* ═══════════ NEY FINGERING TABLE · Arabic Dūkāh (D) ney ═══════════
+   Confirmed with the player. 6 front holes (indexed 1..6 from the mouth
+   down) + 1 thumb hole on the back.
+   Hole value = FRACTION STILL COVERED: 1 closed · 0 open · 0.5/0.75 partial.
+   Same hole patterns serve all three registers — only breath pressure and
+   lip angle change. Registers overlap on purpose (twin fingerings let a
+   player check the ney's internal tuning).
+   PENDING (his own recordings, not documented in any source):
+     • المبحوحة   — breathy sub-fundamental, sits BEFORE قرار
+     • قرار القرار — the register below the standard qarar
+   Both will simply be prepended to REGISTERS[]; nothing else changes.
+   semis = semitones above qarar, so a note's pitch = qararHz * 2^(semis/12)  */
+const REGISTERS=[
+ {key:'قرار', notes:[
+  {ar:'دو',           lat:'C',    semis:0,    kind:'base',  front:[1,1,1,1,1,1],    thumb:1},
+  {ar:'دو دييز',       lat:'C♯',   semis:1,    kind:'sharp', front:[1,1,1,1,1,0.75], thumb:1},
+  {ar:'ري',           lat:'D',    semis:2,    kind:'base',  front:[1,1,1,1,1,0],    thumb:1},
+  {ar:'مي بيمول',      lat:'E♭',   semis:3,    kind:'flat',  front:[1,1,1,1,0,0],    thumb:1},
+  {ar:'مي نصف بيمول',  lat:'E½♭',  semis:3.5,  kind:'half',  front:[1,1,1,0,0,0],    thumb:1},
+  {ar:'مي',           lat:'E',    semis:4,    kind:'base',  front:[1,1,1,0.5,0,0],  thumb:1, hard:true},
+  {ar:'فا',           lat:'F',    semis:5,    kind:'base',  front:[1,1,0,0,0,0],    thumb:1},
+  {ar:'فا دييز',       lat:'F♯',   semis:6,    kind:'sharp', front:[1,0,0,0,0,0],    thumb:1},
+  {ar:'صول',          lat:'G',    semis:7,    kind:'base',  front:[0,0,0,0,0,0],    thumb:1, twin:'يساوي صول الجواب'}
+ ]},
+ {key:'جواب', notes:[
+  {ar:'صول',          lat:'G',    semis:7,    kind:'base',  front:[1,1,1,1,1,1],    thumb:1, twin:'يساوي صول القرار'},
+  {ar:'لا بيمول',      lat:'A♭',   semis:8,    kind:'flat',  front:[1,1,1,1,1,0.75], thumb:1, hard:true},
+  {ar:'لا نصف بيمول',  lat:'A½♭',  semis:8.5,  kind:'half',  front:[1,1,1,1,1,0.5],  thumb:1},
+  {ar:'لا',           lat:'A',    semis:9,    kind:'base',  front:[1,1,1,1,1,0],    thumb:1},
+  {ar:'سي بيمول',      lat:'B♭',   semis:10,   kind:'flat',  front:[1,1,1,1,0,0],    thumb:1},
+  {ar:'سي نصف بيمول',  lat:'B½♭',  semis:10.5, kind:'half',  front:[1,1,1,0,0,0],    thumb:1},
+  {ar:'سي',           lat:'B',    semis:11,   kind:'base',  front:[1,1,1,0.5,0,0],  thumb:1, hard:true},
+  {ar:'دو',           lat:'C',    semis:12,   kind:'base',  front:[1,1,0,0,0,0],    thumb:1, twin:'يساوي دو جواب الجواب'},
+  {ar:'دو دييز',       lat:'C♯',   semis:13,   kind:'sharp', front:[1,0,0,0,0,0],    thumb:1},
+  {ar:'ري',           lat:'D',    semis:14,   kind:'base',  front:[0,0,0,0,0,0],    thumb:1}
+ ]},
+ {key:'جواب الجواب', notes:[
+  {ar:'دو',           lat:'C',    semis:12,   kind:'base',  front:[1,1,1,1,1,1],    thumb:1, twin:'يساوي دو الجواب'},
+  {ar:'ري',           lat:'D',    semis:14,   kind:'base',  front:[1,1,1,1,1,0],    thumb:1},
+  {ar:'مي بيمول',      lat:'E♭',   semis:15,   kind:'flat',  front:[1,1,1,1,0,0],    thumb:1},
+  {ar:'مي نصف بيمول',  lat:'E½♭',  semis:15.5, kind:'half',  front:[1,1,1,0,0,0],    thumb:1},
+  {ar:'فا',           lat:'F',    semis:17,   kind:'base',  front:[1,1,0,0,0,0],    thumb:1},
+  {ar:'صول',          lat:'G',    semis:19,   kind:'base',  front:[0,0,0,0,0,0],    thumb:1}
+ ]}
+];
+/* find the fingering for a curriculum note, matching by semitone distance
+   from qarar. Falls back to null so nothing breaks if a note isn't listed. */
+function fingeringFor(semis, preferReg){
+  if(semis==null) return null;
+  const order = preferReg!=null ? [preferReg,0,1,2] : [0,1,2];
+  for(const r of order){ const R=REGISTERS[r]; if(!R) continue;
+    const hit=R.notes.find(n=>Math.abs(n.semis-semis)<0.01);
+    if(hit) return {note:hit, reg:R.key};
+  }
+  return null;
+}
+
 const CURRICULUM=[
   {id:1, note:'دو', lat:'C',  semis:0, kind:'longtone', targetSec:8, tol:20, stabMax:15, need:7,
     durLadder:[3,5,8], stabMult:[1.8,1.3,1], rungNeed:[2,2,7], title:'نغمة القرار الطويلة', blurb:'ابدأ بثلاث ثوانٍ فقط، وترتفع المدة تدريجيًا حتى ٨ ثوانٍ بصوتٍ صافٍ.'},
@@ -855,81 +913,242 @@ function drawOrbitBg(){ groundBg(); const {cx:mx,cy}=ORB; const R=82;
   cx.strokeStyle='rgba(79,227,193,.5)'; cx.lineWidth=1.4; cx.setLineDash([2,7]);
   cx.beginPath(); cx.arc(mx,cy,R,0,7); cx.stroke(); cx.setLineDash([]); }
 
-/* ══ THE RESONATOR — long-tone visual ═════════════════════════════════
-   The reed bent into a ring. TIME becomes ROTATION, so the last ~6s of
-   your pitch is drawn as a full circle: a perfectly steady note draws a
-   perfect circle; a wavering one draws a lobed wave. Radius = pitch
-   deviation from target, so drifting sharp pushes the ring outward.
+/* ══ THE REED · shared anatomy renderer ═══════════════════════════════
+   Draws a longitudinal cross-section of the ney and places every number in
+   its anatomically natural home, so nothing floats without a reason:
+     at the mouth   → breath duration      (amber, LEFT of the bore)
+     on the body    → note name + live fingering  (gold, ABOVE the bore)
+     in the bore    → pitch deviation, at the wave's node   (cyan, CENTRE)
+     at the open end→ mastery streak       (cyan, RIGHT of the bore)
+   Reserved lanes mean these can never overlap each other or the wave.
    ═══════════════════════════════════════════════════════════════════ */
-let _thread=[]; let _threadStep=0; const THREAD_N=110;
-const RES_R=70, RES_PX=0.62;                    // target radius, px per cent — sized with headroom for the glow
-const resRad=c=>RES_R+Math.max(-ORB_RANGE,Math.min(ORB_RANGE,c))*RES_PX;
-const resAng=slot=>(-Math.PI/2)+(slot/THREAD_N)*Math.PI*2;
-
-function drawThreadBg(){ groundBg(); const {cx:mx,cy}=ORB;
-  sacredRings(RES_R);
-  // tolerance annulus — the band a good note lives in
-  const rIn=resRad(-TOL), rOut=resRad(TOL);
-  cx.fillStyle=C.liveSoft; cx.beginPath();
-  cx.arc(mx,cy,rOut,0,7); cx.arc(mx,cy,rIn,0,7,true); cx.fill();
-  // exact target ring
-  cx.strokeStyle='rgba(79,227,193,.55)'; cx.lineWidth=1.4; cx.setLineDash([2,7]);
-  cx.beginPath(); cx.arc(mx,cy,RES_R,0,7); cx.stroke(); cx.setLineDash([]);
-  // six nodes = the hexagonal symmetry shared by the standing wave and the rosette
-  cx.fillStyle='rgba(79,227,193,.5)';
-  for(let k=0;k<6;k++){ const a=-Math.PI/2+k*Math.PI/3;
-    cx.beginPath(); cx.arc(mx+Math.cos(a)*RES_R, cy+Math.sin(a)*RES_R, 2.1, 0, 7); cx.fill(); } }
-
-function drawThreadIdle(){ drawThreadBg(); const {cx:mx,cy}=ORB;
-  cx.fillStyle=C.muted; cx.font="500 12.5px Cairo,sans-serif"; cx.textAlign='center';
-  cx.fillText('اضغط «ابدأ» ثم انفخ', mx, ORB.h-14);
-  if(curDay&&curDay.note){ cx.fillStyle='rgba(247,220,160,.5)'; cx.font="400 30px 'Aref Ruqaa',serif";
-    cx.fillText(curDay.note, mx, cy+11); }
-  cx.textAlign='start'; }
-
-function _resDraw(){
-  drawThreadBg(); const {cx:mx,cy}=ORB;
-  const pts=_thread;
-  if(pts.length>1){
-    for(let i=1;i<pts.length;i++){
-      if(pts[i].mute||pts[i-1].mute) continue;
-      if(pts[i].slot<pts[i-1].slot) continue;        // lap wrapped — don't draw a chord across the seam
-      const a0=pts[i-1].ang, a1=pts[i].ang, r0=resRad(pts[i-1].c), r1=resRad(pts[i].c);
-      const fade=.25+.75*(i/pts.length);
-      cx.globalAlpha=fade; cx.strokeStyle=pts[i].ok?C.live:C.breath; cx.lineWidth=2.3; cx.lineJoin='round';
-      cx.beginPath(); cx.moveTo(mx+Math.cos(a0)*r0, cy+Math.sin(a0)*r0);
-      cx.lineTo(mx+Math.cos(a1)*r1, cy+Math.sin(a1)*r1); cx.stroke();
-    }
-    cx.globalAlpha=1;
-  }
-  return {mx,cy};
+const REED={x0:0,L:0,R:40,cy:0};
+function reedGeom(){
+  REED.x0 = 62; REED.L = ORB.w-124; REED.R = 40;
+  REED.cy = ORB.cy + 22;                 // leave the top lane for name+holes
+  return REED;
 }
-function _pushThread(entry){
-  entry.slot=_threadStep%THREAD_N; entry.ang=resAng(entry.slot); _threadStep++;
-  _thread.push(entry); if(_thread.length>THREAD_N)_thread.shift();
+function drawReedGround(){ const {w,h}=ORB; cx.clearRect(0,0,w,h);
+  const g=cx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,'#0d0b20'); g.addColorStop(1,'#080616');
+  cx.fillStyle=g; cx.fillRect(0,0,w,h); }
+
+/* one finger hole, honouring partial coverage (0..1 = fraction still covered) */
+function drawHole(px,py,rx,ry,s){
+  if(s>=1){ cx.fillStyle='rgba(230,184,92,.88)'; cx.beginPath(); cx.ellipse(px,py,rx,ry,0,0,7); cx.fill(); return; }
+  cx.fillStyle='#0a0818'; cx.beginPath(); cx.ellipse(px,py,rx,ry,0,0,7); cx.fill();
+  if(s>0){ cx.save(); cx.beginPath(); cx.moveTo(px,py);
+    const a0=Math.PI/2; cx.ellipse(px,py,rx,ry,0,a0,a0+Math.PI*2*s); cx.closePath();
+    cx.fillStyle='rgba(230,184,92,.88)'; cx.fill(); cx.restore(); }
+  cx.strokeStyle='rgba(230,184,92,'+(s>0?'.7':'.42')+')'; cx.lineWidth=1;
+  cx.beginPath(); cx.ellipse(px,py,rx,ry,0,0,7); cx.stroke();
+}
+
+/* the note's identity lane: name, pitch, kind chip, and its live fingering */
+function drawNoteLane(fing, noteAr, hzVal){
+  const mx=ORB.cx;
+  cx.textAlign='center';
+  cx.save(); cx.shadowColor='rgba(230,184,92,.45)'; cx.shadowBlur=13;
+  cx.fillStyle=C.goldHi||'#F7DCA0'; cx.font="700 27px 'Aref Ruqaa',serif";
+  cx.fillText(noteAr, mx, 32); cx.restore();
+  if(hzVal){ cx.fillStyle='rgba(155,146,184,.6)'; cx.font="500 9.5px 'IBM Plex Mono',monospace";
+    cx.fillText((fing?fing.reg+' · ':'')+Math.round(hzVal)+' Hz', mx, 46); }
+  if(!fing) return;
+  const N=fing.note;
+  const KIND={base:['أساسية','79,227,193'],flat:['بيمول','155,146,184'],
+              half:['نصف بيمول · ربع صوت','255,179,71'],sharp:['دييز','230,184,92']};
+  const kd=KIND[N.kind]||KIND.base;
+  cx.font="600 9px Cairo,sans-serif";
+  const cw=cx.measureText(kd[0]).width+16;
+  cx.fillStyle='rgba('+kd[1]+',.14)';
+  cx.beginPath(); cx.roundRect(mx-cw/2,52,cw,15,8); cx.fill();
+  cx.strokeStyle='rgba('+kd[1]+',.4)'; cx.lineWidth=1; cx.stroke();
+  cx.fillStyle='rgba('+kd[1]+',.95)'; cx.fillText(kd[0], mx, 63);
+  // the live fingering row
+  const tw=132, tx=mx-tw/2, ty=82;
+  for(let i=0;i<6;i++) drawHole(tx+(i+0.5)*(tw/6), ty, 6, 6, N.front[i]);
+  drawHole(tx-22, ty, 5.2, 5.2, N.thumb);
+  cx.fillStyle='rgba(155,146,184,.45)'; cx.font="600 7.5px Cairo,sans-serif";
+  cx.fillText('خلفي', tx-22, ty+15);
+  if(N.hard){ cx.fillStyle='#FF9B78'; cx.font="600 8.5px Cairo,sans-serif";
+    cx.fillText('نصف فتحة — تحتاج تحكّمًا دقيقًا', mx, ty+27); }
+}
+
+/* the cane itself, with its holes mirrored from the fingering above */
+function drawCane(fing){
+  const {x0,L,R,cy}=reedGeom();
+  cx.save();
+  const w=cx.createLinearGradient(0,cy-R-15,0,cy+R+15);
+  w.addColorStop(0,'rgba(230,184,92,.24)'); w.addColorStop(.5,'rgba(230,184,92,.05)');
+  w.addColorStop(1,'rgba(230,184,92,.24)');
+  cx.fillStyle=w; cx.fillRect(x0,cy-R-15,L,15); cx.fillRect(x0,cy+R,L,15);
+  cx.strokeStyle='rgba(230,184,92,.5)'; cx.lineWidth=1.2;
+  cx.beginPath(); cx.moveTo(x0,cy-R); cx.lineTo(x0+L,cy-R);
+  cx.moveTo(x0,cy+R); cx.lineTo(x0+L,cy+R); cx.stroke();
+  cx.restore();
+  if(fing) for(let i=0;i<6;i++)
+    drawHole(x0+L*(0.27+i*0.105), cy-R-7.5, 5.4, 3.6, fing.note.front[i]);
+}
+
+/* the standing wave: open pipe → displacement antinodes at both ends,
+   node at the centre for the fundamental. Steadiness drives its calm. */
+function drawAirColumn(steadyFrac, tPhase){
+  const {x0,L,R,cy}=REED;
+  const calm=Math.max(0,Math.min(1,steadyFrac));
+  const amp=R*0.72, jit=(1-calm)*6;
+  const col = calm>0.55 ? C.live : C.breath;
+  cx.save();
+  cx.shadowColor=col; cx.shadowBlur=8+calm*10;
+  cx.strokeStyle=col; cx.lineWidth=2.2;
+  for(const sgn of [1,-1]){
+    cx.beginPath();
+    for(let i=0;i<=L;i+=2){
+      const u=i/L, disp=Math.cos(Math.PI*u);
+      const j=jit?Math.sin(u*21+tPhase)*jit:0;
+      cx.lineTo(x0+i, cy+sgn*(disp*amp+j));
+    }
+    cx.stroke();
+  }
+  cx.restore();
+  cx.save(); cx.globalAlpha=.32; cx.strokeStyle=C.breath; cx.lineWidth=1.1;
+  cx.beginPath();
+  for(let i=0;i<=L;i+=2){ const u=i/L; cx.lineTo(x0+i, cy+Math.cos(2*Math.PI*u)*amp*0.45); }
+  cx.stroke(); cx.restore();
+}
+function drawBreathParticles(tPhase, calm){
+  const {x0,L,cy}=REED;
+  for(let k=0;k<13;k++){
+    const p=((tPhase*2.2+k*29)%(L+70))-40;
+    if(p<0||p>L) continue;
+    const u=p/L;
+    const y=cy+Math.sin(k*3.1+tPhase/6)*(calm>0.55?6:13)*Math.abs(Math.cos(Math.PI*u));
+    cx.fillStyle='rgba(255,179,71,'+(Math.min(1,p/60)*(1-u*.5)*.75)+')';
+    cx.beginPath(); cx.arc(x0+p,y,calm>0.55?1.8:1.3,0,7); cx.fill();
+  }
+}
+/* AT THE MOUTH — breath duration, outside the bore so it never collides */
+function drawMouthGauge(val, frac, label, col){
+  const {x0,cy}=REED, mx=x0-30;
+  const g=cx.createRadialGradient(mx,cy,2,mx,cy,40);
+  g.addColorStop(0,'rgba(255,179,71,.26)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  cx.fillStyle=g; cx.beginPath(); cx.arc(mx,cy,40,0,7); cx.fill();
+  cx.strokeStyle='rgba(255,179,71,.16)'; cx.lineWidth=2.8;
+  cx.beginPath(); cx.arc(mx,cy,23,0,7); cx.stroke();
+  cx.save(); cx.shadowColor=C.breath; cx.shadowBlur=9; cx.lineCap='round';
+  cx.strokeStyle=col||C.breath; cx.lineWidth=2.8;
+  cx.beginPath(); cx.arc(mx,cy,23,-Math.PI/2,-Math.PI/2+Math.max(0,Math.min(1,frac))*Math.PI*2); cx.stroke();
+  cx.restore();
+  cx.textAlign='center'; cx.fillStyle=col||C.breath;
+  cx.font="500 15px 'IBM Plex Mono',monospace"; cx.fillText(val, mx, cy+3);
+  cx.fillStyle='rgba(155,146,184,.6)'; cx.font="600 8px Cairo,sans-serif";
+  cx.fillText(label, mx, cy+15);
+}
+/* IN THE BORE — the deviation, on its own plate at the wave's node */
+function drawNodeReadout(txt, sub, col){
+  const {x0,L,cy}=REED, nx=x0+L/2;
+  cx.save(); cx.fillStyle='rgba(10,8,24,.9)';
+  cx.beginPath(); cx.roundRect(nx-38,cy-19,76,38,11); cx.fill();
+  cx.strokeStyle=col.replace(')',',.3)').replace('rgb','rgba'); cx.lineWidth=1;
+  try{cx.stroke();}catch(e){}
+  cx.restore();
+  cx.textAlign='center'; cx.fillStyle=col;
+  cx.font="500 22px 'IBM Plex Mono',monospace"; cx.fillText(txt, nx, cy+1);
+  cx.fillStyle='rgba(155,146,184,.65)'; cx.font="600 8.5px Cairo,sans-serif";
+  cx.fillText(sub, nx, cy+15);
+}
+/* AT THE OPEN END — mastery streak as emitted arcs */
+function drawExitStreak(done, need){
+  const {x0,L,cy}=REED, ex=x0+L+30;
+  const g=cx.createRadialGradient(ex,cy,2,ex,cy,42);
+  g.addColorStop(0,'rgba(79,227,193,.2)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  cx.fillStyle=g; cx.beginPath(); cx.arc(ex,cy,42,0,7); cx.fill();
+  const n=Math.max(1,need);
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+(i/n)*Math.PI*2, lit=i<done;
+    cx.strokeStyle= lit?C.live:'rgba(155,146,184,.22)';
+    cx.lineWidth= lit?3:2;
+    if(lit){ cx.save(); cx.shadowColor=C.live; cx.shadowBlur=7; }
+    cx.beginPath(); cx.arc(ex,cy,24,a-(Math.PI/n)*0.62,a+(Math.PI/n)*0.62); cx.stroke();
+    if(lit) cx.restore();
+  }
+  cx.textAlign='center'; cx.fillStyle=C.live;
+  cx.font="500 15px 'IBM Plex Mono',monospace"; cx.fillText(done+'/'+need, ex, cy+3);
+  cx.fillStyle='rgba(155,146,184,.6)'; cx.font="600 8px Cairo,sans-serif";
+  cx.fillText('إتقان', ex, cy+15);
+}
+/* quiet context strip along the bottom */
+function drawContextStrip(left, right, rightCol){
+  cx.textAlign='left'; cx.fillStyle='rgba(155,146,184,.45)';
+  cx.font="600 9.5px Cairo,sans-serif"; cx.fillText(left, 14, ORB.h-12);
+  if(right){ cx.textAlign='right'; cx.fillStyle=rightCol||'rgba(155,146,184,.55)';
+    cx.fillText(right, ORB.w-14, ORB.h-12); }
+  cx.textAlign='start';
+}
+
+/* ── LONG TONE, drawn inside the reed ──
+   The air column IS the pitch: steady breath = a calm standing wave;
+   wavering breath = a wave that shudders. A rolling window of your recent
+   deviation drives how calm it looks, so the picture is your playing. */
+let _thread=[]; let _threadStep=0; const THREAD_N=110;
+
+function currentFingering(){
+  if(!curDay) return null;
+  if(curDay.semis!=null) return fingeringFor(curDay.semis);
+  if(curDay.from && curDay.from.semis!=null) return fingeringFor(curDay.from.semis);
+  return null;
+}
+function calmFromThread(){
+  const pts=_thread.filter(p=>!p.mute).slice(-26);
+  if(!pts.length) return 0;
+  const inTol=pts.filter(p=>p.ok).length/pts.length;
+  const vals=pts.map(p=>p.c); const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const sd=Math.sqrt(vals.reduce((a,b)=>a+(b-mean)*(b-mean),0)/vals.length);
+  const steadiness=Math.max(0,1-sd/Math.max(8,STAB_MAX));
+  return Math.max(0,Math.min(1,inTol*0.55+steadiness*0.45));
+}
+function drawThreadBg(){
+  drawReedGround(); reedGeom();
+  const f=currentFingering();
+  drawNoteLane(f, curDay&&curDay.note?curDay.note:'', targetHz);
+  drawCane(f);
+}
+function drawThreadIdle(){
+  drawThreadBg();
+  drawAirColumn(1, 0);
+  drawMouthGauge('0.0', 0, 'ثانية');
+  drawExitStreak(attempts||0, NEED||7);
+  cx.textAlign='center'; cx.fillStyle=C.muted; cx.font="500 12px Cairo,sans-serif";
+  cx.fillText('اضغط «ابدأ» ثم انفخ', ORB.cx, ORB.h-32); cx.textAlign='start';
+  drawContextStrip('اليوم '+toAr(curDay?curDay.id:1)+' · نغمة طويلة', '');
+}
+function _pushThread(entry){ entry.slot=_threadStep%THREAD_N; _threadStep++;
+  _thread.push(entry); if(_thread.length>THREAD_N)_thread.shift(); }
+
+function _reedFrame(cents, inTune, mute){
+  const calm = mute?0:calmFromThread();
+  const run = recData? longestRun(recData.voiced||[]) : 0;
+  drawThreadBg();
+  drawAirColumn(calm, _threadStep/3);
+  drawBreathParticles(_threadStep, calm);
+  drawMouthGauge(run.toFixed(1), TARGET_SEC?run/TARGET_SEC:0, 'ثانية');
+  if(mute) drawNodeReadout('—','لا صوت','rgba(155,146,184,.8)');
+  else{
+    const ok=inTune&&Math.abs(cents)<=TOL;
+    drawNodeReadout((cents>=0?'+':'')+cents.toFixed(0),'سنت', ok?C.live:C.breath);
+  }
+  drawExitStreak(attempts||0, NEED||7);
+  drawContextStrip('اليوم '+toAr(curDay?curDay.id:1)+' · نغمة طويلة',
+    mute?'':(calm>0.55?'الموجة مستقرّة':'الموجة مضطربة'),
+    mute?'':(calm>0.55?'rgba(79,227,193,.7)':'rgba(255,179,71,.75)'));
 }
 function renderThread(cents, inTune){
   _pushThread({c:cents, ok:inTune&&Math.abs(cents)<=TOL});
-  const {mx,cy}=_resDraw();
-  const head=_thread[_thread.length-1];
-  const r=resRad(head.c);
-  const hx=mx+Math.cos(head.ang)*r, hy=cy+Math.sin(head.ang)*r;
-  const col=head.ok?C.live:C.breath;
-  const g=cx.createRadialGradient(hx,hy,1,hx,hy,15);
-  g.addColorStop(0, head.ok?'rgba(79,227,193,.6)':'rgba(255,179,71,.55)'); g.addColorStop(1,'rgba(0,0,0,0)');
-  cx.fillStyle=g; cx.beginPath(); cx.arc(hx,hy,15,0,7); cx.fill();
-  cx.fillStyle=col; cx.beginPath(); cx.arc(hx,hy,5.6,0,7); cx.fill();
-  // centre: live cents readout, the one number that matters — always inside the ring, never touched by the trail
-  cx.textAlign='center';
-  cx.fillStyle=head.ok?C.live:C.breath; cx.font="500 25px 'IBM Plex Mono',monospace";
-  cx.fillText((cents>=0?'+':'')+cents.toFixed(0), mx, cy+4);
-  cx.fillStyle=C.muted; cx.font="500 10px Cairo,sans-serif"; cx.fillText('سنت', mx, cy+20);
-  cx.textAlign='start';
+  _reedFrame(cents, inTune, false);
 }
-function renderThreadSilent(){ _pushThread({c:0, ok:false, mute:true});
-  const {mx,cy}=_resDraw();
-  cx.textAlign='center'; cx.fillStyle=C.muted; cx.font="500 12.5px Cairo,sans-serif";
-  cx.fillText('لا أسمع صوتًا', mx, cy+5); cx.textAlign='start'; }
+function renderThreadSilent(){
+  _pushThread({c:0, ok:false, mute:true});
+  _reedFrame(0,false,true);
+}
 
 function restoreStreak(){
   const rec = prog.inProgress && prog.inProgress[curDay.id];
