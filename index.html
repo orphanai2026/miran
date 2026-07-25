@@ -384,13 +384,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r3.1-reedall</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r3.2-voicetiming</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r3.1-reedall';
+const APP_VERSION='r3.2-voicetiming';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -436,7 +436,9 @@ function setIntroBlocking(on){
   $('btnRec').disabled=on; $('btnRec').style.opacity=on?.45:1;
   $('btnSkipIntro').style.display=on?'':'none';
   clearTimeout(_introSafety);
-  if(on) _introSafety=setTimeout(()=>setIntroBlocking(false), 12000); // safety net: never lock the button forever
+  // safety net only — must sit ABOVE the longest guidance clip (~10.5s speech,
+  // longer if it is a recorded voice) so it never cuts real guidance short.
+  if(on) _introSafety=setTimeout(()=>setIntroBlocking(false), 30000);
 }
 $('btnSkipIntro').addEventListener('click', ()=>{ stopDervishVoice(); setIntroBlocking(false); });
 let _dervishSpeaking=false;
@@ -1432,8 +1434,12 @@ function restoreSustainLabel(){
   else { $('sustainLabel').textContent='تقدّم التمرين'; $('targetSec').textContent='—'; $('sustainUnit').style.display='none'; }
 }
 function stopDervishVoice(){
-  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
-  if(_dervishAudio){ try{_dervishAudio.pause();}catch(e){} }
+  try{ if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    // some Android/Chrome builds ignore a single cancel mid-utterance
+    setTimeout(()=>{ try{ speechSynthesis.cancel(); }catch(e){} }, 30);
+  } }catch(e){}
+  if(_dervishAudio){ try{ _dervishAudio.pause(); _dervishAudio.currentTime=0; }catch(e){} }
   _dervishSpeaking=false;
 }
 let _countdownIv=null;
@@ -1501,7 +1507,10 @@ function _autoNextTick(){
   if(!activeView || activeView.id!=='view-session') return; // day finished, or user navigated away — nothing to continue
   if(counting || recording) return; // already moving on (manual press or rung-advance race) — don't double-trigger
   if(!curDay) return;
-  if(_dervishSpeaking && _autoNextWaited<9000){ // let the Dervish finish talking — recheck shortly, capped so we never stall forever
+  // Let the Dervish finish. The longest phrase runs ~10.5s of speech, and a
+  // recorded clip can be slower than TTS, so the cap sits well clear of it —
+  // it exists only so a broken audio element can never stall the session.
+  if(_dervishSpeaking && _autoNextWaited<25000){
     _autoNextWaited+=400; _autoNextTimer=setTimeout(_autoNextTick, 400); return;
   }
   runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
