@@ -384,13 +384,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r3.0-reedanatomy</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r3.1-reedall</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r3.0-reedanatomy';
+const APP_VERSION='r3.1-reedall';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1593,40 +1593,75 @@ function finishDay(stats){
 /* ================= TRANSITION EXERCISE ================= */
 let TR_HOLD_FROM=2.2, TR_MOVE=0.35, TR_HOLD_TO=2.6; // seconds — now rung-adjustable, see holdLadder
 let TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO;
-/* transition/exchange: concentric target rings — inner = lower note, outer = higher.
-   The ball rides the vertical radius at 12 o'clock, so yT() keeps its old contract
-   (returns a y for a given cents) while the map underneath became radial. */
-const TR_RMIN=30, TR_RMAX=118, TR_CMIN=-70, TR_CMAX=270;
-function trRad(c){ const k=(Math.max(TR_CMIN,Math.min(TR_CMAX,c))-TR_CMIN)/(TR_CMAX-TR_CMIN);
-  return TR_RMIN + k*(TR_RMAX-TR_RMIN); }
-function yT(c){ return ORB.cy - trRad(c); }
-function activeTargetCents(now){ // gold ring travels from 0 (دو) to span (ري)
+/* ── TRANSITION / EXCHANGE, drawn inside the reed ──
+   Two notes, so two fingerings sit side by side above the cane and the
+   ACTIVE one lights up as the target moves. The air column morphs between
+   the two pitches, and the ball rides the bore vertically. yT() keeps its
+   old contract (cents → y) so all scoring code is untouched. */
+const TR_CMIN=-70, TR_CMAX=270;
+function yT(c){
+  const {R,cy}=REED.L?REED:reedGeom();
+  const k=(Math.max(TR_CMIN,Math.min(TR_CMAX,c))-TR_CMIN)/(TR_CMAX-TR_CMIN);
+  return (cy+R*0.9) - k*(R*1.8);
+}
+function activeTargetCents(now){
   if(now<TR_HOLD_FROM) return 0;
   if(now<TR_HOLD_FROM+TR_MOVE){ const k=(now-TR_HOLD_FROM)/TR_MOVE; return TR.span*(0.5-0.5*Math.cos(k*Math.PI)); }
   return TR.span; }
+
+/* two fingerings, side by side — the active one is lit, the other dimmed */
+function drawPairLane(fA, fB, arA, arB, activeIsB){
+  const mx=ORB.cx, gap=94;
+  [[fA,arA,mx-gap,!activeIsB],[fB,arB,mx+gap,activeIsB]].forEach(([f,ar,px,on])=>{
+    cx.textAlign='center';
+    cx.save();
+    if(on){ cx.shadowColor='rgba(230,184,92,.5)'; cx.shadowBlur=13; }
+    cx.globalAlpha = on?1:0.42;
+    cx.fillStyle='#F7DCA0'; cx.font=(on?"700 25px ":"700 20px ")+"'Aref Ruqaa',serif";
+    cx.fillText(ar, px, 32);
+    cx.restore();
+    if(!f) return;
+    cx.save(); cx.globalAlpha = on?1:0.38;
+    const tw=84, tx=px-tw/2, ty=52;
+    for(let i=0;i<6;i++) drawHole(tx+(i+0.5)*(tw/6), ty, 4.4, 4.4, f.note.front[i]);
+    drawHole(tx-15, ty, 3.8, 3.8, f.note.thumb);
+    cx.restore();
+  });
+  // the arrow between them shows the direction of travel
+  cx.save(); cx.globalAlpha=.7; cx.strokeStyle=C.live; cx.lineWidth=1.6;
+  cx.beginPath(); cx.moveTo(mx-24,42); cx.lineTo(mx+24,42); cx.stroke();
+  cx.beginPath(); cx.moveTo(mx+24,42); cx.lineTo(mx+17,38); cx.moveTo(mx+24,42); cx.lineTo(mx+17,46); cx.stroke();
+  cx.restore();
+}
 function drawTransitionBg(now, targetFn){
   const fn = targetFn || activeTargetCents;
-  const {cx:mx,cy}=ORB; groundBg(); sacredRings(82);
-  const tolU=Math.max(7,(TOL/(TR_CMAX-TR_CMIN))*(TR_RMAX-TR_RMIN));
-  // the two home rings (faint, concentric)
-  [[0,curDay.from.note],[TR.span,curDay.to.note]].forEach(([c,label])=>{
-    const r=trRad(c);
-    cx.strokeStyle='rgba(74,59,122,.75)'; cx.lineWidth=1.4; cx.setLineDash([2,6]);
-    cx.beginPath(); cx.arc(mx,cy,r,0,7); cx.stroke(); cx.setLineDash([]);
-    cx.fillStyle='rgba(155,146,184,.85)'; cx.font="700 15px 'Aref Ruqaa',serif"; cx.textAlign='center';
-    cx.fillText(label, mx, cy-r-9); cx.textAlign='start';
-  });
-  // the live target ring (travels between them) — cyan, because it is NOW
-  const at=fn(now), ar=trRad(at), ay=ORB.cy-ar;
-  cx.strokeStyle='rgba(79,227,193,.9)'; cx.lineWidth=2.4;
-  cx.beginPath(); cx.arc(mx,cy,ar,0,7); cx.stroke();
-  cx.strokeStyle='rgba(79,227,193,.22)'; cx.lineWidth=tolU*2;
-  cx.beginPath(); cx.arc(mx,cy,ar,0,7); cx.stroke();
-  return {ay,tolU};
+  drawReedGround(); reedGeom();
+  const at=fn(now);
+  const fA=fingeringFor(curDay.from.semis), fB=fingeringFor(curDay.to.semis);
+  drawPairLane(fA,fB,curDay.from.note,curDay.to.note, at>TR.span*0.5);
+  // the cane wears whichever fingering is currently targeted
+  drawCane(at>TR.span*0.5 ? fB : fA);
+  // the air column morphs between the two pitches
+  const calm = 1 - Math.min(1, Math.abs(at-(at>TR.span*0.5?TR.span:0))/Math.max(1,TR.span))*0.8;
+  drawAirColumn(calm, now*8);
+  // target band inside the bore
+  const ay=yT(at), {x0,L}=REED;
+  cx.strokeStyle='rgba(79,227,193,.85)'; cx.lineWidth=2;
+  cx.beginPath(); cx.moveTo(x0,ay); cx.lineTo(x0+L,ay); cx.stroke();
+  const tolPx=Math.abs(yT(0)-yT(TOL));
+  cx.fillStyle='rgba(79,227,193,.13)'; cx.fillRect(x0,ay-tolPx,L,tolPx*2);
+  return {ay, tolU:tolPx};
 }
-function drawTransitionIdle(){ drawTransitionBg(0); const {cx:mx}=ORB;
-  cx.fillStyle=C.muted; cx.font="500 12.5px Cairo,sans-serif"; cx.textAlign='center';
-  cx.fillText('اضغط «ابدأ» ثم ابدأ على '+curDay.from.note, mx, ORB.h-14); cx.textAlign='start'; }
+function drawTransitionIdle(){
+  drawTransitionBg(0);
+  drawMouthGauge('0.0', 0, 'ثانية');
+  drawExitStreak(attempts||0, NEED||7);
+  cx.fillStyle=C.muted; cx.font="500 12px Cairo,sans-serif"; cx.textAlign='center';
+  cx.fillText('اضغط «ابدأ» ثم ابدأ على '+curDay.from.note, ORB.cx, ORB.h-32);
+  cx.textAlign='start';
+  drawContextStrip('اليوم '+toAr(curDay.id)+' · '+(curDay.kind==='exchange'?'تبادل':'انتقال'),
+    curDay.kind==='exchange'&&TR?('النبضة كل '+TR.beatSec.toFixed(2)+' ث'):'');
+}
 function cueChime(){ if(!audioCtx)return; const o=audioCtx.createOscillator(),g=audioCtx.createGain();
   o.frequency.value=880; g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination); o.start();
   g.gain.exponentialRampToValueAtTime(0.28,audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.3); o.stop(audioCtx.currentTime+0.32); }
@@ -1655,10 +1690,12 @@ function startTransition(){
       cx.fillStyle=col; cx.beginPath(); cx.arc(ORB.cx,py,10,0,7); cx.fill();
       cx.fillStyle='rgba(255,255,255,.85)'; cx.beginPath(); cx.arc(ORB.cx-3,py-3,3,0,7); cx.fill();
     } else { cx.fillStyle='rgba(155,146,184,.5)'; cx.beginPath(); cx.arc(ORB.cx,ay,7,0,7); cx.fill(); }
-    // phase hint + progress
-    let hint = now<TR_HOLD_FROM ? 'اثبت على دو' : (now<TR_HOLD_FROM+TR_MOVE ? 'الآن → ري' : 'اثبت على ري');
-    cx.fillStyle='rgba(237,232,245,.85)'; cx.font="600 15px Cairo,sans-serif"; cx.textAlign='center';
-    cx.fillText(hint, ORB.cx, 24); cx.textAlign='start';
+    // anatomy gauges: breath at the mouth, mastery at the open end
+    drawMouthGauge(now.toFixed(1), now/TR_END, 'ثانية');
+    drawExitStreak(attempts||0, NEED||7);
+    const phase = now<TR_HOLD_FROM ? ('اثبت على '+curDay.from.note)
+                : (now<TR_HOLD_FROM+TR_MOVE ? ('الآن → '+curDay.to.note) : ('اثبت على '+curDay.to.note));
+    drawContextStrip('اليوم '+toAr(curDay.id)+' · انتقال', phase, 'rgba(79,227,193,.75)');
     $('sustainNum').textContent=Math.min(now,TR_END).toFixed(1);
     $('sustainBar').style.width=Math.min(100,(now/TR_END)*100)+'%';
     if(now>=TR_END) stopAttempt();
@@ -1749,10 +1786,13 @@ function startExchange(){
       cx.fillStyle= near?C.live:C.breath; cx.beginPath(); cx.arc(ORB.cx,py,9,0,7); cx.fill();
       cx.fillStyle='rgba(255,255,255,.85)'; cx.beginPath(); cx.arc(ORB.cx-3,py-3,3,0,7); cx.fill();
     } else { cx.fillStyle='rgba(155,146,184,.5)'; cx.beginPath(); cx.arc(ORB.cx,ay,7,0,7); cx.fill(); }
-    cx.fillStyle='rgba(237,232,245,.85)'; cx.font="600 14px Cairo,sans-serif"; cx.textAlign='center';
+    drawMouthGauge(now.toFixed(1), now/END, 'ثانية');
+    drawExitStreak(attempts||0, NEED||7);
     const beatsLeft = Math.max(0, EX_LEAD_BEATS - Math.floor(now/b));
-    const hint = now<lead ? `استعد على دو… ${toAr(beatsLeft)}` : `النبضة ${toAr(Math.min(beatIdx+1,reps+1))} / ${toAr(reps+1)}`;
-    cx.fillText(hint, ORB.cx, 22); cx.textAlign='start';
+    const hint = now<lead ? ('استعد على '+curDay.from.note+'… '+toAr(beatsLeft))
+                          : ('النبضة '+toAr(Math.min(beatIdx+1,reps+1))+' / '+toAr(reps+1));
+    drawContextStrip('اليوم '+toAr(curDay.id)+' · تبادل · '+TR.beatSec.toFixed(2)+' ث',
+      hint, 'rgba(79,227,193,.75)');
     $('sustainNum').textContent=Math.min(now,END).toFixed(1);
     $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
     if(now>=END) stopAttempt();
@@ -1859,29 +1899,43 @@ function openBreath(review){
   syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawBreathIdle();},40);
 }
 let _breathReview=false;
-function drawBreathBg(){ const {w,h}=ORB; cx.clearRect(0,0,w,h); groundBg(); }
-function drawBreathIdle(){ drawBreathBg(); const {cx:mx,cy}=ORB;
-  cx.strokeStyle='rgba(155,146,184,.35)'; cx.lineWidth=2; cx.beginPath(); cx.arc(mx,cy,42,0,7); cx.stroke();
-  cx.fillStyle='rgba(155,146,184,.8)'; cx.font="500 13px Cairo,sans-serif"; cx.textAlign='center';
-  cx.fillText('خذ نفَسًا عميقًا من البطن، ثم أصدر صوتًا ثابتًا', mx, ORB.h-16);
-  cx.font="600 14px Cairo,sans-serif"; cx.fillStyle='rgba(230,184,92,.85)';
-  cx.fillText(`الهدف: ${breathTarget.toFixed(0)} ثوانٍ`, mx, 22); cx.textAlign='start'; }
-// reward: a disc that fills from grey to colour as the sustained sound grows; ring turns amber if the tone wobbles
+function drawBreathBg(){ drawReedGround(); reedGeom(); drawCane(null); }
+function drawBreathIdle(){ drawBreathBg();
+  drawAirColumn(1,0);
+  drawMouthGauge('0.0', 0, 'ثانية');
+  cx.textAlign='center'; cx.fillStyle='#F7DCA0'; cx.font="700 24px 'Aref Ruqaa',serif";
+  cx.save(); cx.shadowColor='rgba(230,184,92,.45)'; cx.shadowBlur=12;
+  cx.fillText('✦ النفَس', ORB.cx, 34); cx.restore();
+  cx.fillStyle='rgba(155,146,184,.6)'; cx.font="600 9.5px Cairo,sans-serif";
+  cx.fillText('أيّ نغمة — المهم الثبات والصفاء', ORB.cx, 52);
+  cx.fillStyle=C.muted; cx.font="500 12px Cairo,sans-serif";
+  cx.fillText('خذ نفَسًا عميقًا من البطن، ثم أصدر صوتًا ثابتًا', ORB.cx, ORB.h-32);
+  cx.textAlign='start';
+  drawContextStrip('مرحلة النفَس · الدرجة '+toAr((breathRung||0)+1)+'/'+toAr(BREATH.rungs.length), '');
+}
+/* breath: the bore fills with light as you hold; steadiness keeps it calm */
 function renderBreath(runSec, voicedNow, steady){
-  drawBreathBg(); const {cx:mx,cy}=ORB; const R=52; const frac=Math.min(1,runSec/breathTarget);
-  cx.strokeStyle='rgba(155,146,184,.25)'; cx.lineWidth=3; cx.beginPath(); cx.arc(mx,cy,R,0,7); cx.stroke();
-  cx.save(); cx.beginPath(); cx.arc(mx,cy,R-2,0,7); cx.clip();
-  const fillTop=cy+R-(2*R)*frac; const grd=cx.createLinearGradient(0,cy+R,0,cy-R);
-  grd.addColorStop(0, steady?C.live:'#8a7d5a'); grd.addColorStop(1, steady?C.gold:'#a98f52');
-  cx.fillStyle=grd; cx.fillRect(mx-R,fillTop,2*R,cy+R-fillTop); cx.restore();
-  const ringCol = !voicedNow ? C.muted : (steady ? C.live : C.breath);
-  cx.strokeStyle=ringCol; cx.lineWidth=3;
-  cx.beginPath(); cx.arc(mx,cy,R,-Math.PI/2,-Math.PI/2+frac*2*Math.PI); cx.stroke();
-  if(frac>=1 && steady){ cx.strokeStyle='rgba(230,184,92,.5)'; cx.lineWidth=2; cx.beginPath(); cx.arc(mx,cy,R+8+Math.sin(performance.now()/200)*3,0,7); cx.stroke(); }
-  cx.fillStyle=C.bone; cx.font="600 18px 'IBM Plex Mono',monospace"; cx.textAlign='center';
-  cx.fillText(runSec.toFixed(1)+'s', mx, cy+6);
-  cx.fillStyle= !voicedNow?'rgba(155,146,184,.7)':(steady?'#a9ecdd':'#ffcf9a'); cx.font="500 12px Cairo,sans-serif";
-  cx.fillText(!voicedNow?'أصدر صوتًا':(frac>=1?(steady?'تجاوزت الهدف — أطِل لأقصى نفَس!':'ثبّت صوتك'):(steady?'استمرّ… صوتٌ صافٍ':'صوتك يهتزّ — ثبّته')), mx, ORB.h-14); cx.textAlign='start'; }
+  drawBreathBg();
+  const frac=Math.min(1, runSec/Math.max(1,breathTarget));
+  drawAirColumn(voicedNow?(steady?1:0.25):0, _threadStep++);
+  if(voicedNow) drawBreathParticles(_threadStep, steady?1:0.2);
+  // fill the bore progressively — the reed lights up as the breath lasts
+  const {x0,L,R,cy}=REED;
+  cx.save(); cx.globalAlpha=.16;
+  const g=cx.createLinearGradient(x0,0,x0+L*frac,0);
+  g.addColorStop(0, steady?'rgba(79,227,193,.9)':'rgba(255,179,71,.8)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  cx.fillStyle=g; cx.fillRect(x0,cy-R,L*frac,R*2); cx.restore();
+  drawMouthGauge(runSec.toFixed(1), frac, 'ثانية', steady?C.breath:'#FF9B78');
+  drawNodeReadout(steady?'✓':'~', steady?'صافٍ':'يهتزّ', steady?C.live:C.breath);
+  cx.textAlign='center'; cx.fillStyle='#F7DCA0'; cx.font="700 22px 'Aref Ruqaa',serif";
+  cx.fillText('✦ النفَس', ORB.cx, 32);
+  cx.fillStyle='rgba(155,146,184,.6)'; cx.font="600 9.5px Cairo,sans-serif";
+  cx.fillText('الهدف '+breathTarget.toFixed(0)+' ثوانٍ', ORB.cx, 50); cx.textAlign='start';
+  drawContextStrip('مرحلة النفَس · الدرجة '+toAr(breathRung+1)+'/'+toAr(BREATH.rungs.length),
+    !voicedNow?'أصدر صوتًا':(steady?(frac>=1?'تجاوزت الهدف — أطِل!':'صوتٌ صافٍ'):'صوتك يهتزّ'),
+    steady?'rgba(79,227,193,.75)':'rgba(255,179,71,.8)');
+}
 function startBreath(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
   recData={t0:performance.now(),voiced:[],samp:[]}; setupCanvas();
@@ -1955,34 +2009,64 @@ function finishBreath(){
 /* ================= RHYTHM (Phase 2 pilot — onset timing, pitch-agnostic) ================= */
 let rhRung=-1, rhTolMs=250;
 let rdRung=0, rdDrop=new Set();
-function drawRhythmBg(){ const {w,h}=ORB; cx.clearRect(0,0,w,h); groundBg(); }
-function drawRhythmIdle(){ drawRhythmBg(); const {cx:mx,cy}=ORB;
-  cx.fillStyle='rgba(155,146,184,.8)'; cx.font="500 13px Cairo,sans-serif"; cx.textAlign='center';
-  cx.fillText('اعزف نغمة قصيرة بالضبط مع كل نبضة', mx, cy);
-  cx.fillText('اضغط «ابدأ» ثم انتظر النبضات', mx, ORB.h-16); cx.textAlign='start'; }
-function beatPos(i,n,R){ const a=-Math.PI/2+(i/n)*Math.PI*2; return {x:ORB.cx+Math.cos(a)*R, y:ORB.cy+Math.sin(a)*R, a}; }
-function renderRhythmBeats(beats, hits, curBeatIdx){
-  groundBg(); sacredRings(82); const {cx:mx,cy}=ORB; const n=beats.length, R=88;
-  cx.strokeStyle='rgba(74,59,122,.6)'; cx.lineWidth=1;
-  cx.beginPath(); cx.arc(mx,cy,R,0,7); cx.stroke();
+function drawRhythmBg(){ drawReedGround(); reedGeom(); drawCane(null); }
+function drawRhythmIdle(){ drawRhythmBg(); drawAirColumn(1,0);
+  cx.textAlign='center'; cx.fillStyle='#F7DCA0'; cx.font="700 24px 'Aref Ruqaa',serif";
+  cx.save(); cx.shadowColor='rgba(230,184,92,.45)'; cx.shadowBlur=12;
+  cx.fillText('♩ الإيقاع', ORB.cx, 34); cx.restore();
+  cx.fillStyle=C.muted; cx.font="500 12px Cairo,sans-serif";
+  cx.fillText('اعزف نغمة قصيرة مع كل نبضة', ORB.cx, ORB.h-32); cx.textAlign='start';
+  drawContextStrip('اليوم '+toAr(curDay.id)+' · إيقاع',
+    'نبضة كل '+curDay.beatSec.toFixed(2)+' ث'); }
+
+/* the beats travel ALONG the bore — time flows the way the air flows */
+function beatX(i,n){ const {x0,L}=REED; return x0 + (L*(i+0.5)/n); }
+function drawBeatRow(beats, hits, curBeatIdx, dropSet){
+  const n=beats.length, {cy,R}=REED;
+  const by=cy+R*0.62;
+  cx.strokeStyle='rgba(74,59,122,.5)'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(beatX(0,n),by); cx.lineTo(beatX(n-1,n),by); cx.stroke();
   for(let i=0;i<n;i++){
-    const {x,y}=beatPos(i,n,R); const st=hits[i]; const active=i===curBeatIdx;
-    const col = st===true?C.live : st===false?C.breath : active?C.gold:'rgba(155,146,184,.42)';
-    if(active&&st===undefined){ cx.strokeStyle='rgba(230,184,92,.55)'; cx.lineWidth=2;
-      cx.beginPath(); cx.arc(x,y,13,0,7); cx.stroke(); }
-    if(st===true){ const g=cx.createRadialGradient(x,y,1,x,y,15);
+    const px=beatX(i,n), st=hits[i], active=i===curBeatIdx;
+    const silent = dropSet && dropSet.has(i);
+    const col = st===true?C.live : st===false?C.breath : active?C.gold:'rgba(155,146,184,.4)';
+    if(active&&st===undefined){ cx.strokeStyle='rgba(230,184,92,.5)'; cx.lineWidth=1.8;
+      cx.beginPath(); cx.arc(px,by,11,0,7); cx.stroke(); }
+    if(st===true){ const g=cx.createRadialGradient(px,by,1,px,by,13);
       g.addColorStop(0,'rgba(79,227,193,.5)'); g.addColorStop(1,'rgba(0,0,0,0)');
-      cx.fillStyle=g; cx.beginPath(); cx.arc(x,y,15,0,7); cx.fill(); }
-    cx.fillStyle=col; cx.beginPath(); cx.arc(x,y,7,0,7); cx.fill();
+      cx.fillStyle=g; cx.beginPath(); cx.arc(px,by,13,0,7); cx.fill(); }
+    if(silent && st===undefined){ cx.strokeStyle=col; cx.lineWidth=1.7;
+      cx.beginPath(); cx.arc(px,by,6,0,7); cx.stroke(); }
+    else { cx.fillStyle=col; cx.beginPath(); cx.arc(px,by,6,0,7); cx.fill(); }
   }
-  // sweeping hand marks the current beat
-  if(curBeatIdx>=0){ const {x,y}=beatPos(Math.min(curBeatIdx,n-1),n,R);
-    cx.strokeStyle='rgba(230,184,92,.45)'; cx.lineWidth=1.6;
-    cx.beginPath(); cx.moveTo(mx,cy); cx.lineTo(x,y); cx.stroke(); }
-  cx.textAlign='center'; cx.fillStyle=C.bone; cx.font="500 22px 'IBM Plex Mono',monospace";
-  cx.fillText(String(Math.min(curBeatIdx+1,n)), mx, cy+3);
-  cx.fillStyle=C.muted; cx.font="500 10px Cairo,sans-serif";
-  cx.fillText('من '+n, mx, cy+19); cx.textAlign='start';
+}
+function renderRhythmBeats(beats, hits, curBeatIdx){
+  drawRhythmBg();
+  const done=hits.filter(h=>h===true).length;
+  drawAirColumn(done/Math.max(1,hits.length), _threadStep++);
+  drawBeatRow(beats, hits, curBeatIdx, null);
+  cx.textAlign='center'; cx.fillStyle=C.bone; cx.font="500 34px 'IBM Plex Mono',monospace";
+  cx.fillText(String(Math.min(curBeatIdx+1,beats.length)), ORB.cx, 40);
+  cx.fillStyle='rgba(155,146,184,.7)'; cx.font="600 10px Cairo,sans-serif";
+  cx.fillText('من '+beats.length, ORB.cx, 56); cx.textAlign='start';
+  drawExitStreak(attempts||0, NEED||7);
+  drawContextStrip('اليوم '+toAr(curDay.id)+' · إيقاع',
+    'هامش '+rhTolMs+' م.ث', 'rgba(79,227,193,.7)');
+}
+function renderDropBeats(beats, hits, curBeatIdx, dropSet){
+  drawRhythmBg();
+  const done=hits.filter(h=>h===true).length;
+  drawAirColumn(done/Math.max(1,hits.length), _threadStep++);
+  drawBeatRow(beats, hits, curBeatIdx, dropSet);
+  cx.textAlign='center'; cx.fillStyle=C.bone; cx.font="500 34px 'IBM Plex Mono',monospace";
+  cx.fillText(String(Math.min(curBeatIdx+1,beats.length)), ORB.cx, 40);
+  cx.fillStyle='rgba(155,146,184,.7)'; cx.font="600 10px Cairo,sans-serif";
+  cx.fillText('من '+beats.length, ORB.cx, 56);
+  cx.fillStyle='rgba(155,146,184,.55)'; cx.font="600 9px Cairo,sans-serif";
+  cx.fillText('الدائرة المفرَغة = نبضة صامتة', ORB.cx, ORB.h-30); cx.textAlign='start';
+  drawExitStreak(attempts||0, NEED||7);
+  drawContextStrip('اليوم '+toAr(curDay.id)+' · حذف النبضات',
+    toAr(dropSet.size)+' صامتة', 'rgba(255,179,71,.75)');
 }
 function startRhythm(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
@@ -2051,30 +2135,6 @@ function scoreRhythm(d){
 }
 
 /* ================= RHYTHM-DROP (Phase 2 day 16 — internal pulse, no audible cue on dropped beats) ================= */
-function renderDropBeats(beats, hits, curBeatIdx, dropSet){
-  groundBg(); sacredRings(82); const {cx:mx,cy}=ORB; const n=beats.length, R=88;
-  cx.strokeStyle='rgba(74,59,122,.6)'; cx.lineWidth=1;
-  cx.beginPath(); cx.arc(mx,cy,R,0,7); cx.stroke();
-  for(let i=0;i<n;i++){
-    const {x,y}=beatPos(i,n,R); const st=hits[i]; const active=i===curBeatIdx; const silent=dropSet.has(i);
-    const col = st===true?C.live : st===false?C.breath : active?C.gold:'rgba(155,146,184,.42)';
-    if(active&&st===undefined){ cx.strokeStyle='rgba(230,184,92,.55)'; cx.lineWidth=2;
-      cx.beginPath(); cx.arc(x,y,13,0,7); cx.stroke(); }
-    if(st===true){ const g=cx.createRadialGradient(x,y,1,x,y,15);
-      g.addColorStop(0,'rgba(79,227,193,.5)'); g.addColorStop(1,'rgba(0,0,0,0)');
-      cx.fillStyle=g; cx.beginPath(); cx.arc(x,y,15,0,7); cx.fill(); }
-    if(silent && st===undefined){ cx.strokeStyle=col; cx.lineWidth=1.8;
-      cx.beginPath(); cx.arc(x,y,7,0,7); cx.stroke(); }        // hollow = no click here
-    else { cx.fillStyle=col; cx.beginPath(); cx.arc(x,y,7,0,7); cx.fill(); }
-  }
-  if(curBeatIdx>=0){ const {x,y}=beatPos(Math.min(curBeatIdx,n-1),n,R);
-    cx.strokeStyle='rgba(230,184,92,.45)'; cx.lineWidth=1.6;
-    cx.beginPath(); cx.moveTo(mx,cy); cx.lineTo(x,y); cx.stroke(); }
-  cx.textAlign='center'; cx.fillStyle=C.bone; cx.font="500 22px 'IBM Plex Mono',monospace";
-  cx.fillText(String(Math.min(curBeatIdx+1,n)), mx, cy+3);
-  cx.fillStyle=C.muted; cx.font="500 9.5px Cairo,sans-serif";
-  cx.fillText('الفارغة صامتة', mx, ORB.h-13); cx.textAlign='start';
-}
 function startRhythmDrop(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
   const beatSec=curDay.beatSec, nBeats=curDay.beats;
