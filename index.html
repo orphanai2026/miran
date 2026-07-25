@@ -178,7 +178,24 @@
     background:rgba(var(--rc),.1);box-shadow:inset 0 0 0 1px rgba(var(--rc),.4), 0 0 10px rgba(var(--rc),.22)}
   .reed-sm-lbl{position:relative;z-index:1;font-family:var(--f-head);font-weight:700;font-size:.66rem;
     color:var(--bone);text-align:center;line-height:1.3}
-  .reed-sm.gold{--rc:230,184,92} .reed-sm.rose{--rc:220,110,76}
+  /* ── admin tiles: settings-around-the-journey, NOT the playing metaphor.
+     Deliberately flat and quiet where the reed is organic and lit — these
+     are administration, not performance, and should read as such. ── */
+  .admin-row3{display:flex;gap:9px;margin-top:11px}
+  .admin-tile{--ac:79,227,193;flex:1;height:84px;border-radius:14px;cursor:pointer;
+    border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.028);
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    padding:18px 8px 14px;gap:9px;
+    transition:.2s cubic-bezier(.2,.8,.3,1);position:relative;overflow:hidden}
+  .admin-tile::before{content:'';position:absolute;top:0;left:14%;right:14%;height:2px;
+    border-radius:0 0 3px 3px;background:rgb(var(--ac));opacity:.55}
+  .admin-tile:hover{background:rgba(255,255,255,.05);border-color:rgba(var(--ac),.35);
+    transform:translateY(-1px)}
+  .admin-ic{width:28px;height:28px;flex:none;border-radius:9px;display:flex;align-items:center;
+    justify-content:center;font-size:.92rem;color:rgb(var(--ac));background:rgba(var(--ac),.1)}
+  .admin-lbl{font-family:var(--f-head);font-weight:600;font-size:.7rem;color:var(--bone);
+    text-align:center;line-height:1.35}
+  .admin-tile.gold{--ac:230,184,92} .admin-tile.rose{--ac:220,110,76} .admin-tile.live{--ac:79,227,193}
 
   .ney-tuning{margin-top:15px;font-family:var(--f-head);font-weight:500;font-size:.76rem;
     color:var(--muted);text-align:center;line-height:2}
@@ -369,30 +386,18 @@
     </button>
     <div class="ney-tuning" id="neyTuning"></div>
 
-    <div class="reed-row3">
-      <button class="reed-sm gold" id="btnGuide">
-        <div class="reed-sm-seg"><div class="reed-sm-wall top"></div>
-          <div class="reed-sm-holes"><i></i><i></i><i class="open"></i></div>
-          <div class="reed-sm-glow"></div>
-          <div class="reed-sm-end">✎</div>
-          <div class="reed-sm-lbl">دليل<br>الوضعية</div>
-        <div class="reed-sm-wall bot"></div></div>
+    <div class="admin-row3">
+      <button class="admin-tile gold" id="btnGuide">
+        <div class="admin-ic">✎</div>
+        <div class="admin-lbl">دليل<br>الوضعية</div>
       </button>
-      <button class="reed-sm" id="btnExport">
-        <div class="reed-sm-seg"><div class="reed-sm-wall top"></div>
-          <div class="reed-sm-holes"><i></i><i class="open"></i></div>
-          <div class="reed-sm-glow"></div>
-          <div class="reed-sm-end">↓</div>
-          <div class="reed-sm-lbl">تقرير<br>الرحلة</div>
-        <div class="reed-sm-wall bot"></div></div>
+      <button class="admin-tile live" id="btnExport">
+        <div class="admin-ic">↓</div>
+        <div class="admin-lbl">تقرير<br>الرحلة</div>
       </button>
-      <button class="reed-sm rose" id="btnReset">
-        <div class="reed-sm-seg"><div class="reed-sm-wall top"></div>
-          <div class="reed-sm-holes"><i class="open"></i><i class="open"></i></div>
-          <div class="reed-sm-glow"></div>
-          <div class="reed-sm-end">↺</div>
-          <div class="reed-sm-lbl">تصفير<br>التقدّم</div>
-        <div class="reed-sm-wall bot"></div></div>
+      <button class="admin-tile rose" id="btnReset">
+        <div class="admin-ic">↺</div>
+        <div class="admin-lbl">تصفير<br>التقدّم</div>
       </button>
     </div>
 
@@ -523,13 +528,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r3.7-patternall</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r3.9-tilespacing</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r3.7-patternall';
+const APP_VERSION='r3.9-tilespacing';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
