@@ -445,6 +445,22 @@
       <p class="lead">إن سمعت صوتًا صفيريًّا أو خرج الصوت أعلى مما تتوقّع رغم إغلاقك الثقب، افحص إصبعك أولًا قبل أن تظنّ الخطأ في نفَسك — أغلب هذه الحالات سببها تسريب بسيط لا يظهر للعين.</p>
     </div>
 
+    <div class="card">
+      <div class="step-eyebrow">٥ · مرجع السرعات الموسيقية</div>
+      <h2 style="font-size:1.35rem">أين تقع سرعتك من المصطلح العالمي</h2>
+      <p class="lead" style="margin-bottom:10px">السرعة تُقاس بعدد النبضات في الدقيقة (BPM) — وهذا التصنيف عام لكل الآلات، لا خاصًّا بالناي. مِران يستعمل ثانية/نبضة، فكل ٦٠ مقسومة على ثانيتك تُعطيك BPM.</p>
+      <table style="width:100%;border-collapse:collapse;font-family:'Cairo',sans-serif;font-size:.82rem">
+        <tr style="border-bottom:1px solid var(--hair)"><td style="padding:7px 4px;color:var(--muted)">المصطلح</td><td style="padding:7px 4px;color:var(--muted)">النبضة/الدقيقة</td><td style="padding:7px 4px;color:var(--muted)">ثانية/نبضة</td></tr>
+        <tr style="border-bottom:1px solid var(--hair)"><td style="padding:7px 4px">Largo (بطيء جدًّا)</td><td style="padding:7px 4px" dir="ltr">40–60</td><td style="padding:7px 4px" dir="ltr">1.5–1.0</td></tr>
+        <tr style="border-bottom:1px solid var(--hair)"><td style="padding:7px 4px">Adagio (هادئ)</td><td style="padding:7px 4px" dir="ltr">66–76</td><td style="padding:7px 4px" dir="ltr">0.91–0.79</td></tr>
+        <tr style="border-bottom:1px solid var(--hair)"><td style="padding:7px 4px">Andante (معتدل الهدوء)</td><td style="padding:7px 4px" dir="ltr">76–108</td><td style="padding:7px 4px" dir="ltr">0.79–0.56</td></tr>
+        <tr style="border-bottom:2px solid var(--gold)"><td style="padding:7px 4px;color:var(--goldHi,#F7DCA0);font-weight:700">Moderato (معتدل)</td><td style="padding:7px 4px;color:var(--goldHi,#F7DCA0);font-weight:700" dir="ltr">108–120</td><td style="padding:7px 4px;color:var(--goldHi,#F7DCA0);font-weight:700" dir="ltr">0.56–0.50</td></tr>
+        <tr style="border-bottom:1px solid var(--hair)"><td style="padding:7px 4px">Allegro (سريع)</td><td style="padding:7px 4px" dir="ltr">120–168</td><td style="padding:7px 4px" dir="ltr">0.50–0.36</td></tr>
+        <tr><td style="padding:7px 4px">Presto (سريع جدًّا)</td><td style="padding:7px 4px" dir="ltr">168–200</td><td style="padding:7px 4px" dir="ltr">0.36–0.30</td></tr>
+      </table>
+      <p class="lead" style="margin-top:10px">هدف أيام التبادل في مِران هو <b style="color:var(--gold)">٠٫٥ ثانية/نبضة (١٢٠ BPM)</b> — تحديدًا عند الحدّ الفاصل بين Moderato وAllegro. سرعة تختبر تحكّمك الحقيقي، لكنها لا تدخل نطاق Presto المتطرّف.</p>
+    </div>
+
     <button class="back" id="guideBack">→ رجوع للرحلة</button>
   </div>
 
@@ -528,13 +544,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r4.4-latcalflow</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r4.5-tempotarget</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r4.4-latcalflow';
+const APP_VERSION='r4.5-tempotarget';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1371,7 +1387,7 @@ function startSession(id){
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'exchange', pair:curDay.lat,
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), beat_sec_start:TR.beatSec, started:new Date().toISOString(), attempts:[]};
-    $('sessEyebrow').textContent=`اليوم ${toAr(id)} · تبادل · النبضة كل ${TR.beatSec.toFixed(2)} ث`;
+    $('sessEyebrow').textContent=`اليوم ${toAr(id)} · تبادل · ${TR.beatSec.toFixed(2)} ث (الهدف ${curDay.beatMin.toFixed(2)})`;
     $('sessGlyph').textContent=curDay.from.note+' ⇄ '+curDay.to.note; $('sessLat').textContent=curDay.lat;
     $('targetHz').textContent=`${TR.fromHz.toFixed(0)} ⇄ ${TR.toHz.toFixed(0)} Hz`;
     $('sustainLabel').textContent='تقدّم التمرين';
@@ -1903,7 +1919,7 @@ function drawTransitionIdle(){
   cx.fillText('اضغط «ابدأ» ثم ابدأ على '+curDay.from.note, ORB.cx, ORB.h-32);
   cx.textAlign='start';
   drawContextStrip('اليوم '+toAr(curDay.id)+' · '+(curDay.kind==='exchange'?'تبادل':'انتقال'),
-    curDay.kind==='exchange'&&TR?('النبضة كل '+TR.beatSec.toFixed(2)+' ث'):'');
+    curDay.kind==='exchange'&&TR?(TR.beatSec.toFixed(2)+' ث (الهدف '+curDay.beatMin.toFixed(2)+')'):'');
 }
 function cueChime(){ if(!audioCtx)return; const o=audioCtx.createOscillator(),g=audioCtx.createGain();
   o.frequency.value=880; g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination); o.start();
@@ -2054,7 +2070,7 @@ function startExchange(){
     const beatsLeft = Math.max(0, EX_LEAD_BEATS - Math.floor(now/b));
     const hint = now<lead ? ('استعد على '+curDay.from.note+'… '+toAr(beatsLeft))
                           : ('النبضة '+toAr(Math.min(beatIdx+1,reps+1))+' / '+toAr(reps+1));
-    drawContextStrip('اليوم '+toAr(curDay.id)+' · تبادل · '+TR.beatSec.toFixed(2)+' ث',
+    drawContextStrip('اليوم '+toAr(curDay.id)+' · تبادل · '+TR.beatSec.toFixed(2)+' ث (الهدف '+curDay.beatMin.toFixed(2)+')',
       hint, 'rgba(79,227,193,.75)');
     $('sustainNum').textContent=Math.min(now,END).toFixed(1);
     $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
@@ -2143,7 +2159,7 @@ function scoreExchange(d){
       }
     } else if(attempts<NEED){ speedMsg='ثبّت هذه السرعة مرة أخرى قبل أن نُسرّع.'; }
     body=`أتقنت ${toAr(reps)} انتقالات متتالية، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية. ${speedMsg}`; }
-  $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · تبادل · النبضة كل ${TR.beatSec.toFixed(2)} ث`;
+  $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · تبادل · ${TR.beatSec.toFixed(2)} ث (الهدف ${curDay.beatMin.toFixed(2)})`;
   if(!ok && !lowConf){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; exHoldCount=0; }
   if(!lowConf) registerAttemptResult(ok);
   sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, low_confidence:lowConf, beat_sec:prevBeat,
