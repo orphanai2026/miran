@@ -528,13 +528,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r4.3-confidence</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r4.4-latcalflow</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r4.3-confidence';
+const APP_VERSION='r4.4-latcalflow';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -905,7 +905,7 @@ function renderHome(){
     let el=document.getElementById('reLatCal');
     if(!el){ el=document.createElement('a'); el.id='reLatCal';
       el.style.cssText='display:block;text-align:center;margin-top:8px;color:var(--gold);cursor:pointer;font-size:.8rem';
-      el.addEventListener('click',()=>show('latcal'));
+      el.addEventListener('click',()=>{ targetDayId=null; show('latcal'); });
       $('neyTuning').parentElement.insertBefore(el, $('neyTuning').nextSibling);
     }
     el.textContent = `تأخيرك الشخصي: ${latencyCal.ms} م.ث · إعادة المعايرة`;
@@ -1051,7 +1051,9 @@ $('btnLatCal').addEventListener('click', async ()=>{
       if(offsets.length<5){ $('latcalHint').textContent='لم ألتقط نبضات كافية — أعد المحاولة، وحافظ على نغمة قصيرة عند كل نبضة.'; return; }
       offsets.sort((a,b)=>a-b); const med=offsets[Math.floor(offsets.length/2)];
       latencyCal={ms:Math.round(med), ts:new Date().toISOString()}; saveLatencyCal();
-      renderHome(); show('home');
+      const continueToDay=targetDayId; // capture BEFORE renderHome() resets targetDayId to the next-incomplete day
+      renderHome();
+      if(continueToDay) openDay(continueToDay); else show('home'); // continue straight into whichever day asked for this calibration
     }
   };
 });
