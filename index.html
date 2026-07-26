@@ -528,13 +528,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r4.1-calibfit</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r4.2-rhythmfoundation</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r4.1-calibfit';
+const APP_VERSION='r4.2-rhythmfoundation';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -726,30 +726,33 @@ const CURRICULUM=[
     durLadder:[4,7,10], stabMult:[1.7,1.25,1], rungNeed:[2,2,7], title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ترتفع المدة تدريجيًا حتى ١٠ ثوانٍ بصوتٍ نقيّ.'},
   {id:5, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], holdFromLadder:[4.5,3.2,2.2], holdToLadder:[4.5,3.4,2.6], rungNeed:[2,2,7], title:'الانتقال: دو ← ري', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى ري.'},
-  {id:6, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+  {id:6, note:'♩', lat:'', kind:'rhythm', beats:6, beatSec:1.1,
+    tolLadder:[420,360,300], rungNeed:[2,2,7], need:7,
+    title:'الإيقاع الأساسي: تابع النبضة', blurb:'قبل أن تُطلَب منك مزامنة نغمتين معًا، تعرّف على الشعور بالنبضة وحدها — أيّ صوت قصير يكفي، لا طبقة محدَّدة.'},
+  {id:7, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: دو⇄ري مع المترونوم', blurb:'انتقل مع كل نبضة — دو، ري، دو، ري، دو.'},
-  {id:7, note:'ري→فا', lat:'D→F', kind:'transition', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
+  {id:8, note:'ري→فا', lat:'D→F', kind:'transition', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
     tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], holdFromLadder:[4.5,3.2,2.2], holdToLadder:[4.5,3.4,2.6], rungNeed:[2,2,7], title:'الانتقال: ري ← فا', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى فا.'},
-  {id:8, note:'فا→صول', lat:'F→G', kind:'transition', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
+  {id:9, note:'فا→صول', lat:'F→G', kind:'transition', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
     tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], holdFromLadder:[4.5,3.2,2.2], holdToLadder:[4.5,3.4,2.6], rungNeed:[2,2,7], title:'الانتقال: فا ← صول', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى صول.'},
-  {id:9, note:'ري⇄فا', lat:'D⇄F', kind:'exchange', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
+  {id:10, note:'ري⇄فا', lat:'D⇄F', kind:'exchange', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: ري⇄فا مع المترونوم', blurb:'انتقل مع كل نبضة — ري، فا، ري، فا، ري.'},
-  {id:10, note:'فا⇄صول', lat:'F⇄G', kind:'exchange', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
+  {id:11, note:'فا⇄صول', lat:'F⇄G', kind:'exchange', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: فا⇄صول مع المترونوم', blurb:'انتقل مع كل نبضة — فا، صول، فا، صول، فا.'},
-  {id:11, note:'دو', lat:'C', semis:0, kind:'longtone', targetSec:6, tol:20, stabMax:16, need:3, review:true,
+  {id:12, note:'دو', lat:'C', semis:0, kind:'longtone', targetSec:6, tol:20, stabMax:16, need:3, review:true,
     title:'مراجعة متباعدة: دو', blurb:'عُد إلى نغمة القرار الأولى بلا مساعدة — هل ما زالت راسخة؟'},
-  {id:12, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+  {id:13, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, beatSec:0.85, beatStart:0.85, beatMin:0.55, stepDown:0.07, stepUp:0.1, reps:4, consolidate:true,
     title:'يوم تثبيت: دو⇄ري', blurb:'ثبّت ما أتقنته — بلا شرح جديد، تكرارٌ يرسّخ.'},
-  {id:13, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+  {id:14, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:1, testMode:true, title:'يوم اختبار: دو ← ري', blurb:'محاولة واحدة، بلا تلميح افتتاحي. أرِني ما تتقنه فعلًا.'},
-  {id:14, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+  {id:15, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, beatSec:0.85, beatStart:0.85, beatMin:0.5, stepDown:0.08, stepUp:0.1, reps:4, phaseFinale:true,
     title:'أداء تأسيسي', blurb:'اختم مرحلة تأسيس الصوت بأداء واحد متصل.'},
-  {id:15, note:'♩', lat:'', kind:'rhythm', beats:8, beatSec:1.0,
+  {id:16, note:'♩', lat:'', kind:'rhythm', beats:8, beatSec:1.0,
     tolLadder:[320,260,220], rungNeed:[2,2,7], need:7, phaseStart:true,
     title:'الإيقاع: المتابعة مع النبضة', blurb:'اعزف نغمة قصيرة مع كل نبضة — الدقة في التوقيت لا الطبقة.'},
-  {id:16, note:'♩·', lat:'', kind:'rhythmdrop', beats:8, beatSec:1.0, tolMs:260,
+  {id:17, note:'♩·', lat:'', kind:'rhythmdrop', beats:8, beatSec:1.0, tolMs:260,
     dropLadder:[[4],[3,6],[1,3,5,7]], rungNeed:[2,2,7], need:7,
     title:'الإيقاع: حذف النبضات', blurb:'استمرّ على النبضة حتى حين تختفي — ابنِ إيقاعك الداخلي لا اعتمادك على السمع.'},
 ];
@@ -768,6 +771,20 @@ let latencyCal = store.get('miran_latency', null);  // {ms, ts} — personal ons
 let prog  = store.get('miran_prog', {done:{}, streakDays:0, lastDate:null});
 prog.foundation = prog.foundation || {breath:false, rung:0};
 function saveProg(){ store.set('miran_prog', prog); }
+/* ── schema migration: day6 "الإيقاع الأساسي" was inserted before the old
+   exchange day, shifting every day id from the old 6 onward up by +1.
+   Runs once ever, for anyone whose save predates this change. ── */
+if(prog.schemaV!==2){
+  const shiftKeys=(obj)=>{
+    if(!obj) return;
+    Object.keys(obj).filter(k=>/^\d+$/.test(k)).map(Number).sort((a,b)=>b-a) // highest first, never overwrite a not-yet-moved key
+      .forEach(oldId=>{ if(oldId>=6){ obj[oldId+1]=obj[oldId]; delete obj[oldId]; } });
+  };
+  shiftKeys(prog.done);
+  shiftKeys(prog.inProgress);
+  prog.schemaV=2;
+  saveProg();
+}
 function saveCalib(){ store.set('miran_cal', calib); }
 function saveLatencyCal(){ store.set('miran_latency', latencyCal); }
 /* Foundational pre-stage: breath before pitch. Pitch-agnostic — measures only
@@ -790,7 +807,7 @@ function show(v){ document.querySelectorAll('.view').forEach(x=>x.classList.remo
 function renderHome(){
   const doneCount=Object.keys(prog.done).length;
   $('streakN').textContent=doneCount;
-  $('phaseBand').textContent = prog.done[14] ? 'المرحلة الثانية · الإيقاع والتوقيت' : 'المرحلة الأولى · تأسيس الصوت';
+  $('phaseBand').textContent = prog.done[15] ? 'المرحلة الثانية · الإيقاع والتوقيت' : 'المرحلة الأولى · تأسيس الصوت';
   // ── the rosette: each day is a petal. gold = mastered, cyan ring = current, violet = ahead ──
   const N=CURRICULUM.length, W=300,H=300, cx=150, cy=150;
   const fi=firstIncomplete();
@@ -1634,6 +1651,7 @@ function togglePause(){
 $('btnPause').addEventListener('click', togglePause);
 function runCountdown(cb){
   stopDervishVoice();                 // never let guidance speech bleed into the count-in cue
+  if(typeof stopListen==='function') stopListen(); // never let the example demo bleed into the count-in cue either
   restoreSustainLabel();
   counting=true; $('btnRecLabel').textContent='…'; let n=4; drawCountdown(n); playTick(1100);
   _countdownIv=setInterval(()=>{ n--;
@@ -2053,8 +2071,12 @@ function scoreExchange(d){
   for(let i=0;i<=reps;i++){
     const start=lead+i*b+(i===0?0.15:slide+0.05);
     const end=(i<reps)?lead+(i+1)*b-slide-0.05:lead+i*b+TR_EX_TAIL-0.05;
-    const seg=d.pts.filter(p=>p.t>=start&&p.t<end).map(p=>p.c);
-    const med=seg.length?median(seg):null;
+    // plausibility filter: a reading more than 400¢ from BOTH this exercise's
+    // notes is a register-jump artifact (rare, real, but not this hold's pitch)
+    // — exclude it from the median instead of letting it skew the result.
+    const raw=d.pts.filter(p=>p.t>=start&&p.t<end).map(p=>p.c);
+    const seg=raw.filter(c=>Math.abs(c-0)<=400 || Math.abs(c-TR.span)<=400);
+    const med=seg.length?median(seg):(raw.length?median(raw):null); // fall back to raw if EVERY point looked implausible, rather than silently dropping the hold
     holds.push({i, med, ok: med!=null && Math.abs(med-noteAt(i))<=TOL});
   }
   let maxGap=0;
