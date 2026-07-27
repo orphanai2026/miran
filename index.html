@@ -544,13 +544,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r4.7-timingfix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r4.8-finalthreshold</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r4.7-timingfix';
+const APP_VERSION='r4.8-finalthreshold';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -2180,8 +2180,13 @@ function scoreExchange(d){
   }
   else { ok=true; cls='ok'; attempts++; _failPattern=[]; head=`تبادل نظيف (${toAr(attempts)}/${toAr(NEED)})`;
     exHoldCount++;
+    // the final two tempo tiers (closest to the target) need more proof than
+    // the earlier ones — his own data showed the real difficulty concentrates
+    // right at the fastest speeds, not spread evenly across the whole ladder.
+    const nearFinal = TR.beatSec <= curDay.beatMin + curDay.stepDown + 0.01;
+    const holdNeeded = nearFinal ? 4 : 2;
     let speedMsg='';
-    if(exHoldCount>=2){
+    if(exHoldCount>=holdNeeded){
       const newBeat = Math.max(curDay.beatMin, +(prevBeat-curDay.stepDown).toFixed(2));
       exHoldCount=0;
       if(newBeat<prevBeat){
@@ -2191,7 +2196,7 @@ function scoreExchange(d){
       } else {
         speedMsg='أنت عند أسرع سرعة — أكمل نحو الإتقان الكامل هنا.';
       }
-    } else if(attempts<NEED){ speedMsg='ثبّت هذه السرعة مرة أخرى قبل أن نُسرّع.'; }
+    } else if(attempts<NEED){ speedMsg=`ثبّت هذه السرعة ${toAr(holdNeeded-exHoldCount)} ${holdNeeded-exHoldCount===1?'مرّة':'مرّات'} أخرى قبل أن نُسرّع.`; }
     body=`أتقنت ${toAr(reps)} انتقالات متتالية، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية. ${speedMsg}`; }
   $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · تبادل · ${TR.beatSec.toFixed(2)} ث (الهدف ${curDay.beatMin.toFixed(2)})`;
   if(!ok && !lowConf){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; exHoldCount=0; }
