@@ -544,13 +544,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r4.6-driftdetect</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r4.7-timingfix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r4.6-driftdetect';
+const APP_VERSION='r4.7-timingfix';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1003,14 +1003,22 @@ $('btnCalib').addEventListener('click', async ()=>{
   try{ await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop(); }
   catch(e){ $('btnCalib').disabled=false; $('calibReadout').className='cents-live off';
     $('calibReadout').textContent='تعذّر الميكروفون — اسمح بالإذن'; return; }
-  const samples=[]; const t0=performance.now(); $('calibHint').textContent='اثبت على النغمة…';
+  const CAL_LEAD=1300, CAL_WINDOW=3600; // settle first (breath-attack is unstable), THEN capture the steady part
+  const samples=[]; const t0=performance.now(); $('calibHint').textContent='ابدأ النفخ الآن — استقرّ بهدوء…';
+  let _capturingShown=false;
   onFrame=(p)=>{
+    const elapsed=performance.now()-t0;
+    if(elapsed<CAL_LEAD){
+      if(p.hz && p.clarity>=CLARITY){ $('calibReadout').className='cents-live ok'; $('calibReadout').textContent=p.hz.toFixed(1)+' Hz'; }
+      return; // settling — heard, shown, but not yet counted toward the result
+    }
+    if(!_capturingShown){ _capturingShown=true; $('calibHint').textContent='الآن ألتقط — ثبّت نفَسك…'; }
     if(p.hz && p.clarity>=CLARITY){ samples.push(p.hz);
       $('calibReadout').className='cents-live ok'; $('calibReadout').textContent=p.hz.toFixed(1)+' Hz'; }
-    if(performance.now()-t0>3200){
+    if(elapsed-CAL_LEAD>CAL_WINDOW){
       onFrame=null; $('btnCalib').disabled=false;
       if(samples.length<15){ $('calibReadout').className='cents-live off';
-        $('calibReadout').textContent='لم أسمع نغمة ثابتة — أعد المحاولة'; $('calibHint').textContent='انفخ برفق واثبت ٣ ثوانٍ.'; return; }
+        $('calibReadout').textContent='لم أسمع نغمة ثابتة — أعد المحاولة'; $('calibHint').textContent='انفخ برفق واثبت — سآخذ وقتي هذه المرّة أيضًا.'; return; }
       samples.sort((a,b)=>a-b); let med=samples[Math.floor(samples.length/2)];
       const cloud=samples.filter(h=>Math.abs(1200*Math.log2(h/med))<80); cloud.sort((a,b)=>a-b);
       const q=cloud.length?cloud[Math.floor(cloud.length/2)]:med;
@@ -1722,9 +1730,9 @@ function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; sto
   persistInProgress();
   scheduleAutoNext();
 }
-let _autoNextTimer=null, _autoNextWaited=0;
+let _autoNextTimer=null, _autoNextWaited=0, _autoNextSettled=false;
 function scheduleAutoNext(){
-  clearTimeout(_autoNextTimer); _autoNextWaited=0;
+  clearTimeout(_autoNextTimer); _autoNextWaited=0; _autoNextSettled=false;
   _autoNextTimer=setTimeout(_autoNextTick, 2400); // pause long enough to read the feedback message before the next count-in begins
 }
 function _autoNextTick(){
@@ -1738,6 +1746,12 @@ function _autoNextTick(){
   if(_dervishSpeaking && _autoNextWaited<25000){
     _autoNextWaited+=400; _autoNextTimer=setTimeout(_autoNextTick, 400); return;
   }
+  // speech just ended (or was never playing) — give a real settle beat before
+  // the count-in starts, so a long message never throws off the next entry.
+  if(!_autoNextSettled){
+    _autoNextSettled=true; _autoNextTimer=setTimeout(_autoNextTick, 700); return;
+  }
+  _autoNextSettled=false;
   runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
 }
 function persistInProgress(){
