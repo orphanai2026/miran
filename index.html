@@ -544,13 +544,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r4.8-finalthreshold</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r4.9-graceattempt</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r4.8-finalthreshold';
+const APP_VERSION='r4.9-graceattempt';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1385,7 +1385,7 @@ function startSession(id){
     return;
   }
   if(curDay.kind==='exchange'){
-    exHoldCount=0; _failPattern=[];
+    exHoldCount=0; exGraceUsed=false; _failPattern=[];
     TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
         span:(curDay.to.semis-curDay.from.semis)*100, beatSec:curDay.beatStart, reps:curDay.reps};
@@ -1449,7 +1449,8 @@ function startSession(id){
 }
 let ltRung=-1;
 let trRung=-1, trGapMax=0.45;
-let exHoldCount=0; // successes held at the current exchange tempo before speeding up (needs 2, per original spec)
+let exHoldCount=0; // successes held at the current exchange tempo before speeding up (needs 2, or 4 near the target)
+let exGraceUsed=false; // near the target tempo, the FIRST failure at a given speed is forgiven — only a second consecutive one pushes the tempo back
 function renderPips(){ $('pips').innerHTML=''; for(let i=0;i<NEED;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);} }
 
 function drawIdleBall(){ // dim resting ball at centre + hint
@@ -2149,7 +2150,7 @@ function scoreExchange(d){
   }
   const missed=holds.filter(h=>!h.ok);
   const nullHolds=holds.filter(h=>h.med==null).length;
-  let ok=false,head='',body='',cls='retry',lowConf=false;
+  let ok=false,head='',body='',cls='retry',lowConf=false,graceThisAttempt=false;
   const prevBeat=b;
   if(nullHolds>Math.floor(holds.length/2)){
     lowConf=true; cls='retry';
@@ -2174,11 +2175,15 @@ function scoreExchange(d){
       body = m.med==null ? `لم أسمعك ثابتًا عند الوقفة رقم ${toAr(m.i+1)}. حافظ على العزف مع كل نبضة.`
         : `عند الوقفة ${toAr(m.i+1)} انحرفت الطبقة ${Math.abs(m.med-noteAt(m.i)).toFixed(0)} سنت. تابع المترونوم بدقة أكبر.`;
     }
-    TR.beatSec = Math.min(curDay.beatStart, +(prevBeat+curDay.stepUp).toFixed(2));
+    const nearFinalF=prevBeat<=curDay.beatMin+curDay.stepDown+0.01;
+    if(nearFinalF && !exGraceUsed){ exGraceUsed=true; graceThisAttempt=true; body+=' لديك فرصة أخرى عند نفس السرعة قبل أن نتراجع — جرّبها الآن.'; }
+    else { exGraceUsed=false; TR.beatSec = Math.min(curDay.beatStart, +(prevBeat+curDay.stepUp).toFixed(2)); }
   } else if(maxGap>0.4){ head='بعض الانتقالات غير نظيفة'; body=`أطول فجوة بين نغمتين ${Math.round(maxGap*1000)} مللي ثانية. انتقل أسرع مع كل نبضة.`;
-    TR.beatSec = Math.min(curDay.beatStart, +(prevBeat+curDay.stepUp*0.5).toFixed(2));
+    const nearFinalG=prevBeat<=curDay.beatMin+curDay.stepDown+0.01;
+    if(nearFinalG && !exGraceUsed){ exGraceUsed=true; graceThisAttempt=true; body+=' لديك فرصة أخرى عند نفس السرعة قبل أن نتراجع — جرّبها الآن.'; }
+    else { exGraceUsed=false; TR.beatSec = Math.min(curDay.beatStart, +(prevBeat+curDay.stepUp*0.5).toFixed(2)); }
   }
-  else { ok=true; cls='ok'; attempts++; _failPattern=[]; head=`تبادل نظيف (${toAr(attempts)}/${toAr(NEED)})`;
+  else { ok=true; cls='ok'; attempts++; _failPattern=[]; exGraceUsed=false; head=`تبادل نظيف (${toAr(attempts)}/${toAr(NEED)})`;
     exHoldCount++;
     // the final two tempo tiers (closest to the target) need more proof than
     // the earlier ones — his own data showed the real difficulty concentrates
@@ -2199,7 +2204,7 @@ function scoreExchange(d){
     } else if(attempts<NEED){ speedMsg=`ثبّت هذه السرعة ${toAr(holdNeeded-exHoldCount)} ${holdNeeded-exHoldCount===1?'مرّة':'مرّات'} أخرى قبل أن نُسرّع.`; }
     body=`أتقنت ${toAr(reps)} انتقالات متتالية، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية. ${speedMsg}`; }
   $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · تبادل · ${TR.beatSec.toFixed(2)} ث (الهدف ${curDay.beatMin.toFixed(2)})`;
-  if(!ok && !lowConf){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; exHoldCount=0; }
+  if(!ok && !lowConf && !graceThisAttempt){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; exHoldCount=0; }
   if(!lowConf) registerAttemptResult(ok);
   if(!lowConf) trackDrift(holds.filter(h=>h.med!=null).map(h=>h.med-noteAt(h.i)));
   sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, low_confidence:lowConf, beat_sec:prevBeat,
