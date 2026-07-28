@@ -544,13 +544,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r5.1-notefix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r5.2-phaseA</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r5.1-notefix';
+const APP_VERSION='r5.2-phaseA';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -771,6 +771,26 @@ const CURRICULUM=[
   {id:17, note:'♩·', lat:'', kind:'rhythmdrop', beats:8, beatSec:1.0, tolMs:260,
     dropLadder:[[4],[3,6],[1,3,5,7]], rungNeed:[2,2,7], need:7,
     title:'الإيقاع: حذف النبضات', blurb:'استمرّ على النبضة حتى حين تختفي — ابنِ إيقاعك الداخلي لا اعتمادك على السمع.'},
+  /* ═══ PHASE A · range extension toward a full octave — no quarter-tones yet,
+     just the natural notes needed to reach عجم/نهاوند/كرد before any maqam work ═══ */
+  {id:18, note:'لا', lat:'A', semis:9, kind:'longtone', targetSec:10, tol:18, stabMax:15, need:7,
+    durLadder:[5,7,10], stabMult:[1.6,1.25,1], rungNeed:[2,2,7], title:'نغمة لا الطويلة', blurb:'أول نغمة خارج ما أتقنته — امتداد المدى يبدأ هنا.'},
+  {id:19, note:'صول→لا', lat:'G→A', kind:'transition', from:{note:'صول',lat:'G',semis:7}, to:{note:'لا',lat:'A',semis:9},
+    tol:22, need:7, tolLadder:[40,32,22], gapLadder:[0.6,0.5,0.4], holdFromLadder:[4,3,2.2], holdToLadder:[4,3.2,2.4], rungNeed:[2,2,7], title:'الانتقال: صول ← لا', blurb:'نفس منطق الانتقالات السابقة، بنغمة جديدة.'},
+  {id:20, note:'صول⇄لا', lat:'G⇄A', kind:'exchange', from:{note:'صول',lat:'G',semis:7}, to:{note:'لا',lat:'A',semis:9},
+    tol:22, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: صول⇄لا مع المترونوم', blurb:'انتقل مع كل نبضة — صول، لا، صول، لا، صول.'},
+  {id:21, note:'سي بيمول', lat:'B♭', semis:10, kind:'longtone', targetSec:10, tol:18, stabMax:15, need:7,
+    durLadder:[5,7,10], stabMult:[1.6,1.25,1], rungNeed:[2,2,7], title:'نغمة سي بيمول الطويلة', blurb:'أول بيمول تعزفه — يمهّد لمقامَي نهاوند وكرد لاحقًا.'},
+  {id:22, note:'لا→سي بيمول', lat:'A→B♭', kind:'transition', from:{note:'لا',lat:'A',semis:9}, to:{note:'سي بيمول',lat:'B♭',semis:10},
+    tol:22, need:7, tolLadder:[40,32,22], gapLadder:[0.6,0.5,0.4], holdFromLadder:[4,3,2.2], holdToLadder:[4,3.2,2.4], rungNeed:[2,2,7], title:'الانتقال: لا ← سي بيمول', blurb:'نصف تون فقط بين النغمتين — انتقال ضيّق يحتاج دقّة أعلى.'},
+  {id:23, note:'لا⇄سي بيمول', lat:'A⇄B♭', kind:'exchange', from:{note:'لا',lat:'A',semis:9}, to:{note:'سي بيمول',lat:'B♭',semis:10},
+    tol:22, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: لا⇄سي بيمول مع المترونوم', blurb:'انتقل مع كل نبضة — لا، سي بيمول، لا، سي بيمول، لا.'},
+  {id:24, note:'دو الجواب', lat:'C5', semis:12, kind:'longtone', targetSec:10, tol:18, stabMax:15, need:7,
+    durLadder:[5,7,10], stabMult:[1.6,1.25,1], rungNeed:[2,2,7], title:'نغمة دو الجواب الطويلة', blurb:'أوكتاف كامل فوق دو القرار — إغلاق المرحلة الأولى من امتداد المدى.'},
+  {id:25, note:'سي بيمول→دو', lat:'B♭→C5', kind:'transition', from:{note:'سي بيمول',lat:'B♭',semis:10}, to:{note:'دو الجواب',lat:'C5',semis:12},
+    tol:22, need:7, tolLadder:[40,32,22], gapLadder:[0.6,0.5,0.4], holdFromLadder:[4,3,2.2], holdToLadder:[4,3.2,2.4], rungNeed:[2,2,7], title:'الانتقال: سي بيمول ← دو الجواب', blurb:'آخر خطوة قبل إتمام الأوكتاف الكامل.'},
+  {id:26, note:'سي بيمول⇄دو', lat:'B♭⇄C5', kind:'exchange', from:{note:'سي بيمول',lat:'B♭',semis:10}, to:{note:'دو الجواب',lat:'C5',semis:12}, phaseFinale:true,
+    tol:22, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: سي بيمول⇄دو الجواب — ختام امتداد المدى', blurb:'إتقان هذا يعني أوكتافًا كاملًا تحت إصبعك — عجم ونهاوند وكرد صارت في متناولك.'},
 ];
 // constellation coordinates (viewBox 320x460) — hand-placed winding path bottom→top
 const SKY=[[165,400],[110,368],[205,344],[135,306],[225,286],[95,258],[180,236],
