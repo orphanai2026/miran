@@ -544,13 +544,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r4.9-graceattempt</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r5.1-notefix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r4.9-graceattempt';
+const APP_VERSION='r5.1-notefix';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1623,7 +1623,7 @@ function drawCountdown(k){
   cx.fillText(toAr(k), ORB.cx, ORB.cy + (compact?10:24));
   if(!compact){
     cx.fillStyle='rgba(237,232,245,.8)'; cx.font="500 14px Cairo,sans-serif";
-    const note = curDay.kind==='breath' ? 'خذ نفَسًا عميقًا' : (curDay.kind==='rhythm'||curDay.kind==='rhythmdrop') ? 'استعدّ للنبضة الأولى' : (moving ? 'استعدّ على دو' : 'استعدّ على '+curDay.note);
+    const note = curDay.kind==='breath' ? 'خذ نفَسًا عميقًا' : (curDay.kind==='rhythm'||curDay.kind==='rhythmdrop') ? 'استعدّ للنبضة الأولى' : (moving ? 'استعدّ على '+curDay.from.note : 'استعدّ على '+curDay.note);
     cx.fillText(note, ORB.cx, ORB.h-20);
   }
   cx.textAlign='start';
@@ -2131,8 +2131,13 @@ function scoreExchange(d){
   const noteAt=i=>(i%2===0?0:TR.span);
   const holds=[];
   for(let i=0;i<=reps;i++){
+    // hold 0 starts from SILENCE (the pickup beats, not a sounding note) —
+    // every other hold continues from an already-sounding note, so it has no
+    // onset delay to absorb. At fast tempos this left hold-0 as little as
+    // 175ms to capture a stable reading — not enough for breath onset to
+    // settle. Give it a gentler trailing margin instead of the standard cut.
     const start=lead+i*b+(i===0?0.15:slide+0.05);
-    const end=(i<reps)?lead+(i+1)*b-slide-0.05:lead+i*b+TR_EX_TAIL-0.05;
+    const end=(i===0)?lead+b-slide*0.4-0.02:(i<reps)?lead+(i+1)*b-slide-0.05:lead+i*b+TR_EX_TAIL-0.05;
     // plausibility filter: a reading more than 400¢ from BOTH this exercise's
     // notes is a register-jump artifact (rare, real, but not this hold's pitch)
     // — exclude it from the median instead of letting it skew the result.
