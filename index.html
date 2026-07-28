@@ -544,13 +544,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r5.2-phaseA</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r5.3-solfocus</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r5.2-phaseA';
+const APP_VERSION='r5.3-solfocus';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -740,56 +740,58 @@ const CURRICULUM=[
     durLadder:[4,6,9], stabMult:[1.7,1.3,1], rungNeed:[2,2,7], title:'نغمة فا الطويلة', blurb:'انتقل إلى فا، وترتفع المدة تدريجيًا حتى ٩ ثوانٍ دون اهتزاز.'},
   {id:4, note:'صول',lat:'G',  semis:7, kind:'longtone', targetSec:10, tol:20, stabMax:16, need:7,
     durLadder:[4,7,10], stabMult:[1.7,1.25,1], rungNeed:[2,2,7], title:'نغمة صول الطويلة', blurb:'أعلى نغمات القرار — ترتفع المدة تدريجيًا حتى ١٠ ثوانٍ بصوتٍ نقيّ.'},
-  {id:5, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+  {id:5, note:'صول', lat:'G', semis:7, kind:'longtone', targetSec:9, tol:13, stabMax:14, need:7,
+    durLadder:[4,6,9], stabMult:[1.6,1.25,1], rungNeed:[2,2,7], title:'صول — تثبيت مركَّز', blurb:'صول تحديدًا تميل للانخفاض عندك — هامش أضيق هنا يبني دعم نفَس أدقّ قبل المتابعة.'},
+  {id:6, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], holdFromLadder:[4.5,3.2,2.2], holdToLadder:[4.5,3.4,2.6], rungNeed:[2,2,7], title:'الانتقال: دو ← ري', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى ري.'},
-  {id:6, note:'♩', lat:'', kind:'rhythm', beats:6, beatSec:1.1,
+  {id:7, note:'♩', lat:'', kind:'rhythm', beats:6, beatSec:1.1,
     tolLadder:[420,360,300], rungNeed:[2,2,7], need:7,
     title:'الإيقاع الأساسي: تابع النبضة', blurb:'قبل أن تُطلَب منك مزامنة نغمتين معًا، تعرّف على الشعور بالنبضة وحدها — أيّ صوت قصير يكفي، لا طبقة محدَّدة.'},
-  {id:7, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+  {id:8, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: دو⇄ري مع المترونوم', blurb:'انتقل مع كل نبضة — دو، ري، دو، ري، دو.'},
-  {id:8, note:'ري→فا', lat:'D→F', kind:'transition', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
+  {id:9, note:'ري→فا', lat:'D→F', kind:'transition', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
     tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], holdFromLadder:[4.5,3.2,2.2], holdToLadder:[4.5,3.4,2.6], rungNeed:[2,2,7], title:'الانتقال: ري ← فا', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى فا.'},
-  {id:9, note:'فا→صول', lat:'F→G', kind:'transition', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
+  {id:10, note:'فا→صول', lat:'F→G', kind:'transition', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
     tol:25, need:7, tolLadder:[45,35,25], gapLadder:[0.7,0.55,0.45], holdFromLadder:[4.5,3.2,2.2], holdToLadder:[4.5,3.4,2.6], rungNeed:[2,2,7], title:'الانتقال: فا ← صول', blurb:'ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى صول.'},
-  {id:10, note:'ري⇄فا', lat:'D⇄F', kind:'exchange', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
+  {id:11, note:'ري⇄فا', lat:'D⇄F', kind:'exchange', from:{note:'ري',lat:'D',semis:2}, to:{note:'فا',lat:'F',semis:5},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: ري⇄فا مع المترونوم', blurb:'انتقل مع كل نبضة — ري، فا، ري، فا، ري.'},
-  {id:11, note:'فا⇄صول', lat:'F⇄G', kind:'exchange', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
+  {id:12, note:'فا⇄صول', lat:'F⇄G', kind:'exchange', from:{note:'فا',lat:'F',semis:5}, to:{note:'صول',lat:'G',semis:7},
     tol:25, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: فا⇄صول مع المترونوم', blurb:'انتقل مع كل نبضة — فا، صول، فا، صول، فا.'},
-  {id:12, note:'دو', lat:'C', semis:0, kind:'longtone', targetSec:6, tol:20, stabMax:16, need:3, review:true,
+  {id:13, note:'دو', lat:'C', semis:0, kind:'longtone', targetSec:6, tol:20, stabMax:16, need:3, review:true,
     title:'مراجعة متباعدة: دو', blurb:'عُد إلى نغمة القرار الأولى بلا مساعدة — هل ما زالت راسخة؟'},
-  {id:13, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+  {id:14, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, beatSec:0.85, beatStart:0.85, beatMin:0.55, stepDown:0.07, stepUp:0.1, reps:4, consolidate:true,
     title:'يوم تثبيت: دو⇄ري', blurb:'ثبّت ما أتقنته — بلا شرح جديد، تكرارٌ يرسّخ.'},
-  {id:14, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+  {id:15, note:'دو→ري', lat:'C→D', kind:'transition', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:1, testMode:true, title:'يوم اختبار: دو ← ري', blurb:'محاولة واحدة، بلا تلميح افتتاحي. أرِني ما تتقنه فعلًا.'},
-  {id:15, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
+  {id:16, note:'دو⇄ري', lat:'C⇄D', kind:'exchange', from:{note:'دو',lat:'C',semis:0}, to:{note:'ري',lat:'D',semis:2},
     tol:25, need:7, beatSec:0.85, beatStart:0.85, beatMin:0.5, stepDown:0.08, stepUp:0.1, reps:4, phaseFinale:true,
     title:'أداء تأسيسي', blurb:'اختم مرحلة تأسيس الصوت بأداء واحد متصل.'},
-  {id:16, note:'♩', lat:'', kind:'rhythm', beats:8, beatSec:1.0,
+  {id:17, note:'♩', lat:'', kind:'rhythm', beats:8, beatSec:1.0,
     tolLadder:[320,260,220], rungNeed:[2,2,7], need:7, phaseStart:true,
     title:'الإيقاع: المتابعة مع النبضة', blurb:'اعزف نغمة قصيرة مع كل نبضة — الدقة في التوقيت لا الطبقة.'},
-  {id:17, note:'♩·', lat:'', kind:'rhythmdrop', beats:8, beatSec:1.0, tolMs:260,
+  {id:18, note:'♩·', lat:'', kind:'rhythmdrop', beats:8, beatSec:1.0, tolMs:260,
     dropLadder:[[4],[3,6],[1,3,5,7]], rungNeed:[2,2,7], need:7,
     title:'الإيقاع: حذف النبضات', blurb:'استمرّ على النبضة حتى حين تختفي — ابنِ إيقاعك الداخلي لا اعتمادك على السمع.'},
   /* ═══ PHASE A · range extension toward a full octave — no quarter-tones yet,
      just the natural notes needed to reach عجم/نهاوند/كرد before any maqam work ═══ */
-  {id:18, note:'لا', lat:'A', semis:9, kind:'longtone', targetSec:10, tol:18, stabMax:15, need:7,
+  {id:19, note:'لا', lat:'A', semis:9, kind:'longtone', targetSec:10, tol:18, stabMax:15, need:7,
     durLadder:[5,7,10], stabMult:[1.6,1.25,1], rungNeed:[2,2,7], title:'نغمة لا الطويلة', blurb:'أول نغمة خارج ما أتقنته — امتداد المدى يبدأ هنا.'},
-  {id:19, note:'صول→لا', lat:'G→A', kind:'transition', from:{note:'صول',lat:'G',semis:7}, to:{note:'لا',lat:'A',semis:9},
+  {id:20, note:'صول→لا', lat:'G→A', kind:'transition', from:{note:'صول',lat:'G',semis:7}, to:{note:'لا',lat:'A',semis:9},
     tol:22, need:7, tolLadder:[40,32,22], gapLadder:[0.6,0.5,0.4], holdFromLadder:[4,3,2.2], holdToLadder:[4,3.2,2.4], rungNeed:[2,2,7], title:'الانتقال: صول ← لا', blurb:'نفس منطق الانتقالات السابقة، بنغمة جديدة.'},
-  {id:20, note:'صول⇄لا', lat:'G⇄A', kind:'exchange', from:{note:'صول',lat:'G',semis:7}, to:{note:'لا',lat:'A',semis:9},
+  {id:21, note:'صول⇄لا', lat:'G⇄A', kind:'exchange', from:{note:'صول',lat:'G',semis:7}, to:{note:'لا',lat:'A',semis:9},
     tol:22, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: صول⇄لا مع المترونوم', blurb:'انتقل مع كل نبضة — صول، لا، صول، لا، صول.'},
-  {id:21, note:'سي بيمول', lat:'B♭', semis:10, kind:'longtone', targetSec:10, tol:18, stabMax:15, need:7,
+  {id:22, note:'سي بيمول', lat:'B♭', semis:10, kind:'longtone', targetSec:10, tol:18, stabMax:15, need:7,
     durLadder:[5,7,10], stabMult:[1.6,1.25,1], rungNeed:[2,2,7], title:'نغمة سي بيمول الطويلة', blurb:'أول بيمول تعزفه — يمهّد لمقامَي نهاوند وكرد لاحقًا.'},
-  {id:22, note:'لا→سي بيمول', lat:'A→B♭', kind:'transition', from:{note:'لا',lat:'A',semis:9}, to:{note:'سي بيمول',lat:'B♭',semis:10},
+  {id:23, note:'لا→سي بيمول', lat:'A→B♭', kind:'transition', from:{note:'لا',lat:'A',semis:9}, to:{note:'سي بيمول',lat:'B♭',semis:10},
     tol:22, need:7, tolLadder:[40,32,22], gapLadder:[0.6,0.5,0.4], holdFromLadder:[4,3,2.2], holdToLadder:[4,3.2,2.4], rungNeed:[2,2,7], title:'الانتقال: لا ← سي بيمول', blurb:'نصف تون فقط بين النغمتين — انتقال ضيّق يحتاج دقّة أعلى.'},
-  {id:23, note:'لا⇄سي بيمول', lat:'A⇄B♭', kind:'exchange', from:{note:'لا',lat:'A',semis:9}, to:{note:'سي بيمول',lat:'B♭',semis:10},
+  {id:24, note:'لا⇄سي بيمول', lat:'A⇄B♭', kind:'exchange', from:{note:'لا',lat:'A',semis:9}, to:{note:'سي بيمول',lat:'B♭',semis:10},
     tol:22, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: لا⇄سي بيمول مع المترونوم', blurb:'انتقل مع كل نبضة — لا، سي بيمول، لا، سي بيمول، لا.'},
-  {id:24, note:'دو الجواب', lat:'C5', semis:12, kind:'longtone', targetSec:10, tol:18, stabMax:15, need:7,
+  {id:25, note:'دو الجواب', lat:'C5', semis:12, kind:'longtone', targetSec:10, tol:18, stabMax:15, need:7,
     durLadder:[5,7,10], stabMult:[1.6,1.25,1], rungNeed:[2,2,7], title:'نغمة دو الجواب الطويلة', blurb:'أوكتاف كامل فوق دو القرار — إغلاق المرحلة الأولى من امتداد المدى.'},
-  {id:25, note:'سي بيمول→دو', lat:'B♭→C5', kind:'transition', from:{note:'سي بيمول',lat:'B♭',semis:10}, to:{note:'دو الجواب',lat:'C5',semis:12},
+  {id:26, note:'سي بيمول→دو', lat:'B♭→C5', kind:'transition', from:{note:'سي بيمول',lat:'B♭',semis:10}, to:{note:'دو الجواب',lat:'C5',semis:12},
     tol:22, need:7, tolLadder:[40,32,22], gapLadder:[0.6,0.5,0.4], holdFromLadder:[4,3,2.2], holdToLadder:[4,3.2,2.4], rungNeed:[2,2,7], title:'الانتقال: سي بيمول ← دو الجواب', blurb:'آخر خطوة قبل إتمام الأوكتاف الكامل.'},
-  {id:26, note:'سي بيمول⇄دو', lat:'B♭⇄C5', kind:'exchange', from:{note:'سي بيمول',lat:'B♭',semis:10}, to:{note:'دو الجواب',lat:'C5',semis:12}, phaseFinale:true,
+  {id:27, note:'سي بيمول⇄دو', lat:'B♭⇄C5', kind:'exchange', from:{note:'سي بيمول',lat:'B♭',semis:10}, to:{note:'دو الجواب',lat:'C5',semis:12}, phaseFinale:true,
     tol:22, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: سي بيمول⇄دو الجواب — ختام امتداد المدى', blurb:'إتقان هذا يعني أوكتافًا كاملًا تحت إصبعك — عجم ونهاوند وكرد صارت في متناولك.'},
 ];
 // constellation coordinates (viewBox 320x460) — hand-placed winding path bottom→top
@@ -807,19 +809,25 @@ let latencyCal = store.get('miran_latency', null);  // {ms, ts} — personal ons
 let prog  = store.get('miran_prog', {done:{}, streakDays:0, lastDate:null});
 prog.foundation = prog.foundation || {breath:false, rung:0};
 function saveProg(){ store.set('miran_prog', prog); }
-/* ── schema migration: day6 "الإيقاع الأساسي" was inserted before the old
-   exchange day, shifting every day id from the old 6 onward up by +1.
-   Runs once ever, for anyone whose save predates this change. ── */
-if(prog.schemaV!==2){
+/* ── schema migrations: each one shifts saved day-id keys to match a
+   curriculum insertion. They run in order and each is idempotent/one-time,
+   so a save from ANY earlier version ends up correctly migrated regardless
+   of how many insertions have happened since. ── */
+const shiftProgKeys=(fromId)=>{
   const shiftKeys=(obj)=>{
     if(!obj) return;
     Object.keys(obj).filter(k=>/^\d+$/.test(k)).map(Number).sort((a,b)=>b-a) // highest first, never overwrite a not-yet-moved key
-      .forEach(oldId=>{ if(oldId>=6){ obj[oldId+1]=obj[oldId]; delete obj[oldId]; } });
+      .forEach(oldId=>{ if(oldId>=fromId){ obj[oldId+1]=obj[oldId]; delete obj[oldId]; } });
   };
-  shiftKeys(prog.done);
-  shiftKeys(prog.inProgress);
-  prog.schemaV=2;
-  saveProg();
+  shiftKeys(prog.done); shiftKeys(prog.inProgress);
+};
+if(!prog.schemaV || prog.schemaV<2){
+  // day6 "الإيقاع الأساسي" was inserted before the old exchange day (old id>=6 shifted +1)
+  shiftProgKeys(6); prog.schemaV=2; saveProg();
+}
+if(!prog.schemaV || prog.schemaV<3){
+  // day5 "صول — تثبيت مركَّز" was inserted right after the original صول long-tone day (id>=5 shifted +1)
+  shiftProgKeys(5); prog.schemaV=3; saveProg();
 }
 function saveCalib(){ store.set('miran_cal', calib); }
 function saveLatencyCal(){ store.set('miran_latency', latencyCal); }
@@ -843,7 +851,7 @@ function show(v){ document.querySelectorAll('.view').forEach(x=>x.classList.remo
 function renderHome(){
   const doneCount=Object.keys(prog.done).length;
   $('streakN').textContent=doneCount;
-  $('phaseBand').textContent = prog.done[15] ? 'المرحلة الثانية · الإيقاع والتوقيت' : 'المرحلة الأولى · تأسيس الصوت';
+  $('phaseBand').textContent = prog.done[16] ? 'المرحلة الثانية · الإيقاع والتوقيت' : 'المرحلة الأولى · تأسيس الصوت';
   // ── the rosette: each day is a petal. gold = mastered, cyan ring = current, violet = ahead ──
   const N=CURRICULUM.length, W=300,H=300, cx=150, cy=150;
   const fi=firstIncomplete();
