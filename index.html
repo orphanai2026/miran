@@ -607,13 +607,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r5.8-cleannumbering</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r5.9-hubfix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r5.8-cleannumbering';
+const APP_VERSION='r5.9-hubfix';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1029,10 +1029,19 @@ function renderHome(){
   svg+=`<circle cx="${cx}" cy="${cy}" r="34" fill="url(#hubG)">
     <animate attributeName="r" values="34;36.5;34" dur="4.2s" repeatCount="indefinite"/>
   </circle>`;
-  svg+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="IBM Plex Mono,monospace"
-     font-size="21" fill="#F7DCA0">${N?levelDone:doneCount}</text>`;
-  svg+=`<text x="${cx}" y="${cy+15}" text-anchor="middle" font-family="Cairo,sans-serif"
-     font-size="9.5" fill="#9B92B8">من ${N||doneCount}</text>`;
+  if(N>0){
+    svg+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+       font-size="21" fill="#F7DCA0">${levelDone}</text>`;
+    svg+=`<text x="${cx}" y="${cy+15}" text-anchor="middle" font-family="Cairo,sans-serif"
+       font-size="9.5" fill="#9B92B8">من ${N}</text>`;
+  } else if(selectedLevel===1){
+    // breath level has no curriculum "days" to count — show its own real
+    // status (rung reached), never the unrelated global days-done total
+    svg+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+       font-size="18" fill="#F7DCA0">${prog.foundation.breath?'✓':toAr(prog.foundation.rung||0)}</text>`;
+    svg+=`<text x="${cx}" y="${cy+15}" text-anchor="middle" font-family="Cairo,sans-serif"
+       font-size="9" fill="#9B92B8">${prog.foundation.breath?'مكتمل':'الدرجة'}</text>`;
+  }
   svg+=`</svg>`;
   $('sky').innerHTML=svg;
   $('sky').querySelectorAll('.st-tap').forEach(c=>c.addEventListener('click',()=>openDay(+c.dataset.day)));
