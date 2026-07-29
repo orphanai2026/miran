@@ -87,14 +87,21 @@
     min-width:74px;text-align:center;text-shadow:0 0 18px rgba(230,184,92,.3)}
   /* ── level rail: horizontal scroll of level chips, browsing convenience
      over the same strict-order curriculum — never a gate ── */
-  .lvl-rail{display:flex;gap:9px;overflow-x:auto;padding:2px 2px 4px;margin:12px 0 6px;
+  .lvl-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+    margin-top:16px;font-family:var(--f-head);font-weight:700;font-size:.86rem;color:var(--bone)}
+  .lvl-swipe{font-family:var(--f-body);font-weight:400;font-size:.66rem;color:var(--muted);opacity:.8}
+  .lvl-rail-wrap{position:relative}
+  .lvl-rail-wrap::before{content:'';position:absolute;inset-inline-end:0;top:2px;bottom:10px;width:26px;
+    background:linear-gradient(270deg,var(--void),transparent);pointer-events:none;z-index:1}
+  .lvl-rail{display:flex;gap:9px;overflow-x:auto;padding:2px 2px 4px;margin:8px 0 6px;
     scrollbar-width:none}
   .lvl-rail::-webkit-scrollbar{display:none}
   .lvl-chip{--lc:79,227,193;flex:none;width:98px;border-radius:15px;padding:11px 11px;cursor:pointer;
     background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.012));
     border:1.5px solid rgba(255,255,255,.08);position:relative;transition:.22s;text-align:right}
-  .lvl-chip.sel{border-color:rgba(var(--lc),.55);background:linear-gradient(160deg,rgba(var(--lc),.13),rgba(255,255,255,.02));
-    box-shadow:0 0 18px rgba(var(--lc),.16)}
+  .lvl-chip.sel{border-color:rgba(var(--lc),.75);border-width:2px;
+    background:linear-gradient(160deg,rgba(var(--lc),.19),rgba(255,255,255,.02));
+    box-shadow:0 0 24px rgba(var(--lc),.28),inset 0 0 0 1px rgba(var(--lc),.15)}
   .lvl-chip.locked{opacity:.4;cursor:default}
   .lvl-num{font-family:var(--f-data);font-size:.6rem;color:var(--muted);direction:ltr}
   .lvl-name{font-family:var(--f-head);font-weight:700;font-size:.8rem;color:var(--bone);margin:3px 0 7px;line-height:1.3}
@@ -378,7 +385,8 @@
   <div class="view active" id="view-home">
     <div class="epigraph">من نَفَسٍ واحدٍ يبدأُ كلُّ لحن</div>
     <div class="phase-band" id="phaseBand">المرحلة الأولى · تأسيس الصوت</div>
-    <div class="lvl-rail" id="lvlRail"></div>
+    <div class="lvl-heading">مستوى رحلتك <span class="lvl-swipe">← مرّر لرؤية البقية</span></div>
+    <div class="lvl-rail-wrap"><div class="lvl-rail" id="lvlRail"></div></div>
     <div class="sky" id="sky"></div>
     <p class="hint" style="margin:2px 0 10px">اضغط رقم أي وريقة ذهبية لإعادة تدريب ذلك اليوم متى شئت.</p>
 
@@ -599,13 +607,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r5.6-rosetteanim</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r5.8-cleannumbering</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r5.6-rosetteanim';
+const APP_VERSION='r5.8-cleannumbering';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -870,6 +878,14 @@ function levelProgress(levelId){
   return {done: days.filter(d=>prog.done[d.id]).length, total: days.length};
 }
 function levelOfDay(id){ if(id==='breath') return 1; const d=CURRICULUM.find(x=>x.id===id); return d?d.level:2; }
+function dayLabel(id){
+  const lvlId = levelOfDay(id);
+  const lvl = LEVELS.find(L=>L.id===lvlId);
+  if(!lvl) return dayLabel(id);
+  const days = levelDays(lvlId);
+  const pos = days.findIndex(d=>d.id===id)+1;
+  return lvl.name+' · '+toAr(pos||1)+'/'+toAr(days.length||1);
+}
 let selectedLevel=null;
 // constellation coordinates (viewBox 320x460) — hand-placed winding path bottom→top
 const SKY=[[165,400],[110,368],[205,344],[135,306],[225,286],[95,258],[180,236],
@@ -992,9 +1008,20 @@ function renderHome(){
          fill="none" stroke="${col}" stroke-width="${done?1.7:0.85}" opacity="${op}" ${fil}/>`;
     }
     const rad=(a-90)*Math.PI/180, tx=cx+Math.cos(rad)*114, ty=cy+Math.sin(rad)*114;
+    // the number shown is this day's position WITHIN THIS LEVEL (always 1..N,
+    // never jumps) — the raw global id (used internally for openDay/storage)
+    // stays invisible here; it only surfaces once you're actually inside the
+    // exercise, via dayLabel(), so the trainee never sees a confusing gap.
     svg+=`<text x="${tx.toFixed(1)}" y="${(ty+3.5).toFixed(1)}" text-anchor="middle"
        font-family="IBM Plex Mono,monospace" font-size="9"
-       fill="${done?'#E6B85C':(current?'#4FE3C1':'#6b5f91')}" opacity="${tappable?'.95':'.42'}">${id}</text>`;
+       fill="${done?'#E6B85C':(current?'#4FE3C1':'#6b5f91')}" opacity="${tappable?'.95':'.42'}">${i+1}</text>`;
+    if(!tappable){
+      // a small lock glyph — a locked day should visibly say so, not just look dim
+      svg+=`<g transform="translate(${(tx+9).toFixed(1)},${(ty-10).toFixed(1)})" opacity=".55">
+        <rect x="-3.2" y="-1" width="6.4" height="5" rx="1" fill="none" stroke="#6b5f91" stroke-width=".8"/>
+        <path d="M -1.8 -1 v-1.6 a1.8 1.8 0 0 1 3.6 0 v1.6" fill="none" stroke="#6b5f91" stroke-width=".8"/>
+      </g>`;
+    }
     if(tappable) svg+=`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="15" fill="transparent"
        class="st-tap" style="cursor:pointer" data-day="${id}"/>`;
   });
@@ -1026,7 +1053,7 @@ function renderHome(){
   $('tonightGlyph').textContent=d.note;
   $('tonightTitle').textContent=d.title;
   $('tonightBlurb').textContent=d.blurb;
-  $('tonightLat').textContent=(d.lat?d.lat+' · ':'')+'اليوم '+toAr(d.id);
+  $('tonightLat').textContent=(d.lat?d.lat+' · ':'')+dayLabel(d.id);
   $('tonightEyebrow').textContent = doneCount>0 ? 'التالي في رحلتك' : 'أول أيام الرحلة';
   $('btnStart').textContent = d.kind==='soon' ? 'قريبًا' : (doneCount>0?'تابع التدريب':'ابدأ التدريب');
   $('btnStart').disabled = d.kind==='soon';
@@ -1475,7 +1502,7 @@ function drawThreadIdle(){
   drawExitStreak(attempts||0, NEED||7);
   cx.textAlign='center'; cx.fillStyle=C.muted; cx.font="500 12px Cairo,sans-serif";
   cx.fillText('اضغط «ابدأ» ثم انفخ', ORB.cx, ORB.h-32); cx.textAlign='start';
-  drawContextStrip('اليوم '+toAr(curDay?curDay.id:1)+' · نغمة طويلة', '');
+  drawContextStrip(dayLabel(curDay?curDay.id:1)+' · نغمة طويلة', '');
 }
 function _pushThread(entry){ entry.slot=_threadStep%THREAD_N; _threadStep++;
   _thread.push(entry); if(_thread.length>THREAD_N)_thread.shift(); }
@@ -1493,7 +1520,7 @@ function _reedFrame(cents, inTune, mute){
     drawNodeReadout((cents>=0?'+':'')+cents.toFixed(0),'سنت', ok?C.live:C.breath);
   }
   drawExitStreak(attempts||0, NEED||7);
-  drawContextStrip('اليوم '+toAr(curDay?curDay.id:1)+' · نغمة طويلة',
+  drawContextStrip(dayLabel(curDay?curDay.id:1)+' · نغمة طويلة',
     mute?'':(calm>0.55?'الموجة مستقرّة':'الموجة مضطربة'),
     mute?'':(calm>0.55?'rgba(79,227,193,.7)':'rgba(255,179,71,.75)'));
 }
@@ -1529,7 +1556,7 @@ function startSession(id){
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'transition', pair:curDay.lat,
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
-    $('sessEyebrow').textContent = curDay.tolLadder ? `اليوم ${toAr(id)} · انتقال · الدرجة ${toAr(trRung+1)}/${toAr(curDay.tolLadder.length)}` : `اليوم ${toAr(id)} · انتقال`;
+    $('sessEyebrow').textContent = curDay.tolLadder ? `${dayLabel(id)} · انتقال · الدرجة ${toAr(trRung+1)}/${toAr(curDay.tolLadder.length)}` : `${dayLabel(id)} · انتقال`;
     $('sessGlyph').textContent=curDay.from.note+' → '+curDay.to.note; $('sessLat').textContent=curDay.lat;
     $('targetHz').textContent=`${TR.fromHz.toFixed(0)} → ${TR.toHz.toFixed(0)} Hz`;
     $('sustainLabel').textContent='تقدّم التمرين';
@@ -1549,7 +1576,7 @@ function startSession(id){
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'exchange', pair:curDay.lat,
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), beat_sec_start:TR.beatSec, started:new Date().toISOString(), attempts:[]};
-    $('sessEyebrow').textContent=`اليوم ${toAr(id)} · تبادل · ${TR.beatSec.toFixed(2)} ث (الهدف ${curDay.beatMin.toFixed(2)})`;
+    $('sessEyebrow').textContent=`${dayLabel(id)} · تبادل · ${TR.beatSec.toFixed(2)} ث (الهدف ${curDay.beatMin.toFixed(2)})`;
     $('sessGlyph').textContent=curDay.from.note+' ⇄ '+curDay.to.note; $('sessLat').textContent=curDay.lat;
     $('targetHz').textContent=`${TR.fromHz.toFixed(0)} ⇄ ${TR.toHz.toFixed(0)} Hz`;
     $('sustainLabel').textContent='تقدّم التمرين';
@@ -1564,7 +1591,7 @@ function startSession(id){
     NEED = curDay.tolLadder ? curDay.rungNeed[0] : curDay.need;
     attempts=restoreStreak(); _failPattern=[]; resetDrift();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythm', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
-    $('sessEyebrow').textContent = curDay.tolLadder ? `اليوم ${toAr(id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}` : `اليوم ${toAr(id)} · إيقاع`;
+    $('sessEyebrow').textContent = curDay.tolLadder ? `${dayLabel(id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}` : `${dayLabel(id)} · إيقاع`;
     $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
     $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
     $('sustainLabel').textContent='تقدّم الدورة';
@@ -1576,7 +1603,7 @@ function startSession(id){
   if(curDay.kind==='rhythmdrop'){
     rdRung=0; rdDrop=new Set(curDay.dropLadder[0]); NEED=curDay.rungNeed[0]; attempts=restoreStreak(); _failPattern=[]; resetDrift();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythmdrop', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
-    $('sessEyebrow').textContent=`اليوم ${toAr(id)} · إيقاع · حذف · الدرجة ${toAr(rdRung+1)}/${toAr(curDay.dropLadder.length)}`;
+    $('sessEyebrow').textContent=`${dayLabel(id)} · إيقاع · حذف · الدرجة ${toAr(rdRung+1)}/${toAr(curDay.dropLadder.length)}`;
     $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
     $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
     $('sustainLabel').textContent='تقدّم الدورة';
@@ -1592,7 +1619,7 @@ function startSession(id){
   attempts=restoreStreak(); _failPattern=[]; resetDrift();
   sessionLog={app:'miran', version:APP_VERSION, day:id, note:curDay.lat, kind:curDay.kind,
     concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2), target_hz:+targetHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
-  $('sessEyebrow').textContent = curDay.durLadder ? `اليوم ${toAr(id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}` : `اليوم ${toAr(id)} · نغمة طويلة`;
+  $('sessEyebrow').textContent = curDay.durLadder ? `${dayLabel(id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}` : `${dayLabel(id)} · نغمة طويلة`;
   $('sessGlyph').textContent=curDay.note; $('sessLat').textContent=curDay.lat;
   $('targetHz').textContent=targetHz.toFixed(1)+' Hz'; $('targetSec').textContent=TARGET_SEC.toFixed(1);
   $('sustainLabel').textContent='ثبات النفَس على النغمة';
@@ -1973,7 +2000,7 @@ function score(d){
       setTimeout(()=>{
         ltRung++; attempts=0;
         TARGET_SEC=curDay.durLadder[ltRung]; STAB_MAX=Math.round(curDay.stabMax*curDay.stabMult[ltRung]); NEED=curDay.rungNeed[ltRung];
-        $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}`;
+        $('sessEyebrow').textContent=`${dayLabel(curDay.id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}`;
         $('targetSec').textContent=TARGET_SEC.toFixed(1);
         $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>الدرجة التالية: ${TARGET_SEC.toFixed(0)} ثوانٍ. تبدأ سلسلة الإتقان من جديد عند هذه الدرجة.</div>`;
         renderPips();
@@ -1995,7 +2022,7 @@ function finishDay(stats){
   stopAll();
   $('doneSub').textContent = curDay.id===14
     ? 'اكتملت المرحلة الأولى — تأسيس الصوت — بأربع عشرة نجمة مُتقنة.'
-    : `نجمة اليوم ${toAr(curDay.id)} أُضيئت في سماء رحلتك.`;
+    : `نجمة ${dayLabel(curDay.id)} أُضيئت في سماء رحلتك.`;
   setTimeout(()=>dervishCelebrate(curDay.id===14), 400);
   $('doneStats').innerHTML = curDay.kind==='transition' ?
     `<div class="stat g"><div class="v">${stats.bestGapMs}</div><div class="k">أنظف انتقال (م.ث)</div></div>
@@ -2088,7 +2115,7 @@ function drawTransitionIdle(){
   cx.fillStyle=C.muted; cx.font="500 12px Cairo,sans-serif"; cx.textAlign='center';
   cx.fillText('اضغط «ابدأ» ثم ابدأ على '+curDay.from.note, ORB.cx, ORB.h-32);
   cx.textAlign='start';
-  drawContextStrip('اليوم '+toAr(curDay.id)+' · '+(curDay.kind==='exchange'?'تبادل':'انتقال'),
+  drawContextStrip(dayLabel(curDay.id)+' · '+(curDay.kind==='exchange'?'تبادل':'انتقال'),
     curDay.kind==='exchange'&&TR?(TR.beatSec.toFixed(2)+' ث (الهدف '+curDay.beatMin.toFixed(2)+')'):'');
 }
 function cueChime(){ if(!audioCtx)return; const o=audioCtx.createOscillator(),g=audioCtx.createGain();
@@ -2124,7 +2151,7 @@ function startTransition(){
     drawExitStreak(attempts||0, NEED||7);
     const phase = now<TR_HOLD_FROM ? ('اثبت على '+curDay.from.note)
                 : (now<TR_HOLD_FROM+TR_MOVE ? ('الآن → '+curDay.to.note) : ('اثبت على '+curDay.to.note));
-    drawContextStrip('اليوم '+toAr(curDay.id)+' · انتقال', phase, 'rgba(79,227,193,.75)');
+    drawContextStrip(dayLabel(curDay.id)+' · انتقال', phase, 'rgba(79,227,193,.75)');
     $('sustainNum').textContent=Math.min(now,TR_END).toFixed(1);
     $('sustainBar').style.width=Math.min(100,(now/TR_END)*100)+'%';
     if(now>=TR_END) stopAttempt();
@@ -2184,7 +2211,7 @@ function scoreTransition(d){
         trRung++; attempts=0;
         TOL=curDay.tolLadder[trRung]; trGapMax=curDay.gapLadder[trRung]; NEED=curDay.rungNeed[trRung];
         if(curDay.holdFromLadder){ TR_HOLD_FROM=curDay.holdFromLadder[trRung]; TR_HOLD_TO=curDay.holdToLadder[trRung]; TR_END=TR_HOLD_FROM+TR_MOVE+TR_HOLD_TO; }
-        $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · انتقال · الدرجة ${toAr(trRung+1)}/${toAr(curDay.tolLadder.length)}`;
+        $('sessEyebrow').textContent=`${dayLabel(curDay.id)} · انتقال · الدرجة ${toAr(trRung+1)}/${toAr(curDay.tolLadder.length)}`;
         $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>الهامش صار أضيق (±${TOL}¢) — تبدأ سلسلة الإتقان من جديد عند هذه الدرجة.</div>`;
         renderPips();
       },900);
@@ -2240,7 +2267,7 @@ function startExchange(){
     const beatsLeft = Math.max(0, EX_LEAD_BEATS - Math.floor(now/b));
     const hint = now<lead ? ('استعد على '+curDay.from.note+'… '+toAr(beatsLeft))
                           : ('النبضة '+toAr(Math.min(beatIdx+1,reps+1))+' / '+toAr(reps+1));
-    drawContextStrip('اليوم '+toAr(curDay.id)+' · تبادل · '+TR.beatSec.toFixed(2)+' ث (الهدف '+curDay.beatMin.toFixed(2)+')',
+    drawContextStrip(dayLabel(curDay.id)+' · تبادل · '+TR.beatSec.toFixed(2)+' ث (الهدف '+curDay.beatMin.toFixed(2)+')',
       hint, 'rgba(79,227,193,.75)');
     $('sustainNum').textContent=Math.min(now,END).toFixed(1);
     $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
@@ -2362,7 +2389,7 @@ function scoreExchange(d){
       }
     } else if(attempts<NEED){ speedMsg=`ثبّت هذه السرعة ${toAr(holdNeeded-exHoldCount)} ${holdNeeded-exHoldCount===1?'مرّة':'مرّات'} أخرى قبل أن نُسرّع.`; }
     body=`أتقنت ${toAr(reps)} انتقالات متتالية، بأقصى فجوة ${Math.round(maxGap*1000)} مللي ثانية. ${speedMsg}`; }
-  $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · تبادل · ${TR.beatSec.toFixed(2)} ث (الهدف ${curDay.beatMin.toFixed(2)})`;
+  $('sessEyebrow').textContent=`${dayLabel(curDay.id)} · تبادل · ${TR.beatSec.toFixed(2)} ث (الهدف ${curDay.beatMin.toFixed(2)})`;
   if(!ok && !lowConf && !graceThisAttempt){ if(attempts>0){ body+=` — انقطعت السلسلة (كنت عند ${toAr(attempts)})، نبدأ من جديد.`; } attempts=0; exHoldCount=0; }
   if(!lowConf) registerAttemptResult(ok);
   if(!lowConf) trackDrift(holds.filter(h=>h.med!=null).map(h=>h.med-noteAt(h.i)));
@@ -2512,7 +2539,7 @@ function drawRhythmIdle(){ drawRhythmBg(); drawAirColumn(1,0);
   cx.fillText('♩ الإيقاع', ORB.cx, 34); cx.restore();
   cx.fillStyle=C.muted; cx.font="500 12px Cairo,sans-serif";
   cx.fillText('اعزف نغمة قصيرة مع كل نبضة', ORB.cx, ORB.h-32); cx.textAlign='start';
-  drawContextStrip('اليوم '+toAr(curDay.id)+' · إيقاع',
+  drawContextStrip(dayLabel(curDay.id)+' · إيقاع',
     'نبضة كل '+curDay.beatSec.toFixed(2)+' ث'); }
 
 /* the beats travel ALONG the bore — time flows the way the air flows */
@@ -2546,7 +2573,7 @@ function renderRhythmBeats(beats, hits, curBeatIdx){
   cx.fillStyle='rgba(155,146,184,.7)'; cx.font="600 10px Cairo,sans-serif";
   cx.fillText('من '+beats.length, ORB.cx, 56); cx.textAlign='start';
   drawExitStreak(attempts||0, NEED||7);
-  drawContextStrip('اليوم '+toAr(curDay.id)+' · إيقاع',
+  drawContextStrip(dayLabel(curDay.id)+' · إيقاع',
     'هامش '+rhTolMs+' م.ث', 'rgba(79,227,193,.7)');
 }
 function renderDropBeats(beats, hits, curBeatIdx, dropSet){
@@ -2561,7 +2588,7 @@ function renderDropBeats(beats, hits, curBeatIdx, dropSet){
   cx.fillStyle='rgba(155,146,184,.55)'; cx.font="600 9px Cairo,sans-serif";
   cx.fillText('الدائرة المفرَغة = نبضة صامتة', ORB.cx, ORB.h-30); cx.textAlign='start';
   drawExitStreak(attempts||0, NEED||7);
-  drawContextStrip('اليوم '+toAr(curDay.id)+' · حذف النبضات',
+  drawContextStrip(dayLabel(curDay.id)+' · حذف النبضات',
     toAr(dropSet.size)+' صامتة', 'rgba(255,179,71,.75)');
 }
 function startRhythm(){
@@ -2627,7 +2654,7 @@ function scoreRhythm(d){
     if(rhRung>=0 && rhRung<curDay.tolLadder.length-1){
       setTimeout(()=>{
         rhRung++; attempts=0; rhTolMs=curDay.tolLadder[rhRung]; NEED=curDay.rungNeed[rhRung];
-        $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}`;
+        $('sessEyebrow').textContent=`${dayLabel(curDay.id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}`;
         $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>هامش التوقيت صار أضيق (±${rhTolMs} م.ث).</div>`;
         renderPips();
       },900);
@@ -2703,7 +2730,7 @@ function scoreRhythmDrop(d){
     if(rdRung<curDay.dropLadder.length-1){
       setTimeout(()=>{
         rdRung++; attempts=0; rdDrop=new Set(curDay.dropLadder[rdRung]); NEED=curDay.rungNeed[rdRung];
-        $('sessEyebrow').textContent=`اليوم ${toAr(curDay.id)} · إيقاع · حذف · الدرجة ${toAr(rdRung+1)}/${toAr(curDay.dropLadder.length)}`;
+        $('sessEyebrow').textContent=`${dayLabel(curDay.id)} · إيقاع · حذف · الدرجة ${toAr(rdRung+1)}/${toAr(curDay.dropLadder.length)}`;
         $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>عدد النبضات الصامتة صار ${toAr(rdDrop.size)}.</div>`;
         renderPips();
       },900);
