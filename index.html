@@ -607,13 +607,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r5.9-hubfix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r6.1-breathknots</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r5.9-hubfix';
+const APP_VERSION='r6.1-breathknots';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -2431,10 +2431,40 @@ function openBreath(review){
   syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawBreathIdle();},40);
 }
 let _breathReview=false;
+/* the ney's own growth knots (عُقَد) along the cane — a real anatomical
+   feature repurposed as the breath stage's achievement marker. Each of the
+   5 rungs lights one knot gold when mastered; the current rung's knot
+   breathes gently; future ones stay as quiet dark rings. */
+function drawBreathNodes(rung){
+  const {x0,L,R,cy}=REED, n=BREATH.rungs.length;
+  for(let i=0;i<n;i++){
+    const nx = x0 + L*(0.12 + i*0.76/(n-1));
+    const ny = cy - R - 13;
+    const done = i<rung, current = i===rung;
+    cx.save();
+    if(done||current){ cx.shadowColor = done?'rgba(230,184,92,.7)':'rgba(79,227,193,.6)'; cx.shadowBlur = current?10:6; }
+    cx.beginPath(); cx.arc(nx, ny, current?5.2:4, 0, 7);
+    cx.fillStyle = done?'rgba(230,184,92,.92)':(current?'rgba(79,227,193,.85)':'#0a0818');
+    cx.fill();
+    cx.strokeStyle = done?'rgba(247,220,160,.9)':(current?'rgba(79,227,193,1)':'rgba(155,146,184,.35)');
+    cx.lineWidth = current?1.6:1.1; cx.stroke();
+    cx.restore();
+    // the seconds-target for this knot, small and quiet below it
+    cx.fillStyle = done?'rgba(230,184,92,.75)':(current?'rgba(79,227,193,.85)':'rgba(155,146,184,.4)');
+    cx.font = "600 7px 'IBM Plex Mono',monospace"; cx.textAlign='center';
+    cx.fillText(BREATH.rungs[i]+'s', nx, ny+14); cx.textAlign='start';
+    if(i<n-1){ // connecting thread between knots, lit only up to what's mastered
+      cx.strokeStyle = i<rung? 'rgba(230,184,92,.4)' : 'rgba(155,146,184,.15)';
+      cx.lineWidth=1; cx.beginPath();
+      cx.moveTo(nx+6, ny); cx.lineTo(x0+L*(0.12+(i+1)*0.76/(n-1))-6, ny); cx.stroke();
+    }
+  }
+}
 function drawBreathBg(){ drawReedGround(); reedGeom(); drawCane(null); }
 function drawBreathIdle(){ drawBreathBg();
   drawAirColumn(1,0);
   drawMouthGauge('0.0', 0, 'ثانية');
+  drawBreathNodes(breathRung||0);
   cx.textAlign='center'; cx.fillStyle='#F7DCA0'; cx.font="700 24px 'Aref Ruqaa',serif";
   cx.save(); cx.shadowColor='rgba(230,184,92,.45)'; cx.shadowBlur=12;
   cx.fillText('✦ النفَس', ORB.cx, 34); cx.restore();
@@ -2458,6 +2488,7 @@ function renderBreath(runSec, voicedNow, steady){
   g.addColorStop(0, steady?'rgba(79,227,193,.9)':'rgba(255,179,71,.8)');
   g.addColorStop(1,'rgba(0,0,0,0)');
   cx.fillStyle=g; cx.fillRect(x0,cy-R,L*frac,R*2); cx.restore();
+  drawBreathNodes(breathRung);
   drawMouthGauge(runSec.toFixed(1), frac, 'ثانية', steady?C.breath:'#FF9B78');
   drawNodeReadout(steady?'✓':'~', steady?'صافٍ':'يهتزّ', steady?C.live:C.breath);
   cx.textAlign='center'; cx.fillStyle='#F7DCA0'; cx.font="700 22px 'Aref Ruqaa',serif";
@@ -2491,14 +2522,32 @@ function startBreath(){
 function scoreBreath(d){
   const w=longestRunWindow(d.voiced); const run=w.dur;
   const inWin=(d.samp||[]).filter(s=>s.t>=w.start-0.05 && s.t<=w.end+0.05);
-  const medHz=inWin.length?median(inWin.map(s=>s.hz)):0;
-  const jitter=inWin.length>=6? std(inWin.map(s=>1200*Math.log2(s.hz/medHz))) : 999;
+  const rawMedHz=inWin.length?median(inWin.map(s=>s.hz)):0;
+  // plausibility filter: a reading more than 400¢ from the run's own median
+  // is a register-jump/tracking artifact, not real vocal jitter — exclude it
+  // from the jitter measurement (same principle already applied to exchange).
+  const plausible = rawMedHz ? inWin.filter(s=>Math.abs(1200*Math.log2(s.hz/rawMedHz))<=400) : inWin;
+  const cleanSamples = plausible.length>=6 ? plausible : inWin; // never drop below a usable sample size
+  const medHz=cleanSamples.length?median(cleanSamples.map(s=>s.hz)):0;
+  const jitter=cleanSamples.length>=6? std(cleanSamples.map(s=>1200*Math.log2(s.hz/medHz))) : 999;
+  // confidence gate: if a real sustained sound was heard (run is fine) but
+  // very little of it carried a trustworthy pitch reading, this is a signal
+  // problem, not a real jitter failure — don't judge it either way.
+  const expectedSamples = run*10; // ~10 pitch samples/sec is the normal rate
+  const lowConf = run>=breathTarget && expectedSamples>6 && (inWin.length/expectedSamples)<0.35;
   const longEnough = run>=breathTarget;
   const steadyEnough = jitter<=BREATH.jitterMax;
-  const ok = longEnough && steadyEnough;
-  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, sustained_sec:+run.toFixed(2), target_sec:breathTarget, jitter_cents:+jitter.toFixed(1), ts:new Date().toISOString()});
-  registerAttemptResult(ok);
+  const ok = !lowConf && longEnough && steadyEnough;
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, low_confidence:lowConf, sustained_sec:+run.toFixed(2), target_sec:breathTarget, jitter_cents:+jitter.toFixed(1), ts:new Date().toISOString()});
+  if(!lowConf) registerAttemptResult(ok);
   let head,body,cls;
+  if(lowConf){
+    cls='retry';
+    head='لم أستطع الحكم بثقة كافية';
+    body=`أطلت نفَسك ${run.toFixed(1)} ثانية، لكن جودة الإشارة كانت منخفضة جدًّا لقياس ثباته بدقّة — على الأرجح ضوضاء في الغرفة أو بُعد عن الميكروفون. هذه المحاولة لا تُحتسب ضدّك؛ أعِد في بيئة أهدأ أو اقترب قليلًا من الميكروفون.`;
+    $('resultZone').innerHTML=`<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
+    return;
+  }
   if(ok){
     cls='ok';
     if(_breathReview){
