@@ -599,13 +599,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r5.5-levelsnav</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r5.6-rosetteanim</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r5.5-levelsnav';
+const APP_VERSION='r5.6-rosetteanim';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -974,21 +974,34 @@ function renderHome(){
     if(done) levelDone++;
     const a=360*i/N;
     const col = done?'#E6B85C':(current?'#4FE3C1':'#4A3B7A');
-    const op  = done?'.92':(current?'1':'.42');
+    const op  = done?'.92':(current?'1':'.28');
     const fil = tappable?'filter="url(#pglow)"':'';
-    if(current) svg+=`<ellipse cx="${cx}" cy="${cy}" rx="15" ry="98" transform="rotate(${a} ${cx} ${cy})"
-       fill="none" stroke="#4FE3C1" stroke-width="3.4" opacity=".2" filter="url(#pglow)"/>`;
-    svg+=`<ellipse cx="${cx}" cy="${cy}" rx="13" ry="96" transform="rotate(${a} ${cx} ${cy})"
-       fill="none" stroke="${col}" stroke-width="${done||current?1.7:1.1}" opacity="${op}" ${fil}/>`;
-    const rad=(a-90)*Math.PI/180, tx=cx+Math.cos(rad)*104, ty=cy+Math.sin(rad)*104;
+    if(current){
+      // the active petal's outer glow, PLUS a small bright point of light that
+      // travels around its loop continuously — the one deliberately animated
+      // element on the whole rosette, so motion reads as "this is where you are"
+      svg+=`<ellipse cx="${cx}" cy="${cy}" rx="15" ry="98" transform="rotate(${a} ${cx} ${cy})"
+         fill="none" stroke="#4FE3C1" stroke-width="3.4" opacity=".2" filter="url(#pglow)"/>`;
+      svg+=`<ellipse cx="${cx}" cy="${cy}" rx="13" ry="96" transform="rotate(${a} ${cx} ${cy})"
+         fill="none" stroke="#4FE3C1" stroke-width="1.7" opacity="1" filter="url(#pglow)"
+         stroke-dasharray="16 378" stroke-linecap="round">
+         <animate attributeName="stroke-dashoffset" from="0" to="-394" dur="3.4s" repeatCount="indefinite"/>
+       </ellipse>`;
+    } else {
+      svg+=`<ellipse cx="${cx}" cy="${cy}" rx="13" ry="96" transform="rotate(${a} ${cx} ${cy})"
+         fill="none" stroke="${col}" stroke-width="${done?1.7:0.85}" opacity="${op}" ${fil}/>`;
+    }
+    const rad=(a-90)*Math.PI/180, tx=cx+Math.cos(rad)*114, ty=cy+Math.sin(rad)*114;
     svg+=`<text x="${tx.toFixed(1)}" y="${(ty+3.5).toFixed(1)}" text-anchor="middle"
        font-family="IBM Plex Mono,monospace" font-size="9"
-       fill="${done?'#E6B85C':(current?'#4FE3C1':'#6b5f91')}" opacity="${tappable?'.95':'.5'}">${id}</text>`;
+       fill="${done?'#E6B85C':(current?'#4FE3C1':'#6b5f91')}" opacity="${tappable?'.95':'.42'}">${id}</text>`;
     if(tappable) svg+=`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="15" fill="transparent"
        class="st-tap" style="cursor:pointer" data-day="${id}"/>`;
   });
   // hub
-  svg+=`<circle cx="${cx}" cy="${cy}" r="34" fill="url(#hubG)"/>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="34" fill="url(#hubG)">
+    <animate attributeName="r" values="34;36.5;34" dur="4.2s" repeatCount="indefinite"/>
+  </circle>`;
   svg+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="IBM Plex Mono,monospace"
      font-size="21" fill="#F7DCA0">${N?levelDone:doneCount}</text>`;
   svg+=`<text x="${cx}" y="${cy+15}" text-anchor="middle" font-family="Cairo,sans-serif"
