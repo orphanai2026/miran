@@ -607,13 +607,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r6.2-homenecklace</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r6.3-organicgrowth</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r6.2-homenecklace';
+const APP_VERSION='r6.3-organicgrowth';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -987,6 +987,7 @@ function renderHome(){
     // the day rosette — a small necklace of its 5 real rungs (2, 4, 6, 8, 12s)
     // arcing above the hub, in the exact same gold/cyan/dark grammar.
     const rungs=BREATH.rungs, rn=rungs.length, rung=prog.foundation.rung||0, breathDone=prog.foundation.breath;
+    const bestSec=prog.foundation.bestSec||[];
     const arcR=88, startA=-150, endA=-30; // a gentle arc across the top, like a crown
     svg+=`<text x="${cx}" y="${cy-arcR-26}" text-anchor="middle" font-family="'Aref Ruqaa',serif" font-size="15" fill="#F7DCA0">✦ عُقَد النفَس</text>`;
     for(let i=0;i<rn;i++){
@@ -995,8 +996,12 @@ function renderHome(){
       const done=breathDone||i<rung, current=!breathDone&&i===rung;
       if(i>0){ const pa=(startA+(endA-startA)*(i-1)/(rn-1))*Math.PI/180;
         const px=cx+Math.cos(pa)*arcR, py=cy+Math.sin(pa)*arcR;
+        // the stem only grows as far as actually mastered — ungrown segments
+        // are barely-there dotted hints, not a fully pre-drawn skeleton
+        const grown = breathDone || i<=rung;
         svg+=`<line x1="${px.toFixed(1)}" y1="${py.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}"
-          stroke="${done?'rgba(230,184,92,.45)':'rgba(155,146,184,.16)'}" stroke-width="1"/>`;
+          stroke="${grown?'rgba(230,184,92,.45)':'rgba(155,146,184,.14)'}" stroke-width="${grown?1.3:.7}"
+          ${grown?'':'stroke-dasharray="1 3"'}/>`;
       }
       if(current) svg+=`<circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="9" fill="none"
         stroke="#4FE3C1" stroke-width="1.4" opacity=".55" filter="url(#pglow)">
@@ -1005,9 +1010,10 @@ function renderHome(){
         fill="${done?'rgba(230,184,92,.92)':(current?'rgba(79,227,193,.85)':'#0a0818')}"
         stroke="${done?'rgba(247,220,160,.9)':(current?'#4FE3C1':'rgba(155,146,184,.35)')}" stroke-width="1.3"
         ${done||current?'filter="url(#pglow)"':''}/>`;
+      const lbl = done ? (bestSec[i]!=null?bestSec[i].toFixed(1):rungs[i])+'s' : rungs[i]+'s';
       svg+=`<text x="${nx.toFixed(1)}" y="${(ny+18).toFixed(1)}" text-anchor="middle"
         font-family="IBM Plex Mono,monospace" font-size="8"
-        fill="${done?'#E6B85C':(current?'#4FE3C1':'#6b5f91')}" opacity="${done||current?'.9':'.45'}">${rungs[i]}s</text>`;
+        fill="${done?'#E6B85C':(current?'#4FE3C1':'#6b5f91')}" opacity="${done||current?'.9':'.45'}">${lbl}</text>`;
     }
     svg+=`<text x="${cx}" y="${cy+arcR+18}" text-anchor="middle" font-family="Cairo,sans-serif" font-size="10.5" fill="#9B92B8">تابع من بطاقة النفَس أدناه</text>`;
   }
@@ -2463,10 +2469,18 @@ let _breathReview=false;
    breathes gently; future ones stay as quiet dark rings. */
 function drawBreathNodes(rung){
   const {x0,L,R,cy}=REED, n=BREATH.rungs.length;
+  const best = prog.foundation.bestSec||[];
   for(let i=0;i<n;i++){
     const nx = x0 + L*(0.12 + i*0.76/(n-1));
     const ny = cy - R - 13;
     const done = i<rung, current = i===rung;
+    if(i<n-1 && i<rung){ // the stem only grows as far as you've actually mastered
+      cx.strokeStyle='rgba(230,184,92,.45)'; cx.lineWidth=1.4; cx.beginPath();
+      cx.moveTo(nx+6, ny); cx.lineTo(x0+L*(0.12+(i+1)*0.76/(n-1))-6, ny); cx.stroke();
+    } else if(i<n-1){
+      cx.strokeStyle='rgba(155,146,184,.12)'; cx.lineWidth=.8; cx.setLineDash([1,3]); cx.beginPath();
+      cx.moveTo(nx+6, ny); cx.lineTo(x0+L*(0.12+(i+1)*0.76/(n-1))-6, ny); cx.stroke(); cx.setLineDash([]);
+    }
     cx.save();
     if(done||current){ cx.shadowColor = done?'rgba(230,184,92,.7)':'rgba(79,227,193,.6)'; cx.shadowBlur = current?10:6; }
     cx.beginPath(); cx.arc(nx, ny, current?5.2:4, 0, 7);
@@ -2475,15 +2489,11 @@ function drawBreathNodes(rung){
     cx.strokeStyle = done?'rgba(247,220,160,.9)':(current?'rgba(79,227,193,1)':'rgba(155,146,184,.35)');
     cx.lineWidth = current?1.6:1.1; cx.stroke();
     cx.restore();
-    // the seconds-target for this knot, small and quiet below it
-    cx.fillStyle = done?'rgba(230,184,92,.75)':(current?'rgba(79,227,193,.85)':'rgba(155,146,184,.4)');
+    // real seconds achieved for mastered rungs; the target for current/future
+    const label = done ? (best[i]!=null?best[i].toFixed(1):BREATH.rungs[i])+'s' : BREATH.rungs[i]+'s';
+    cx.fillStyle = done?'rgba(230,184,92,.85)':(current?'rgba(79,227,193,.85)':'rgba(155,146,184,.4)');
     cx.font = "600 7px 'IBM Plex Mono',monospace"; cx.textAlign='center';
-    cx.fillText(BREATH.rungs[i]+'s', nx, ny+14); cx.textAlign='start';
-    if(i<n-1){ // connecting thread between knots, lit only up to what's mastered
-      cx.strokeStyle = i<rung? 'rgba(230,184,92,.4)' : 'rgba(155,146,184,.15)';
-      cx.lineWidth=1; cx.beginPath();
-      cx.moveTo(nx+6, ny); cx.lineTo(x0+L*(0.12+(i+1)*0.76/(n-1))-6, ny); cx.stroke();
-    }
+    cx.fillText(label, nx, ny+14); cx.textAlign='start';
   }
 }
 function drawBreathBg(){ drawReedGround(); reedGeom(); drawCane(null); }
@@ -2581,6 +2591,8 @@ function scoreBreath(d){
       $('resultZone').innerHTML=`<div class="msg ok"><div class="head">${head}</div>${body}</div>`;
       return;
     }
+    prog.foundation.bestSec = prog.foundation.bestSec || [];
+    prog.foundation.bestSec[breathRung] = +run.toFixed(1); // the rung just mastered
     breathRung++; prog.foundation.rung=breathRung; saveProg();
     if(breathRung>=BREATH.rungs.length){
       head='اكتمل النفَس!'; body=`أطلت نفَسك ${run.toFixed(1)} ثانية بصوتٍ صافٍ ثابت. أنت جاهز للنغمات الآن.`;
