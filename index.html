@@ -607,13 +607,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r6.3-organicgrowth</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r6.4-subdivision</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r6.3-organicgrowth';
+const APP_VERSION='r6.4-subdivision';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -856,6 +856,15 @@ const CURRICULUM=[
     tol:22, need:7, tolLadder:[40,32,22], gapLadder:[0.6,0.5,0.4], holdFromLadder:[4,3,2.2], holdToLadder:[4,3.2,2.4], rungNeed:[2,2,7], title:'الانتقال: سي بيمول ← دو الجواب', blurb:'آخر خطوة قبل إتمام الأوكتاف الكامل.'},
   {id:27, level:3, note:'سي بيمول⇄دو', lat:'B♭⇄C5', kind:'exchange', from:{note:'سي بيمول',lat:'B♭',semis:10}, to:{note:'دو الجواب',lat:'C5',semis:12}, phaseFinale:true,
     tol:22, need:7, beatSec:1.0, beatStart:1.0, beatMin:0.55, stepDown:0.09, stepUp:0.13, reps:4, title:'التبادل: سي بيمول⇄دو الجواب — ختام امتداد المدى', blurb:'إتقان هذا يعني أوكتافًا كاملًا تحت إصبعك — عجم ونهاوند وكرد صارت في متناولك.'},
+  /* ═══ beat subdivision (كروش · two notes per beat) — a natural extension of
+     already-mastered rhythmic feel, not a new physical skill, so it stays
+     inside the rhythm/speed level per the pedagogy-review decision ═══ */
+  {id:28, level:3, note:'♪♪', lat:'', kind:'rhythm', beats:6, beatSec:1.2, sub:2,
+    tolLadder:[440,380,320], rungNeed:[2,2,7], need:7,
+    title:'تقسيم الضربة: نغمتان لكل نبضة', blurb:'نغمة عند بداية كل نبضة، وأخرى عند منتصفها بالضبط — نفس نبضك المُتقَن، بدقّة مضاعفة.'},
+  {id:29, level:3, note:'♪♪·', lat:'', kind:'rhythm', beats:8, beatSec:1.0, sub:2,
+    tolLadder:[340,280,230], rungNeed:[2,2,7], need:7,
+    title:'تقسيم الضربة: تثبيت', blurb:'نفس التقسيم، بسرعة أقرب لسرعتك المعتادة — ثبّته حتى يصير بديهيًّا.'},
 ];
 /* ── LEVELS: a browsing/overview grouping over the same CURRICULUM sequence.
    Purely a navigation convenience — it does NOT change unlock order at all;
@@ -2640,36 +2649,39 @@ function drawRhythmIdle(){ drawRhythmBg(); drawAirColumn(1,0);
 
 /* the beats travel ALONG the bore — time flows the way the air flows */
 function beatX(i,n){ const {x0,L}=REED; return x0 + (L*(i+0.5)/n); }
-function drawBeatRow(beats, hits, curBeatIdx, dropSet){
-  const n=beats.length, {cy,R}=REED;
+function drawBeatRow(beats, hits, curBeatIdx, dropSet, subN){
+  const n=beats.length, {cy,R}=REED, sub=subN||1;
   const by=cy+R*0.62;
   cx.strokeStyle='rgba(74,59,122,.5)'; cx.lineWidth=1;
   cx.beginPath(); cx.moveTo(beatX(0,n),by); cx.lineTo(beatX(n-1,n),by); cx.stroke();
   for(let i=0;i<n;i++){
     const px=beatX(i,n), st=hits[i], active=i===curBeatIdx;
+    const isSub = sub>1 && (i%sub!==0); // a mid-beat subdivision point, not the beat itself
+    const rad = isSub?4.2:6; // sub-points read as visually secondary to the real beat
     const silent = dropSet && dropSet.has(i);
-    const col = st===true?C.live : st===false?C.breath : active?C.gold:'rgba(155,146,184,.4)';
+    const col = st===true?C.live : st===false?C.breath : active?C.gold:(isSub?'rgba(155,146,184,.28)':'rgba(155,146,184,.4)');
     if(active&&st===undefined){ cx.strokeStyle='rgba(230,184,92,.5)'; cx.lineWidth=1.8;
-      cx.beginPath(); cx.arc(px,by,11,0,7); cx.stroke(); }
-    if(st===true){ const g=cx.createRadialGradient(px,by,1,px,by,13);
+      cx.beginPath(); cx.arc(px,by,rad+5,0,7); cx.stroke(); }
+    if(st===true){ const g=cx.createRadialGradient(px,by,1,px,by,rad+7);
       g.addColorStop(0,'rgba(79,227,193,.5)'); g.addColorStop(1,'rgba(0,0,0,0)');
-      cx.fillStyle=g; cx.beginPath(); cx.arc(px,by,13,0,7); cx.fill(); }
+      cx.fillStyle=g; cx.beginPath(); cx.arc(px,by,rad+7,0,7); cx.fill(); }
     if(silent && st===undefined){ cx.strokeStyle=col; cx.lineWidth=1.7;
-      cx.beginPath(); cx.arc(px,by,6,0,7); cx.stroke(); }
-    else { cx.fillStyle=col; cx.beginPath(); cx.arc(px,by,6,0,7); cx.fill(); }
+      cx.beginPath(); cx.arc(px,by,rad,0,7); cx.stroke(); }
+    else { cx.fillStyle=col; cx.beginPath(); cx.arc(px,by,rad,0,7); cx.fill(); }
   }
 }
-function renderRhythmBeats(beats, hits, curBeatIdx){
+function renderRhythmBeats(beats, hits, curBeatIdx, subN){
   drawRhythmBg();
   const done=hits.filter(h=>h===true).length;
   drawAirColumn(done/Math.max(1,hits.length), _threadStep++);
-  drawBeatRow(beats, hits, curBeatIdx, null);
+  drawBeatRow(beats, hits, curBeatIdx, null, subN);
+  const sub=subN||1;
   cx.textAlign='center'; cx.fillStyle=C.bone; cx.font="500 34px 'IBM Plex Mono',monospace";
-  cx.fillText(String(Math.min(curBeatIdx+1,beats.length)), ORB.cx, 40);
+  cx.fillText(String(Math.min(Math.floor(curBeatIdx/sub)+1, Math.ceil(beats.length/sub))), ORB.cx, 40);
   cx.fillStyle='rgba(155,146,184,.7)'; cx.font="600 10px Cairo,sans-serif";
-  cx.fillText('من '+beats.length, ORB.cx, 56); cx.textAlign='start';
+  cx.fillText('من '+Math.ceil(beats.length/sub), ORB.cx, 56); cx.textAlign='start';
   drawExitStreak(attempts||0, NEED||7);
-  drawContextStrip(dayLabel(curDay.id)+' · إيقاع',
+  drawContextStrip(dayLabel(curDay.id)+(sub>1?' · تقسيم الضربة':' · إيقاع'),
     'هامش '+rhTolMs+' م.ث', 'rgba(79,227,193,.7)');
 }
 function renderDropBeats(beats, hits, curBeatIdx, dropSet){
@@ -2689,37 +2701,43 @@ function renderDropBeats(beats, hits, curBeatIdx, dropSet){
 }
 function startRhythm(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
-  const beatSec=curDay.beatSec, nBeats=curDay.beats;
-  const beatTimes=Array.from({length:nBeats+1},(_,i)=>i*beatSec);
-  recData={t0:performance.now(), onsets:[], hits:new Array(nBeats+1).fill(undefined), wasVoiced:false, lastBeatPlayed:-1};
+  const beatSec=curDay.beatSec, nBeats=curDay.beats, subN=curDay.sub||1;
+  const stepSec=beatSec/subN; // subdivision: same nearest-target matching logic, just a finer time grid
+  const nSteps=nBeats*subN;
+  const beatTimes=Array.from({length:nSteps+1},(_,i)=>i*stepSec);
+  const isSubPoint=i=>subN>1 && (i%subN!==0); // true for a mid-beat target, not the beat itself
+  recData={t0:performance.now(), onsets:[], hits:new Array(nSteps+1).fill(undefined), wasVoiced:false, lastBeatPlayed:-1};
   setupCanvas();
   const END=nBeats*beatSec+0.7;
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000;
-    const beatIdx=Math.min(Math.floor(now/beatSec+0.5), nBeats);
+    const beatIdx=Math.min(Math.floor(now/beatSec+0.5), nBeats); // tick sound stays on the REAL beat only, never sub-points
     if(beatIdx!==recData.lastBeatPlayed && now>=beatIdx*beatSec-0.02){ recData.lastBeatPlayed=beatIdx; playTick(beatIdx%4===0?1300:1100); }
     const voiced = !!(p.hz && p.clarity>=CLARITY);
     if(voiced && !recData.wasVoiced){ // rising edge = onset
       recData.onsets.push(now);
-      // assign to nearest beat if within half a beat and not already hit
       let bi=-1,bd=Infinity;
       beatTimes.forEach((bt,i)=>{ if(recData.hits[i]===undefined){ const dd=Math.abs(now-bt); if(dd<bd){bd=dd;bi=i;} } });
-      if(bi>=0 && bd<=beatSec/2){ const offMs=(now-beatTimes[bi])*1000; const corrected=offMs-(latencyCal?latencyCal.ms:0); recData.hits[bi] = Math.abs(corrected)<=rhTolMs; }
+      if(bi>=0 && bd<=stepSec/2){
+        const offMs=(now-beatTimes[bi])*1000; const corrected=offMs-(latencyCal?latencyCal.ms:0);
+        const tol = isSubPoint(bi) ? rhTolMs*1.4 : rhTolMs; // mid-beat points get a wider margin — physically harder to place precisely
+        recData.hits[bi] = Math.abs(corrected)<=tol;
+      }
     }
     recData.wasVoiced=voiced;
-    const curIdx=Math.min(Math.floor(now/beatSec), nBeats);
-    renderRhythmBeats(beatTimes, recData.hits, curIdx);
+    const curIdx=Math.min(Math.floor(now/stepSec), nSteps);
+    renderRhythmBeats(beatTimes, recData.hits, curIdx, subN);
     $('sustainNum').textContent=Math.min(now,END).toFixed(1);
     $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
     if(now>=END) stopAttempt();
   };
 }
 function scoreRhythm(d){
-  const nBeats=curDay.beats;
+  const nBeats=curDay.beats, subN=curDay.sub||1;
   const hits=d.hits.filter(h=>h===true).length;
   const misses=d.hits.filter(h=>h===false).length;
   const missed=d.hits.filter(h=>h===undefined).length;
-  const total=nBeats+1;
+  const total=nBeats*subN+1;
   const ok = hits>=total-1; // allow one miss/skip — new skill, some grace
   sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, hits, misses, missed_beats:missed, tol_ms:rhTolMs, latency_correction_ms:latencyCal?latencyCal.ms:0, ts:new Date().toISOString()});
   registerAttemptResult(ok);
