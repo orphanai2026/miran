@@ -608,13 +608,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r6.9-racefix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r7.0-kodaly</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r6.9-racefix';
+const APP_VERSION='r7.0-kodaly';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -2795,6 +2795,16 @@ function drawRhythmIdle(){ drawRhythmBg(); drawAirColumn(1,0);
 
 /* the beats travel ALONG the bore — time flows the way the air flows */
 function beatX(i,n){ const {x0,L}=REED; return x0 + (L*(i+0.5)/n); }
+/* Kodály rhythm syllables — the SAME spoken system in the reference chart,
+   applied to exercises we already train. Not a new skill: a spoken name
+   for the rhythmic feel the trainee is already producing with their fingers. */
+function kodalySyllable(i, subN, silent){
+  if(silent) return '−';
+  if(!subN || subN<=1) return 'تا';
+  if(subN===2) return 'تِ';           // each half of a تِ-تِ (eighth) pair
+  if(subN===4) return ['فِ','تِ','فَ','تِ'][i%4]; // فِ-تِ-فَ-تِ (sixteenth-note group)
+  return 'تا';
+}
 function drawBeatRow(beats, hits, curBeatIdx, dropSet, subN){
   const n=beats.length, {cy,R}=REED, sub=subN||1;
   const by=cy+R*0.62;
@@ -2814,6 +2824,12 @@ function drawBeatRow(beats, hits, curBeatIdx, dropSet, subN){
     if(silent && st===undefined){ cx.strokeStyle=col; cx.lineWidth=1.7;
       cx.beginPath(); cx.arc(px,by,rad,0,7); cx.stroke(); }
     else { cx.fillStyle=col; cx.beginPath(); cx.arc(px,by,rad,0,7); cx.fill(); }
+    // the spoken syllable, quiet unless this beat is active right now
+    cx.fillStyle = active ? 'rgba(230,184,92,.95)' : 'rgba(155,146,184,.4)';
+    cx.font = active ? "700 11px Cairo,sans-serif" : "600 9px Cairo,sans-serif";
+    cx.textAlign='center';
+    cx.fillText(kodalySyllable(i, sub, silent), px, by-rad-8);
+    cx.textAlign='start';
   }
 }
 function renderRhythmBeats(beats, hits, curBeatIdx, subN){
