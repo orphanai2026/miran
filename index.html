@@ -387,6 +387,7 @@
     <div class="phase-band" id="phaseBand">المرحلة الأولى · تأسيس الصوت</div>
     <div class="lvl-heading">مستوى رحلتك <span class="lvl-swipe">← مرّر لرؤية البقية</span></div>
     <div class="lvl-rail-wrap"><div class="lvl-rail" id="lvlRail"></div></div>
+    <div id="pitchReviewPrompt"></div>
     <div class="sky" id="sky"></div>
     <p class="hint" style="margin:2px 0 10px">اضغط رقم أي وريقة ذهبية لإعادة تدريب ذلك اليوم متى شئت.</p>
 
@@ -607,13 +608,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r6.7-spacedreview</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r6.8-pitchreview</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r6.7-spacedreview';
+const APP_VERSION='r6.8-pitchreview';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -888,6 +889,16 @@ function levelProgress(levelId){
   return {done: days.filter(d=>prog.done[d.id]).length, total: days.length};
 }
 function levelOfDay(id){ if(id==='breath') return 1; const d=CURRICULUM.find(x=>x.id===id); return d?d.level:2; }
+const EARLY_NOTE_DAYS=[1,2,3,4]; // دو ري فا صول — the four foundational long-tones worth periodically re-testing
+function mostOverdueEarlyDay(){
+  let worst=null, worstDays=-1;
+  EARLY_NOTE_DAYS.forEach(id=>{
+    const rec=prog.done[id]; if(!rec||!rec.ts) return;
+    const days=Math.floor((Date.now()-new Date(rec.ts).getTime())/86400000);
+    if(days>worstDays){ worstDays=days; worst=id; }
+  });
+  return worst==null ? null : {id:worst, days:worstDays};
+}
 function dayLabel(id){
   const lvlId = levelOfDay(id);
   const lvl = LEVELS.find(L=>L.id===lvlId);
@@ -978,6 +989,19 @@ function renderHome(){
   $('lvlRail').querySelectorAll('[data-lvl]').forEach(c=>c.addEventListener('click',()=>{
     selectedLevel=+c.dataset.lvl; renderHome();
   }));
+
+  // pitch-accuracy spaced review: only surfaces when genuinely due, and only
+  // while browsing this specific level — never nags on other levels.
+  const PITCH_REVIEW_DAYS=6;
+  const overdue = selectedLevel===2 ? mostOverdueEarlyDay() : null;
+  if(overdue && overdue.days>=PITCH_REVIEW_DAYS){
+    const noteName = CURRICULUM.find(d=>d.id===overdue.id).note;
+    $('pitchReviewPrompt').innerHTML = `<a id="rePitch" style="display:block;text-align:center;margin:10px 0 2px;
+      color:var(--gold-hi,#F7DCA0);cursor:pointer;font-size:.82rem;font-weight:700;
+      background:rgba(230,184,92,.09);border:1px solid rgba(230,184,92,.3);border-radius:100px;padding:9px 14px">
+      مرّت ${toAr(overdue.days)} أيام دون مراجعة نغمة ${noteName} — راجعها الآن</a>`;
+    $('rePitch').addEventListener('click',()=>openDay(overdue.id));
+  } else { $('pitchReviewPrompt').innerHTML=''; }
 
   // ── the rosette: each petal is a day WITHIN the selected level only ──
   const days = selectedLevel===1 ? [] : levelDays(selectedLevel);
