@@ -608,13 +608,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r6.8-pitchreview</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r6.9-racefix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r6.8-pitchreview';
+const APP_VERSION='r6.9-racefix';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -2183,6 +2183,7 @@ function drawPairLane(fA, fB, arA, arB, activeIsB){
   cx.restore();
 }
 function drawTransitionBg(now, targetFn){
+  if(!curDay || !curDay.from || !curDay.to) return null; // a stale delayed call from a day we've since navigated away from — nothing to draw
   const fn = targetFn || activeTargetCents;
   drawReedGround(); reedGeom();
   const at=fn(now);
@@ -2202,6 +2203,7 @@ function drawTransitionBg(now, targetFn){
   return {ay, tolU:tolPx};
 }
 function drawTransitionIdle(){
+  if(!curDay || !curDay.from || !curDay.to) return; // stale delayed call — nothing to draw safely
   drawTransitionBg(0);
   drawMouthGauge('0.0', 0, 'ثانية');
   drawExitStreak(attempts||0, NEED||7);
