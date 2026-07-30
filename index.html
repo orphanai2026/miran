@@ -607,13 +607,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r6.5-diaphragm</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r6.6-dynamiccontrol</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r6.5-diaphragm';
+const APP_VERSION='r6.6-dynamiccontrol';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -911,6 +911,7 @@ let calib = store.get('miran_cal', null);          // {qararHz, concertA4, cents
 let latencyCal = store.get('miran_latency', null);  // {ms, ts} — personal onset-latency offset for rhythm scoring
 let prog  = store.get('miran_prog', {done:{}, streakDays:0, lastDate:null});
 prog.foundation = prog.foundation || {breath:false, rung:0};
+if(prog.foundation.breath && prog.foundation.dynamicDone===undefined) prog.foundation.dynamicDone=true; // grandfather pre-existing completions
 function saveProg(){ store.set('miran_prog', prog); }
 /* ── schema migrations: each one shifts saved day-id keys to match a
    curriculum insertion. They run in order and each is idempotent/one-time,
@@ -1088,7 +1089,7 @@ function renderHome(){
   $('sky').innerHTML=svg;
   $('sky').querySelectorAll('.st-tap').forEach(c=>c.addEventListener('click',()=>openDay(+c.dataset.day)));
 
-  // tonight card = breath gateway first, then first incomplete day
+  // tonight card = breath gateway first, then dynamic control, then first incomplete day
   if(!prog.foundation.breath){
     const r=prog.foundation.rung||0;
     $('tonightGlyph').textContent='✦';
@@ -1099,6 +1100,15 @@ function renderHome(){
     $('btnStart').textContent = r>0 ? 'تابع النفَس' : 'ابدأ النفَس';
     $('btnStart').disabled=false; $('btnStart').style.opacity=1;
     targetDayId='breath';
+  } else if(!prog.foundation.dynamicDone){
+    $('tonightGlyph').textContent='◐';
+    $('tonightTitle').textContent='التحكّم الديناميكي';
+    $('tonightBlurb').textContent='نفَس ثابت أتقنته — الآن تحكّم بشدّته: ابدأ خافتًا وانتهِ بصوت أقوى، بلا فقدان الطبقة.';
+    $('tonightLat').textContent='مهارة جديدة · قبل النغمات';
+    $('tonightEyebrow').textContent='الخطوة الأخيرة قبل النغمات';
+    $('btnStart').textContent='ابدأ التحكّم';
+    $('btnStart').disabled=false; $('btnStart').style.opacity=1;
+    targetDayId='dynamic';
   } else {
   const d=CURRICULUM[fi-1] || CURRICULUM[CURRICULUM.length-1];
   $('tonightGlyph').textContent=d.note;
@@ -1164,6 +1174,7 @@ const toAr=n=>String(n).replace(/\d/g,d=>arNum[d]);
 
 function openDay(id){
   if(id==='breath'){ openBreath(); return; }
+  if(id==='dynamic'){ openDynamicControl(); return; }
   if(!isUnlocked(id)) return;
   targetDayId=id;
   if(!calib){ show('calib'); return; }
@@ -1187,17 +1198,17 @@ function detectPitch(x, sr){
   const n=x.length; let mean=0; for(let i=0;i<n;i++) mean+=x[i]; mean/=n;
   for(let i=0;i<n;i++) x[i]-=mean;
   let rms=0; for(let i=0;i<n;i++) rms+=x[i]*x[i]; rms=Math.sqrt(rms/n);
-  if(rms<0.006) return {hz:null,clarity:0};
+  if(rms<0.006) return {hz:null,clarity:0,rms};
   const tauMin=Math.floor(sr/FMAX), tauMax=Math.min(Math.floor(sr/FMIN),n-1);
   const d=new Float32Array(tauMax+1);
   for(let t=tauMin;t<=tauMax;t++){ let ac=0,m=0; for(let j=0;j<n-t;j++){ac+=x[j]*x[j+t];m+=x[j]*x[j]+x[j+t]*x[j+t];} d[t]=m>0?2*ac/m:0; }
   const peaks=[]; let t=tauMin; while(t<=tauMax&&d[t]>0)t++;
   while(t<=tauMax){ if(d[t]<=0){t++;continue;} let best=t; while(t<=tauMax&&d[t]>0){if(d[t]>d[best])best=t;t++;} peaks.push(best); }
-  if(!peaks.length) return {hz:null,clarity:0};
+  if(!peaks.length) return {hz:null,clarity:0,rms};
   let mx=0; for(const p of peaks) if(d[p]>mx)mx=d[p];
   const th=0.8*mx; let ch=peaks[0]; for(const p of peaks){if(d[p]>=th){ch=p;break;}}
   let sh=0; if(ch>0&&ch<tauMax){const a=d[ch-1],b=d[ch],c=d[ch+1],dd=a-2*b+c; if(dd!==0)sh=0.5*(a-c)/dd;}
-  return {hz:sr/(ch+sh), clarity:mx};
+  return {hz:sr/(ch+sh), clarity:mx, rms};
 }
 const centsBetween=(f,ref)=>1200*Math.log2(f/ref);
 /* Output and capture are separate concerns: playing an example or a metronome
@@ -1922,7 +1933,7 @@ $('btnRec').addEventListener('click', async ()=>{
   if(counting) return;
   if(recording){ stopAttempt(); return; }
   if(!analyser){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ setupCanvas();drawOrbitBg(); cx.fillStyle='#ffcf9a';cx.font="500 14px Cairo,sans-serif";cx.textAlign='center';cx.fillText('تعذّر الميكروفون — اسمح بالإذن',ORB.cx,ORB.cy);cx.textAlign='start'; return;} }
-  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
+  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='dynamic'? startDynamic() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
 });
 function startAttempt(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
@@ -1949,6 +1960,7 @@ function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; sto
   $('btnRecLabel').textContent='ابدأ'; $('btnRec').classList.remove('recording');
   setupCanvas();
   if(curDay.kind==='breath'){ drawBreathIdle(); scoreBreath(recData); }
+  else if(curDay.kind==='dynamic'){ drawDynamicIdle(); scoreDynamic(recData); }
   else if(curDay.kind==='transition'){ drawTransitionIdle(); scoreTransition(recData); }
   else if(curDay.kind==='exchange'){ drawTransitionIdle(); scoreExchange(recData); }
   else if(curDay.kind==='rhythm'){ drawRhythmIdle(); scoreRhythm(recData); }
@@ -1985,7 +1997,7 @@ function _autoNextTick(){
     _autoNextSettled=true; _autoNextTimer=setTimeout(_autoNextTick, 700); return;
   }
   _autoNextSettled=false;
-  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
+  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='dynamic'? startDynamic() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
 }
 function persistInProgress(){
   if(!curDay || !sessionLog) return;
@@ -2528,6 +2540,19 @@ function drawBreathIdle(){ drawBreathBg();
   cx.textAlign='start';
   drawContextStrip('مرحلة النفَس · الدرجة '+toAr((breathRung||0)+1)+'/'+toAr(BREATH.rungs.length), '');
 }
+function drawDynamicIdle(){ drawBreathBg();
+  drawAirColumn(1,0);
+  drawMouthGauge('0.0', 0, 'ثانية');
+  cx.textAlign='center'; cx.fillStyle='#F7DCA0'; cx.font="700 24px 'Aref Ruqaa',serif";
+  cx.save(); cx.shadowColor='rgba(230,184,92,.45)'; cx.shadowBlur=12;
+  cx.fillText('◐ التحكّم الديناميكي', ORB.cx, 34); cx.restore();
+  cx.fillStyle='rgba(155,146,184,.6)'; cx.font="600 9.5px Cairo,sans-serif";
+  cx.fillText('أيّ نغمة — ابدأ خافتًا وانتهِ أقوى', ORB.cx, 52);
+  cx.fillStyle=C.muted; cx.font="500 12px Cairo,sans-serif";
+  cx.fillText('نفَس واحد ثابت الطبقة، متدرّج الشدّة', ORB.cx, ORB.h-32);
+  cx.textAlign='start';
+  drawContextStrip('التحكّم الديناميكي · قبل النغمات', `${dynAttempts}/${DYN_NEED}`);
+}
 /* breath: the bore fills with light as you hold; steadiness keeps it calm */
 function renderBreath(runSec, voicedNow, steady){
   drawBreathBg();
@@ -2640,6 +2665,85 @@ function finishBreath(){
     <div class="stat g"><div class="v">${toAr(BREATH.rungs.length)}</div><div class="k">درجات</div></div>`;
   setTimeout(()=>dervishCelebrate(false), 400);
   show('done');
+}
+
+/* ── dynamic control: a genuinely different skill from duration — can you
+   grow your volume deliberately (quiet → strong) while HOLDING the same
+   pitch? Isolated on purpose, after breath-duration is already mastered,
+   per the same "new skill = isolated first" principle used throughout. ── */
+const DYN_TARGET=6, DYN_NEED=3;
+let dynAttempts=0;
+function openDynamicControl(){
+  curDay={kind:'dynamic', id:'dynamic', title:'التحكّم الديناميكي'};
+  sessionLog={app:'miran', version:APP_VERSION, stage:'dynamic', started:new Date().toISOString(), attempts:[]};
+  $('sessEyebrow').textContent='التحكّم الديناميكي · قبل النغمات';
+  $('sessGlyph').textContent='◐'; $('sessLat').textContent=''; $('targetHz').textContent='أيّ نغمة';
+  $('sustainLabel').textContent='ابدأ خافتًا وانتهِ بصوت أقوى'; $('targetSec').textContent=DYN_TARGET.toFixed(1);
+  $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
+  $('pips').innerHTML=''; for(let i=0;i<DYN_NEED;i++){const el=document.createElement('div');el.className='pip'+(i<dynAttempts?' done':'');$('pips').appendChild(el);}
+  if(!_seenIntro.has('dynamic')){ _seenIntro.add('dynamic');
+    setIntroBlocking(true);
+    _introTimeout=setTimeout(()=>showDervish(
+      'ثبّت نغمة واحدة، لكن غيّر شدّة نفَسك هذه المرّة: ابدأ بصوت خافت جدًّا، وقوِّه تدريجيًّا حتى تنتهي بصوت قويّ واضح — بلا تغيير الطبقة نفسها.',
+      {audioKey:'intro_dynamic', blocking:true}), 500);
+  }
+  syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawDynamicIdle();},40);
+}
+function startDynamic(){
+  recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
+  recData={t0:performance.now(),voiced:[],samp:[]}; setupCanvas();
+  onFrame=(p)=>{
+    const now=(performance.now()-recData.t0)/1000;
+    const voiced = !!(p.hz && p.clarity>=CLARITY);
+    recData.voiced.push({t:now,on:voiced});
+    if(voiced) recData.samp.push({t:now, hz:p.hz, rms:p.rms||0});
+    const run=longestRun(recData.voiced);
+    renderBreath(run, voiced, true);
+    $('sustainNum').textContent=run.toFixed(1); $('sustainBar').style.width=Math.min(100,(run/DYN_TARGET)*100)+'%';
+    if(voiced) recData._lastVoiced=now;
+    const endedBlowing = recData._lastVoiced!=null && (now-recData._lastVoiced)>0.8 && run>=0.5;
+    if(endedBlowing) stopAttempt(); else if(recData._lastVoiced==null && now>6) stopAttempt(); else if(now>20) stopAttempt();
+  };
+}
+function scoreDynamic(d){
+  const w=longestRunWindow(d.voiced); const run=w.dur;
+  const inWin=(d.samp||[]).filter(s=>s.t>=w.start-0.05 && s.t<=w.end+0.05);
+  const longEnough = run>=DYN_TARGET*0.8;
+  const early=inWin.filter(s=>s.t<=w.start+run*0.35), late=inWin.filter(s=>s.t>=w.end-run*0.35);
+  const avg=arr=>arr.length?arr.reduce((a,b)=>a+b.rms,0)/arr.length:0;
+  const earlyRms=avg(early), lateRms=avg(late);
+  const ratio = earlyRms>0.0008 ? lateRms/earlyRms : (lateRms>0.008?99:0);
+  const grew = ratio>=1.6; // late portion must be genuinely, deliberately louder — not incidental variation
+  const expected=run*8;
+  const lowConf = longEnough && expected>6 && (inWin.length/expected)<0.35;
+  const ok = !lowConf && longEnough && grew;
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, low_confidence:lowConf,
+    sustained_sec:+run.toFixed(2), early_rms:+earlyRms.toFixed(4), late_rms:+lateRms.toFixed(4), growth_ratio:+ratio.toFixed(2), ts:new Date().toISOString()});
+  let head,body,cls;
+  if(lowConf){
+    cls='retry'; head='لم أستطع الحكم بثقة كافية';
+    body='جودة الإشارة كانت منخفضة جدًّا لقياس شدّة صوتك بدقّة. أعِد في بيئة أهدأ أو اقترب من الميكروفون — هذه المحاولة لا تُحتسب ضدّك.';
+  } else if(!longEnough){
+    cls='retry'; head='نفَسك أقصر من الهدف';
+    body=`استمررت ${run.toFixed(1)} ثانية من أصل ${DYN_TARGET} — أعطِ نفسك وقتًا كافيًا لتنمية الصوت تدريجيًّا، لا فجأة.`;
+  } else if(!grew){
+    cls='retry'; head='الشدّة لم تتغيّر بوضوح كافٍ';
+    body='ابدأ أخفت ممّا فعلت، وانتهِ أقوى بوضوح — يجب أن يكون الفرق واضحًا للأذن، لا خفيًّا.';
+  } else {
+    cls='ok'; dynAttempts++;
+    head=`تحكّم واضح (${toAr(dynAttempts)}/${toAr(DYN_NEED)})`;
+    body = dynAttempts>=DYN_NEED
+      ? 'أتقنت التحكّم الديناميكي — النغمات جاهزة لك الآن.'
+      : `نمَت شدّة صوتك بوضوح (×${ratio.toFixed(1)}) على مدى ${run.toFixed(1)} ثانية. ${DYN_NEED-dynAttempts} محاولة أخرى.`;
+  }
+  $('resultZone').innerHTML=`<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
+  if(cls==='ok' && dynAttempts>=DYN_NEED){
+    prog.foundation.dynamicDone=true; saveProg();
+    setTimeout(()=>{ $('doneSub').textContent='أتقنت التحكّم بشدّة صوتك — النغمات في انتظارك فعليًّا الآن.';
+      $('doneStats').innerHTML=`<div class="stat g"><div class="v">◐</div><div class="k">تحكّم دينامي</div></div>
+        <div class="stat g"><div class="v">${toAr(DYN_NEED)}</div><div class="k">محاولات ناجحة</div></div>`;
+      dervishCelebrate(false); show('done'); }, 900);
+  }
 }
 
 /* ================= RHYTHM (Phase 2 pilot — onset timing, pitch-agnostic) ================= */
