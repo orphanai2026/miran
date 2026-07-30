@@ -607,13 +607,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r6.6-dynamiccontrol</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r6.7-spacedreview</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r6.6-dynamiccontrol';
+const APP_VERSION='r6.7-spacedreview';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1148,15 +1148,21 @@ function renderHome(){
     $('calibReadoutPair').style.display='none';
   }
   $('neyTuning').innerHTML='';
-  // always-available link back to the breath stage, even after it's mastered
+  // spaced-review prompt for breath: quiet link normally, but turns into a
+  // real prompt once genuinely due — the trainee shouldn't have to remember.
+  const BREATH_REVIEW_DAYS=5;
   if(prog.foundation.breath){
     const existing=document.getElementById('reBreath');
-    if(!existing){
-      const a=document.createElement('a'); a.id='reBreath'; a.textContent='مراجعة مرحلة النفَس';
-      a.style.cssText='display:block;text-align:center;margin-top:8px;color:var(--jade);cursor:pointer;font-size:.8rem';
-      a.addEventListener('click',()=>openBreath(true));
-      $('neyTuning').parentElement.insertBefore(a, $('neyTuning').nextSibling);
-    }
+    const el = existing || document.createElement('a');
+    el.id='reBreath';
+    const lastAt = prog.foundation.lastBreathAt ? new Date(prog.foundation.lastBreathAt) : null;
+    const daysSince = lastAt ? Math.floor((Date.now()-lastAt.getTime())/86400000) : 999;
+    const due = daysSince>=BREATH_REVIEW_DAYS;
+    el.textContent = due ? `مرّت ${toAr(daysSince)} أيام على آخر مراجعة للنفَس — راجعه الآن` : 'مراجعة مرحلة النفَس';
+    el.style.cssText = due
+      ? 'display:block;text-align:center;margin-top:9px;color:var(--breath);cursor:pointer;font-size:.82rem;font-weight:700;background:rgba(255,179,71,.09);border:1px solid rgba(255,179,71,.3);border-radius:100px;padding:9px 14px'
+      : 'display:block;text-align:center;margin-top:8px;color:var(--jade);cursor:pointer;font-size:.8rem';
+    if(!existing){ el.addEventListener('click',()=>openBreath(true)); $('neyTuning').parentElement.insertBefore(el, $('neyTuning').nextSibling); }
   }
   // latency calibration status/re-calibrate link
   if(latencyCal){
@@ -2630,6 +2636,7 @@ function scoreBreath(d){
     cls='ok';
     if(_breathReview){
       head='نفَس ممتاز'; body=`أطلت نفَسك ${run.toFixed(1)} ثانية بصوتٍ صافٍ ثابت — مراجعة ناجحة.`;
+      prog.foundation.lastBreathAt=new Date().toISOString(); saveProg();
       $('resultZone').innerHTML=`<div class="msg ok"><div class="head">${head}</div>${body}</div>`;
       return;
     }
@@ -2657,7 +2664,8 @@ function scoreBreath(d){
   }
 }
 function finishBreath(){
-  prog.foundation.breath=true; if(prog.inProgress) delete prog.inProgress['breath']; saveProg(); stopAll();
+  prog.foundation.breath=true; prog.foundation.lastBreathAt=new Date().toISOString();
+  if(prog.inProgress) delete prog.inProgress['breath']; saveProg(); stopAll();
   $('doneSub').textContent='اجتزت مرحلة النفَس — بوابة الرحلة فُتحت، والنغمات في انتظارك.';
   $('doneStats').innerHTML=`
     <div class="stat g"><div class="v">${BREATH.rungs[BREATH.rungs.length-1]}</div><div class="k">ثانية نفَس</div></div>
