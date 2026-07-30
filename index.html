@@ -607,18 +607,19 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r6.4-subdivision</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r6.5-diaphragm</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r6.4-subdivision';
+const APP_VERSION='r6.5-diaphragm';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
    browser TTS guess vowels and mispronounce; explicit tashkeel fixes most of it. */
 const DERVISH = {
+  introDiaphragm: ['قَبْلَ أَنْ نَبْدَأ، تَحَقَّقْ مِنْ شَهِيقِكَ: ضَعْ يَدَكَ عَلَى بَطْنِكَ، وَخُذْ نَفَسًا. إِنِ اتَّسَعَتْ يَدُكَ وَبَطْنُكَ لَا كَتِفَاكَ، فَنَفَسُكَ صَحِيحٌ. هَذَا أَسَاسُ كُلِّ نَفَسٍ سَنَبْنِيهِ مَعًا.'],
   introLongtone: ['اسْتَعِدَّ… ثَبِّتْ نَفَسَكَ عَلَى النَّغْمَةِ بِهُدُوءٍ، وَابْدَأْ حِينَ تَرْتَاحُ.'],
   introBreath: ['قَبْلَ النَّغْمَةِ، النَّفَسُ. خُذْ شَهِيقًا عَمِيقًا مِنَ الْبَطْنِ، وَأَطْلِقْ صَوْتًا وَاحِدًا ثَابِتًا مَا اسْتَطَعْتَ — لَا تَهُمُّكَ الطَّبَقَةُ الْآنَ، بَلِ الِاسْتِمْرَارُ.'],
   introTransition: ['اثْبُتْ عَلَى النَّغْمَةِ الْأُولَى، وَحِينَ تَسْمَعُ الْإِشَارَةَ انْتَقِلْ بِنُعُومَةٍ إِلَى الثَّانِيَةِ.'],
@@ -699,7 +700,7 @@ function showDervish(text, opts){
   el.textContent=text; el.classList.add('show');
   if(_dervishAudio){ try{_dervishAudio.pause();}catch(e){} }
   if(opts.blocking) setIntroBlocking(true);
-  const finish=()=>{ if(opts.blocking) setIntroBlocking(false); };
+  const finish=()=>{ if(opts.blocking) setIntroBlocking(false); if(opts.onEnd) opts.onEnd(); };
   if(opts.speak!==false){
     if(opts.audioKey) dervishPlayAudio(opts.audioKey, ()=>dervishSpeak(text, finish), finish);
     else dervishSpeak(text, finish);
@@ -2468,7 +2469,14 @@ function openBreath(review){
   $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
   // pips reflect ladder rungs
   $('pips').innerHTML=''; for(let i=0;i<BREATH.rungs.length;i++){const d=document.createElement('div');d.className='pip'+(i<breathRung?' done':'');$('pips').appendChild(d);}
-  dervishIntroFor(BREATH);
+  if(!review && !prog.foundation.diaphragmSeen){
+    prog.foundation.diaphragmSeen=true; saveProg();
+    setIntroBlocking(true);
+    _introTimeout=setTimeout(()=>showDervish(DERVISH.introDiaphragm[0],
+      {audioKey:'intro_diaphragm', blocking:true, onEnd:()=>dervishIntroFor(BREATH)}), 500);
+  } else {
+    dervishIntroFor(BREATH);
+  }
   syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawBreathIdle();},40);
 }
 let _breathReview=false;
