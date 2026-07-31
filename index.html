@@ -229,6 +229,11 @@
      Deliberately flat and quiet where the reed is organic and lit — these
      are administration, not performance, and should read as such. ── */
   .admin-row3{display:flex;gap:9px;margin-top:11px}
+  .backup-row{margin-top:14px;padding:14px 16px;border-radius:16px;border:1px dashed rgba(155,146,184,.25);background:rgba(255,255,255,.015)}
+  .backup-note{font-family:var(--f-body);font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:10px;line-height:1.7}
+  .backup-btns{display:flex;gap:8px}
+  .backup-btn{flex:1;padding:10px 8px;border-radius:100px;border:1px solid rgba(155,146,184,.3);
+    background:rgba(255,255,255,.03);color:var(--bone);font-family:var(--f-head);font-weight:600;font-size:.74rem;cursor:pointer}
   .admin-tile{--ac:79,227,193;flex:1;height:84px;border-radius:14px;cursor:pointer;
     border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.028);
     display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
@@ -464,6 +469,14 @@
         <div class="admin-lbl">تصفير التقدّم</div>
       </button>
     </div>
+    <div class="backup-row">
+      <p class="backup-note">انتقل بتقدّمك بين أجهزتك — لا حساب، لا إنترنت، ملفّ واحد فقط.</p>
+      <div class="backup-btns">
+        <button class="backup-btn" id="btnBackupExport">↓ نسخة احتياطية كاملة</button>
+        <button class="backup-btn" id="btnBackupImport">↑ استيراد نسخة</button>
+      </div>
+      <input type="file" id="backupFileInput" accept="application/json" style="display:none">
+    </div>
 
   </div>
 
@@ -608,13 +621,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r7.3-sixteenthcomplete</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r7.4-backuprestore</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r7.3-sixteenthcomplete';
+const APP_VERSION='r7.4-backuprestore';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -3228,6 +3241,37 @@ function scoreRhythmDrop(d){
 }
 
 /* ================= EXPORT PROGRESS ================= */
+$('btnBackupExport').addEventListener('click', ()=>{
+  const backup={ app:'miran', version:APP_VERSION, exported:new Date().toISOString(), backup:true,
+    prog, calib, latencyCal };
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`miran-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+});
+$('btnBackupImport').addEventListener('click', ()=> $('backupFileInput').click());
+$('backupFileInput').addEventListener('change', (e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    let data;
+    try{ data=JSON.parse(ev.target.result); }
+    catch(err){ alert('تعذّرت قراءة الملف — تأكّد أنه ملفّ نسخة احتياطية صحيح من مِران.'); return; }
+    if(!data || data.app!=='miran' || !data.prog){
+      alert('هذا ليس ملفّ نسخة احتياطية من مِران — لا يحتوي البيانات المطلوبة.'); return;
+    }
+    const daysCount=Object.keys(data.prog.done||{}).length;
+    const sure=confirm(`استيراد هذه النسخة سيستبدل تقدّمك الحالي بالكامل.\n\nالنسخة المستورَدة: ${daysCount} يومًا مُتقَنًا، مُصدَّرة بتاريخ ${(data.exported||'').slice(0,10)}.\n\nهل أنت متأكد؟`);
+    if(!sure){ e.target.value=''; return; }
+    prog=data.prog; saveProg();
+    if(data.calib){ calib=data.calib; saveCalib(); }
+    if(data.latencyCal){ latencyCal=data.latencyCal; saveLatencyCal(); }
+    e.target.value='';
+    selectedLevel=null; renderHome(); show('home');
+    alert('تمّ استيراد تقدّمك بنجاح.');
+  };
+  reader.readAsText(file);
+});
 $('btnExport').addEventListener('click', ()=>{
   const report={ app:'miran', version:APP_VERSION, exported:new Date().toISOString(),
     ney_calibration: calib ? {qarar_hz:+calib.qararHz.toFixed(2), implied_concert_A4:+neyConcertPitch(calib.qararHz).impliedA4.toFixed(2), cents_from_440:+calib.cents.toFixed(1)} : null,
