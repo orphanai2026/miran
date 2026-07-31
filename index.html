@@ -642,13 +642,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r7.9-plausscale</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r8.0-maqamtable</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r7.9-plausscale';
+const APP_VERSION='r8.0-maqamtable';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -896,22 +896,64 @@ function levelDays(levelId){ return CURRICULUM.filter(d=>d.level===levelId); }
    optional audio field that gracefully shows "coming later" until a real,
    rights-clear recording exists. Sourced from Maqam World (primary reference). ── */
 const MAQAMAT=[
-  {key:'ajam', name:'عجم', quarterTone:false,
+  {key:'ajam', name:'عجم', quarterTone:false, mood:'قوّة ووقار واحتفاء — أقرب المقامات لأذن معتادة على السلّم الكبير الغربي، لهذا غالبًا أول مقام يُقدَّم لمتعلّم جديد.',
    notesText:'دو - ري - مي - فا - صول - لا - سي - دو',
+   semis:[0,2,4,5,7,9,11,12],
+   songs:[{title:'أغدًا ألقاك', artist:'أم كلثوم', composer:'محمد عبد الوهاب', year:1971}],
+   audioKey:null},
+  {key:'nahawand', name:'نهاوند', quarterTone:false, mood:'دراما وعمق عاطفي — أقرب مقام لإحساس السلّم الصغير الغربي، يحمل شجنًا ورومانسية حقيقية.',
+   notesText:'دو - ري - مي بيمول - فا - صول - لا - سي بيمول - دو',
+   semis:[0,2,3,5,7,9,10,12],
+   songs:[],
+   audioKey:null},
+  {key:'kurd', name:'كرد', quarterTone:false, mood:'حنين ودفء — أقرب نقطة انطلاق لأذن غربية أيضًا (سلّم صغير مألوف)، لكن بطابع شرقي حزين مميَّز.',
+   notesText:'دو - ري بيمول - مي بيمول - فا - صول - لا بيمول - سي بيمول - دو',
+   semis:[0,1,3,5,7,8,10,12],
+   songs:[],
+   audioKey:null},
+  {key:'hijaz', name:'حجاز', quarterTone:false, mood:'شوق وتأمّل روحانيّ — الثانية الزائدة المميِّزة تمنحه طابعًا صحراويًّا بعيدًا، يُستخدم كثيرًا في الأذان والابتهالات.',
+   notesText:'دو - ري بيمول - مي - فا - صول - لا بيمول - سي بيمول - دو',
+   semis:[0,1,4,5,7,8,10,12],
+   songs:[{title:'مدنقة جفاه مرقده', artist:'محمد عبد الوهاب', composer:'محمد عبد الوهاب', year:1938}],
+   audioKey:null},
+  {key:'bayati', name:'بياتي', quarterTone:true, mood:'الأكثر شيوعًا في التراث العربي كله — دفء وحيوية وقرب إنساني. كلمة «بياتي» من «بيت»؛ يُقال إنه أوّل مقام يجب أن يتعلّمه أي عازف عربي.',
+   notesText:'ري - مي نصف بيمول - فا - صول - لا - سي بيمول - دو - ري',
+   semis:[2,3.5,5,7,9,10,12,14],
    songs:[
-     {title:'أغدًا ألقاك', artist:'أم كلثوم', composer:'محمد عبد الوهاب', year:1971},
+     {title:'ع الباب المحبوب ودّيني', artist:'أم كلثوم', composer:'رياض السنباطي', year:1935},
+     {title:'أكون سعيد', artist:'أم كلثوم', composer:'زكريا أحمد', year:1932},
    ],
+   audioKey:null},
+  {key:'rast', name:'راست', quarterTone:true, mood:'«أبو المقامات» — أساس النظام المقامي العربي كله، وقار وفخر واعتدال، غالبًا أول مقام تُبنى عليه تعاليم النظرية الموسيقية العربية.',
+   notesText:'دو - ري - مي نصف بيمول - فا - صول - لا - سي نصف بيمول - دو',
+   semis:[0,2,3.5,5,7,9,10.5,12],
+   songs:[],
    audioKey:null},
 ];
 function maqamAudioSrc(m){ return m.audioKey ? `maqam-audio/${m.audioKey}.mp3` : null; }
+function maqamReadiness(m){
+  const taughtSemis=new Set();
+  CURRICULUM.forEach(d=>{ if(d.semis!=null) taughtSemis.add(d.semis); if(d.from&&d.from.semis!=null) taughtSemis.add(d.from.semis); if(d.to&&d.to.semis!=null) taughtSemis.add(d.to.semis); });
+  const known=m.semis.filter(s=>taughtSemis.has(s)).length;
+  return {known, total:m.semis.length};
+}
 function renderMaqamPreview(){
   let html='';
   MAQAMAT.forEach(m=>{
+    const {known,total}=maqamReadiness(m);
+    const pct=Math.round(known/total*100);
     html+=`<div class="maqam-card">
       <div class="maqam-name">${m.name}${m.quarterTone?' <span style="font-size:.6em;opacity:.6">(ربع صوت)</span>':''}</div>
+      <p style="font-family:var(--f-body);font-size:.78rem;color:var(--muted);text-align:center;line-height:1.85;margin-bottom:12px">${m.mood}</p>
       <div class="maqam-notes">${m.notesText}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <div style="flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${pct===100?'var(--live)':'var(--gold)'};border-radius:3px"></div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--muted)">${known}/${total} نغمات مُتقَنة</div>
+      </div>
       <div class="maqam-sec-lbl">أغانٍ مشهورة بهذا المقام</div>
-      ${m.songs.map(s=>`<div class="maqam-song">${s.title} — <span class="composer">${s.artist}${s.composer?' · لحن '+s.composer:''}${s.year?' · '+toAr(s.year):''}</span></div>`).join('')}
+      ${m.songs.length?m.songs.map(s=>`<div class="maqam-song">${s.title} — <span class="composer">${s.artist}${s.composer?' · لحن '+s.composer:''}${s.year?' · '+toAr(s.year):''}</span></div>`).join(''):'<div class="maqam-song" style="color:var(--muted)">لم تُضَف بعد</div>'}
       <div class="maqam-audio">
         <div class="ic">♪</div>
         <div class="txt">${m.audioKey?'مقطع تعريفي متاح':'مقطع صوتي تعريفي — سيُضاف لاحقًا'}</div>
