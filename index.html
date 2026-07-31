@@ -642,13 +642,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r7.8-maqampreview</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r7.9-plausscale</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r7.8-maqampreview';
+const APP_VERSION='r7.9-plausscale';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -2510,8 +2510,14 @@ function scoreExchange(d){
     // plausibility filter: a reading more than 400¢ from BOTH this exercise's
     // notes is a register-jump artifact (rare, real, but not this hold's pitch)
     // — exclude it from the median instead of letting it skew the result.
+    // plausibility filter: threshold scales with the exchange's own span so
+    // narrow exchanges (e.g. a semitone) aren't left with a proportionally
+    // loose filter, and wide ones aren't left with a proportionally tight one
+    // — 2x span matches the original 200¢-exchange design ratio, with a floor
+    // so very narrow exchanges still tolerate normal pitch variance.
+    const plausTol = Math.max(250, TR.span*2);
     const raw=d.pts.filter(p=>p.t>=start&&p.t<end).map(p=>p.c);
-    const seg=raw.filter(c=>Math.abs(c-0)<=400 || Math.abs(c-TR.span)<=400);
+    const seg=raw.filter(c=>Math.abs(c-0)<=plausTol || Math.abs(c-TR.span)<=plausTol);
     const med=seg.length?median(seg):(raw.length?median(raw):null); // fall back to raw if EVERY point looked implausible, rather than silently dropping the hold
     holds.push({i, med, ok: med!=null && Math.abs(med-noteAt(i))<=TOL});
   }
