@@ -608,13 +608,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r7.0-kodaly</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r7.3-sixteenthcomplete</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r7.0-kodaly';
+const APP_VERSION='r7.3-sixteenthcomplete';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -867,6 +867,28 @@ const CURRICULUM=[
   {id:29, level:3, note:'♪♪·', lat:'', kind:'rhythm', beats:8, beatSec:1.0, sub:2,
     tolLadder:[340,280,230], rungNeed:[2,2,7], need:7,
     title:'تقسيم الضربة: تثبيت', blurb:'نفس التقسيم، بسرعة أقرب لسرعتك المعتادة — ثبّته حتى يصير بديهيًّا.'},
+  /* ═══ sustained note across beats (تا-آه / تا-آه-آه-آه) — completes the
+     Kodály duration set; still a rhythm-timing skill (level 3), not a new
+     physical skill, so no isolation phase needed ═══ */
+  {id:30, level:3, kind:'sustainRhythm', beats:2, beatSec:1.0, holdTolMs:280, need:7,
+    title:'النغمة الممتدّة: تا-آه', blurb:'ابدأ نفَسك مع النبضة الأولى، واستمرّ بلا انقطاع حتى نهاية الثانية بالضبط.'},
+  {id:31, level:3, kind:'sustainRhythm', beats:4, beatSec:0.9, holdTolMs:320, need:7,
+    title:'النغمة الممتدّة: تا-آه-آه-آه', blurb:'أربع نبضات كاملة بنفَس واحد متّصل، من البداية للنهاية بلا أي انقطاع.'},
+  /* ═══ tonguing / articulation (النقر) — a genuinely NEW physical skill
+     (tongue+breath+lip coordination), isolated per the pedagogy-review
+     principle. level 4: its own phase, between rhythm and maqamat ═══ */
+  {id:32, level:4, kind:'tongue', beats:6, beatSec:1.1, tolLadder:[420,360,300], minGapMs:35, maxGapMs:160, rungNeed:[2,2,7], need:7,
+    title:'النقر: تقديم', blurb:'نغمة واحدة، لكن انقرها بلسانك بدل نفخة واحدة ممتدّة — نفَس مستمرّ، ولسان يفصل.'},
+  {id:33, level:4, kind:'tongue', beats:8, beatSec:0.85, tolLadder:[340,280,230], minGapMs:30, maxGapMs:130, rungNeed:[2,2,7], need:7,
+    title:'النقر: تثبيت', blurb:'نفس النقر، أسرع وأدقّ — حتى يصير لمسة لسان طبيعية لا تفكيرًا واعيًا.'},
+  /* ═══ سُدس عشر (توكو-توكو) — يُكمل مجموعة كودالي بالكامل. نفس محرّك تقسيم
+     الضربة (sub) المبني مسبقًا، بتقسيم رباعي بدل ثنائي — لا منطق كشف جديد ═══ */
+  {id:34, level:3, note:'♬♬', lat:'', kind:'rhythm', beats:4, beatSec:1.4, sub:4,
+    tolLadder:[460,400,340], rungNeed:[2,2,7], need:7,
+    title:'تقسيم الضربة: أربع نغمات (توكو-توكو)', blurb:'أربع نغمات قصيرة متساوية في كل نبضة — توكو-توكو، توكو-توكو.'},
+  {id:35, level:3, note:'♬♬·', lat:'', kind:'rhythm', beats:6, beatSec:1.1, sub:4,
+    tolLadder:[360,300,250], rungNeed:[2,2,7], need:7,
+    title:'تقسيم الضربة: أربع نغمات — تثبيت', blurb:'نفس التقسيم الرباعي، بسرعة أقرب لسرعتك المعتادة.'},
 ];
 /* ── LEVELS: a browsing/overview grouping over the same CURRICULUM sequence.
    Purely a navigation convenience — it does NOT change unlock order at all;
@@ -879,8 +901,9 @@ const LEVELS=[
   {id:1, key:'breath', name:'النفَس', color:'79,227,193'},
   {id:2, key:'pitch',  name:'دقّة النغمات', color:'230,184,92'},
   {id:3, key:'rhythm', name:'السرعة والإيقاع', color:'220,110,76'},
-  {id:4, key:'maqam',  name:'المقامات الأساسية', color:'74,59,122', locked:true},
-  {id:5, key:'perf',   name:'الأداء والتقاسيم', color:'155,146,184', locked:true},
+  {id:4, key:'tongue', name:'النقر', color:'155,110,220'},
+  {id:5, key:'maqam',  name:'المقامات الأساسية', color:'74,59,122', locked:true},
+  {id:6, key:'perf',   name:'الأداء والتقاسيم', color:'155,146,184', locked:true},
 ];
 function levelDays(levelId){ return CURRICULUM.filter(d=>d.level===levelId); }
 function levelProgress(levelId){
@@ -1209,7 +1232,7 @@ function openDay(id){
   targetDayId=id;
   if(!calib){ show('calib'); return; }
   const day=CURRICULUM.find(d=>d.id===id);
-  if(day && (day.kind==='rhythm'||day.kind==='rhythmdrop') && !latencyCal){ show('latcal'); return; }
+  if(day && (day.kind==='rhythm'||day.kind==='rhythmdrop'||day.kind==='tongue') && !latencyCal){ show('latcal'); return; }
   startSession(id);
 }
 $('btnStart').addEventListener('click',()=>openDay(targetDayId));
@@ -1704,6 +1727,39 @@ function startSession(id){
     dervishIntroFor(curDay);
     return;
   }
+  if(curDay.kind==='sustainRhythm'){
+    NEED=curDay.need||7; attempts=restoreStreak(); _failPattern=[]; resetDrift();
+    sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'sustainRhythm', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
+    $('sessEyebrow').textContent=`${dayLabel(id)} · نغمة ممتدّة`;
+    $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
+    $('targetHz').textContent=`${curDay.beats} نبضات متّصلة`;
+    $('sustainLabel').textContent='استمرارية النغمة';
+    $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
+    renderPips(); syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawRhythmIdle();},40);
+    dervishIntroFor(curDay);
+    return;
+  }
+  if(curDay.kind==='tongue'){
+    rhRung = curDay.tolLadder ? 0 : -1;
+    rhTolMs = curDay.tolLadder ? curDay.tolLadder[0] : 250;
+    NEED = curDay.tolLadder ? curDay.rungNeed[0] : curDay.need;
+    attempts=restoreStreak(); _failPattern=[]; resetDrift();
+    sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'tongue', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
+    $('sessEyebrow').textContent = curDay.tolLadder ? `${dayLabel(id)} · نقر · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}` : `${dayLabel(id)} · نقر`;
+    $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
+    $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
+    $('sustainLabel').textContent='تقدّم الدورة';
+    $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
+    renderPips(); syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawRhythmIdle();},40);
+    if(!_seenIntro.has('tongue-air') && !prog.tongueAirSeen){
+      _seenIntro.add('tongue-air'); prog.tongueAirSeen=true; saveProg();
+      setIntroBlocking(true);
+      _introTimeout=setTimeout(()=>showDervish(
+        'قبل أن تنفخ: جرّب النطق بلا الناي أولًا — قل «تُو-تُو-تُو» بلسانك عدّة مرّات. الآن افعل الشيء نفسه بالناي: لا توقف نفَسك بين كل نقرة — لسانك وحده يقطع الصوت، والهواء يبقى مستمرًّا خلفه.',
+        {audioKey:'intro_tongue_air', blocking:true, onEnd:()=>dervishIntroFor(curDay)}), 500);
+    } else dervishIntroFor(curDay);
+    return;
+  }
   targetHz=dayTarget(curDay);
   ltRung = curDay.durLadder ? 0 : -1;
   if(curDay.durLadder){ TARGET_SEC=curDay.durLadder[0]; STAB_MAX=Math.round(curDay.stabMax*curDay.stabMult[0]); NEED=curDay.rungNeed[0]; }
@@ -1963,7 +2019,7 @@ $('btnRec').addEventListener('click', async ()=>{
   if(counting) return;
   if(recording){ stopAttempt(); return; }
   if(!analyser){ try{await initAudio(); if(audioCtx.state==='suspended')await audioCtx.resume(); if(!rafId)loop();}catch(e){ setupCanvas();drawOrbitBg(); cx.fillStyle='#ffcf9a';cx.font="500 14px Cairo,sans-serif";cx.textAlign='center';cx.fillText('تعذّر الميكروفون — اسمح بالإذن',ORB.cx,ORB.cy);cx.textAlign='start'; return;} }
-  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='dynamic'? startDynamic() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
+  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='dynamic'? startDynamic() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : curDay.kind==='sustainRhythm'? startSustainRhythm() : curDay.kind==='tongue'? startTongue() : startAttempt());
 });
 function startAttempt(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
@@ -1995,6 +2051,8 @@ function stopAttempt(){ if(!recording)return; recording=false; onFrame=null; sto
   else if(curDay.kind==='exchange'){ drawTransitionIdle(); scoreExchange(recData); }
   else if(curDay.kind==='rhythm'){ drawRhythmIdle(); scoreRhythm(recData); }
   else if(curDay.kind==='rhythmdrop'){ drawRhythmIdle(); scoreRhythmDrop(recData); }
+  else if(curDay.kind==='sustainRhythm'){ drawRhythmIdle(); scoreSustainRhythm(recData); }
+  else if(curDay.kind==='tongue'){ drawRhythmIdle(); scoreTongue(recData); }
   else { drawThreadIdle(); score(recData); }
   const streakFrac = NEED>0 ? Math.min(1, attempts/NEED) : 0;
   $('sustainBar').style.width=(streakFrac*100)+'%';
@@ -2027,7 +2085,7 @@ function _autoNextTick(){
     _autoNextSettled=true; _autoNextTimer=setTimeout(_autoNextTick, 700); return;
   }
   _autoNextSettled=false;
-  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='dynamic'? startDynamic() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : startAttempt());
+  runCountdown(()=> curDay.kind==='breath'? startBreath() : curDay.kind==='dynamic'? startDynamic() : curDay.kind==='transition'? startTransition() : curDay.kind==='exchange'? startExchange() : curDay.kind==='rhythm'? startRhythm() : curDay.kind==='rhythmdrop'? startRhythmDrop() : curDay.kind==='sustainRhythm'? startSustainRhythm() : curDay.kind==='tongue'? startTongue() : startAttempt());
 }
 function persistInProgress(){
   if(!curDay || !sessionLog) return;
@@ -2784,7 +2842,9 @@ function scoreDynamic(d){
 let rhRung=-1, rhTolMs=250;
 let rdRung=0, rdDrop=new Set();
 function drawRhythmBg(){ drawReedGround(); reedGeom(); drawCane(null); }
-function drawRhythmIdle(){ drawRhythmBg(); drawAirColumn(1,0);
+function drawRhythmIdle(){
+  if(!curDay || curDay.beatSec==null) return; // stale delayed call from a day we've since left — nothing to draw safely
+  drawRhythmBg(); drawAirColumn(1,0);
   cx.textAlign='center'; cx.fillStyle='#F7DCA0'; cx.font="700 24px 'Aref Ruqaa',serif";
   cx.save(); cx.shadowColor='rgba(230,184,92,.45)'; cx.shadowBlur=12;
   cx.fillText('♩ الإيقاع', ORB.cx, 34); cx.restore();
@@ -2802,7 +2862,7 @@ function kodalySyllable(i, subN, silent){
   if(silent) return '−';
   if(!subN || subN<=1) return 'تا';
   if(subN===2) return 'تِ';           // each half of a تِ-تِ (eighth) pair
-  if(subN===4) return ['فِ','تِ','فَ','تِ'][i%4]; // فِ-تِ-فَ-تِ (sixteenth-note group)
+  if(subN===4) return ['تُو','كُو','تُو','كُو'][i%4]; // تُوكُو-تُوكُو — chosen for the ney's lip-driven articulation, not a literal translation of tika-tika
   return 'تا';
 }
 function drawBeatRow(beats, hits, curBeatIdx, dropSet, subN){
@@ -2860,6 +2920,157 @@ function renderDropBeats(beats, hits, curBeatIdx, dropSet){
   drawExitStreak(attempts||0, NEED||7);
   drawContextStrip(dayLabel(curDay.id)+' · حذف النبضات',
     toAr(dropSet.size)+' صامتة', 'rgba(255,179,71,.75)');
+}
+/* ── sustained note across beats (تا-آه / تا-آه-آه-آه): a different skill
+   from discrete-onset rhythm — start ON the beat, hold with ZERO
+   re-articulation, release ON the target beat. Completes the Kodály set
+   started with تا/تِ-تِ, for the half-note and whole-note durations. ── */
+function startSustainRhythm(){
+  recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
+  const beatSec=curDay.beatSec, nBeats=curDay.beats;
+  recData={t0:performance.now(), voiced:[], wasVoiced:false, lastBeatPlayed:-1};
+  setupCanvas();
+  const END=nBeats*beatSec+1.0;
+  onFrame=(p)=>{
+    const now=(performance.now()-recData.t0)/1000;
+    const beatIdx=Math.min(Math.floor(now/beatSec+0.001), nBeats);
+    if(beatIdx!==recData.lastBeatPlayed){ recData.lastBeatPlayed=beatIdx; playTick(beatIdx===0||beatIdx===nBeats?1300:1100); }
+    const voiced=!!(p.hz && p.clarity>=CLARITY);
+    recData.voiced.push({t:now,on:voiced});
+    renderSustainRhythm(now, voiced, nBeats, beatSec, beatIdx);
+    $('sustainNum').textContent=Math.min(now,END).toFixed(1);
+    $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
+    if(now>=END) stopAttempt();
+  };
+}
+function scoreSustainRhythm(d){
+  const beatSec=curDay.beatSec, nBeats=curDay.beats, target=nBeats*beatSec;
+  const tol=curDay.holdTolMs||250;
+  const w=longestRunWindow(d.voiced);
+  const startOffMs=Math.abs(w.start*1000);
+  const endOffMs=Math.abs((w.end-target)*1000);
+  // count ALL distinct voiced segments across the whole capture (same 0.15s
+  // break threshold as longestRunWindow) — more than one substantial segment
+  // means the breath really stopped and restarted somewhere, even if that
+  // break isn't inside whichever segment happened to end up "longest"
+  const segs=[]; let cs=null, lo=null;
+  d.voiced.forEach(s=>{ if(s.on){ if(cs==null)cs=s.t; lo=s.t; } else { if(cs!=null && s.t-lo>0.15){ segs.push(lo-cs); cs=null; } } });
+  if(cs!=null) segs.push(lo-cs);
+  const substantialSegs=segs.filter(dur=>dur>0.2).length;
+  const hadInnerBreak = substantialSegs>1;
+  const durOk = startOffMs<=tol && endOffMs<=tol;
+  const totalVoicedFrames=d.voiced.filter(s=>s.on).length;
+  const lowConf = totalVoicedFrames < d.voiced.length*0.25 && (w.dur)>1;
+  const ok = !lowConf && durOk && !hadInnerBreak;
+  attempts = attempts||0; NEED = curDay.need||7;
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, low_confidence:lowConf,
+    start_off_ms:+startOffMs.toFixed(0), end_off_ms:+endOffMs.toFixed(0), had_inner_break:hadInnerBreak, ts:new Date().toISOString()});
+  let head,body,cls;
+  if(lowConf){ cls='retry'; head='لم أستطع الحكم بثقة كافية';
+    body='إشارة الصوت كانت ضعيفة جدًّا لتتبّع استمرارية نفَسك بدقّة. أعِد المحاولة في بيئة أهدأ — هذه لا تُحتسب ضدّك.';
+  } else if(hadInnerBreak){ cls='retry'; head='انقطع نفَسك في المنتصف';
+    body='توقّفت واستأنفت أكثر من مرّة — هذا نفَسان منفصلان، لا نغمة واحدة ممتدّة. حافظ على استمرار الهواء من البداية للنهاية بلا انقطاع.';
+  } else if(!durOk){ cls='retry';
+    if(startOffMs>tol && endOffMs>tol){ head='البداية والنهاية بحاجة دقّة أكبر'; body=`ابدأ عند النبضة الأولى بالضبط، واستمرّ حتى النبضة ${toAr(nBeats+1)} تمامًا — لا قبل ولا بعد.`; }
+    else if(startOffMs>tol){ head='بدأت مبكرًا أو متأخّرًا'; body='دع النبضة الأولى تبدأ نفَسك بالضبط، لا قبلها بلحظة ولا بعدها.'; }
+    else { head='أنهيت مبكرًا أو أطلت أكثر من اللازم'; body=`النغمة يجب أن تنتهي بالضبط عند النبضة ${toAr(nBeats+1)} — لا أقصر ولا أطول.`; }
+  } else {
+    cls='ok'; attempts++; head=`نغمة ممتدّة نظيفة (${toAr(attempts)}/${toAr(NEED)})`;
+    body=`استمررت من النبضة الأولى حتى ${toAr(nBeats+1)} بلا انقطاع — بالضبط ما يحتاجه ${nBeats===2?'"تا-آه"':'"تا-آه-آه-آه"'}.`;
+  }
+  $('resultZone').innerHTML=`<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
+  if(cls==='ok' && attempts>=NEED){ setTimeout(()=>finishDay({bestStartOffMs:+startOffMs.toFixed(0), bestEndOffMs:+endOffMs.toFixed(0)}),900); }
+}
+function renderSustainRhythm(now, voiced, nBeats, beatSec, curBeatIdx){
+  drawRhythmBg();
+  const target=nBeats*beatSec;
+  drawAirColumn(voiced?1:0.2, _threadStep++);
+  const {x0,L,R,cy}=REED, by=cy+R*0.62;
+  cx.strokeStyle='rgba(74,59,122,.5)'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(beatX(0,nBeats),by); cx.lineTo(beatX(nBeats,nBeats+1),by); cx.stroke();
+  // the held span itself — fills as you sustain, breaks visually if you stop
+  const heldFrac=Math.min(1, now/target);
+  cx.strokeStyle = voiced? 'rgba(79,227,193,.9)' : 'rgba(155,146,184,.3)';
+  cx.lineWidth=5; cx.lineCap='round';
+  cx.beginPath(); cx.moveTo(beatX(0,nBeats+1), by); cx.lineTo(beatX(0,nBeats+1)+(beatX(nBeats,nBeats+1)-beatX(0,nBeats+1))*heldFrac, by); cx.stroke();
+  cx.lineCap='butt';
+  // beat boundary ticks (start + target release point are the only ones that matter)
+  [0,nBeats].forEach(i=>{
+    const px=x0 + L*(0.12+i*0.76/nBeats);
+    cx.fillStyle = i===0?'rgba(79,227,193,.85)':'rgba(230,184,92,.85)';
+    cx.beginPath(); cx.arc(px,by,5,0,7); cx.fill();
+  });
+  cx.textAlign='center'; cx.fillStyle='#F7DCA0'; cx.font="700 22px 'Aref Ruqaa',serif";
+  cx.fillText(nBeats===2?'تا-آه':'تا-آه-آه-آه', ORB.cx, 32);
+  cx.fillStyle='rgba(155,146,184,.6)'; cx.font="600 9.5px Cairo,sans-serif";
+  cx.fillText('ابدأ مع الأولى، استمرّ حتى '+toAr(nBeats+1), ORB.cx, 50); cx.textAlign='start';
+  drawExitStreak(attempts||0, NEED||7);
+  drawContextStrip(dayLabel(curDay.id)+' · نغمة ممتدّة', voiced?'مستمرّ':'صامت', voiced?'rgba(79,227,193,.75)':'rgba(155,146,184,.5)');
+}
+/* ── tonguing / articulation (النقر): a genuinely NEW physical skill, isolated
+   on purpose per the pedagogy-review principle. Research correction applied:
+   real tonguing does NOT stop the breath — only the tongue interrupts the
+   sound briefly. So the target gap between repeated onsets is SHORT
+   (a quick flick), and a gap that's too long is treated as a breath restart,
+   not real articulation, and explicitly coached against. ── */
+function startTongue(){
+  recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
+  const beatSec=curDay.beatSec, nBeats=curDay.beats;
+  const beatTimes=Array.from({length:nBeats+1},(_,i)=>i*beatSec);
+  recData={t0:performance.now(), onsets:[], gaps:[], hits:new Array(nBeats+1).fill(undefined), wasVoiced:false, lastOffAt:null, lastBeatPlayed:-1};
+  setupCanvas();
+  const END=nBeats*beatSec+0.7;
+  onFrame=(p)=>{
+    const now=(performance.now()-recData.t0)/1000;
+    const beatIdx=Math.min(Math.floor(now/beatSec+0.5), nBeats);
+    if(beatIdx!==recData.lastBeatPlayed && now>=beatIdx*beatSec-0.02){ recData.lastBeatPlayed=beatIdx; playTick(beatIdx%4===0?1300:1100); }
+    const voiced=!!(p.hz && p.clarity>=CLARITY);
+    if(!voiced && recData.wasVoiced) recData.lastOffAt=now; // falling edge: the tongue just cut the sound
+    if(voiced && !recData.wasVoiced){ // rising edge = a new tap
+      recData.onsets.push(now);
+      const gapMs = recData.lastOffAt!=null ? (now-recData.lastOffAt)*1000 : null;
+      if(gapMs!=null) recData.gaps.push(gapMs);
+      let bi=-1,bd=Infinity;
+      beatTimes.forEach((bt,i)=>{ if(recData.hits[i]===undefined){ const dd=Math.abs(now-bt); if(dd<bd){bd=dd;bi=i;} } });
+      if(bi>=0 && bd<=beatSec/2){
+        const offMs=(now-beatTimes[bi])*1000; const corrected=offMs-(latencyCal?latencyCal.ms:0);
+        const timingOk = Math.abs(corrected)<=rhTolMs;
+        // the FIRST tap has no prior gap to judge — timing alone decides it.
+        // every tap after must ALSO show a real, short tongue-gap, not silence-free bleed nor a full breath restart.
+        const gapOk = bi===0 ? true : (gapMs!=null && gapMs>=curDay.minGapMs && gapMs<=curDay.maxGapMs);
+        recData.hits[bi] = timingOk && gapOk;
+      }
+    }
+    recData.wasVoiced=voiced;
+    const curIdx=Math.min(Math.floor(now/beatSec), nBeats);
+    renderRhythmBeats(beatTimes, recData.hits, curIdx, 1);
+    $('sustainNum').textContent=Math.min(now,END).toFixed(1);
+    $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
+    if(now>=END) stopAttempt();
+  };
+}
+function scoreTongue(d){
+  const nBeats=curDay.beats;
+  const hits=d.hits.filter(h=>h===true).length;
+  const misses=d.hits.filter(h=>h===false).length;
+  const missed=d.hits.filter(h=>h===undefined).length;
+  const total=nBeats+1;
+  const tooLong = d.gaps.filter(g=>g>curDay.maxGapMs).length;
+  const tooShort = d.gaps.filter(g=>g<curDay.minGapMs).length;
+  const ok = hits>=total-1 && misses===0 && missed===0; // near-perfect: every tap timed AND separated correctly
+  attempts=attempts||0; NEED=curDay.need||7;
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, hits, misses, missed,
+    gaps_ms:d.gaps.map(g=>+g.toFixed(0)), too_long_breaks:tooLong, too_short_bleeds:tooShort, ts:new Date().toISOString()});
+  let head,body,cls;
+  if(missed>0){ cls='retry'; head='فاتتك نقرة'; body='حافظ على نقر كل نبضة — لا تدع أيّ نبضة تمرّ بلا نقرة.'; }
+  else if(tooLong>tooShort && tooLong>0){ cls='retry'; head='توقّفت عن التنفّس بين النقرات';
+    body='الفجوة بين نقراتك طويلة جدًّا — هذا يعني أنك تُوقف نفَسك وتُعيده، لا تنقر بلسانك فقط. أبقِ الهواء مستمرًّا طوال الوقت، ودع لسانك وحده يقطع الصوت بلمسة سريعة.'; }
+  else if(tooShort>0){ cls='retry'; head='النقرات متلاصقة جدًّا'; body='لا توجد فاصلة واضحة كافية بين نقراتك — النغمات تكاد تلتحم ببعضها. اجعل لمسة اللسان أوضح قليلًا.'; }
+  else if(misses>0){ cls='retry'; head='التوقيت يحتاج دقّة أكبر'; body='الفاصلة بين نقراتك جيدة، لكن توقيتها مع النبضة يحتاج ضبطًا أدقّ.'; }
+  else { cls='ok'; attempts++; head=`نقر نظيف (${toAr(attempts)}/${toAr(NEED)})`;
+    body='لمسة لسان واضحة، نفَس متواصل — بالضبط النقر الصحيح.'; }
+  $('resultZone').innerHTML=`<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
+  if(cls==='ok' && attempts>=NEED){ setTimeout(()=>finishDay({bestGapsMs:d.gaps.map(g=>+g.toFixed(0))}),900); }
 }
 function startRhythm(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
