@@ -644,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r8.2-adjacentseq</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r8.3-speedlock</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r8.2-adjacentseq';
+const APP_VERSION='r8.3-speedlock';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1806,7 +1806,7 @@ function startSession(id){
     return;
   }
   if(curDay.kind==='exchange'){
-    exHoldCount=0; exGraceUsed=false; _failPattern=[];
+    exHoldCount=0; exGraceUsed=false; exTargetReachedThisSession=false; _failPattern=[];
     TR={fromHz:calib.qararHz*Math.pow(2,curDay.from.semis/12),
         toHz:calib.qararHz*Math.pow(2,curDay.to.semis/12),
         span:(curDay.to.semis-curDay.from.semis)*100, beatSec:curDay.beatStart, reps:curDay.reps};
@@ -1916,6 +1916,7 @@ function startSession(id){
 let ltRung=-1;
 let trRung=-1, trGapMax=0.45;
 let exHoldCount=0; // successes held at the current exchange tempo before speeding up (needs 2, or 4 near the target)
+let exTargetReachedThisSession=false; // fires the speed-lock invitation once per session, right when beatMin is first reached
 let exGraceUsed=false; // near the target tempo, the FIRST failure at a given speed is forgiven — only a second consecutive one pushes the tempo back
 function renderPips(){ $('pips').innerHTML=''; for(let i=0;i<NEED;i++){const d=document.createElement('div');d.className='pip'+(i<attempts?' done':'');$('pips').appendChild(d);} }
 
@@ -2679,8 +2680,13 @@ function scoreExchange(d){
       exHoldCount=0;
       if(newBeat<prevBeat){
         TR.beatSec=newBeat;
+        const justArrived = newBeat===curDay.beatMin && !exTargetReachedThisSession;
+        if(justArrived) exTargetReachedThisSession=true;
         speedMsg=`نرفع السرعة الآن — نبضة كل ${TR.beatSec.toFixed(2)} ث. تبدأ سلسلة الإتقان من جديد عند هذه السرعة الجديدة.`;
         attempts=0; // mastery streak resets — the 7-consecutive bar must be proven at the tempo you've actually settled at
+        if(justArrived){
+          setTimeout(()=>offerSpeedLock(curDay.beatMin), 1100);
+        }
       } else {
         speedMsg='أنت عند أسرع سرعة — أكمل نحو الإتقان الكامل هنا.';
       }
@@ -3290,6 +3296,93 @@ function scoreTongue(d){
     body='لمسة لسان واضحة، نفَس متواصل — بالضبط النقر الصحيح.'; }
   $('resultZone').innerHTML=`<div class="msg ${cls}"><div class="head">${head}</div>${body}</div>`;
   if(cls==='ok' && attempts>=NEED){ setTimeout(()=>finishDay({bestGapsMs:d.gaps.map(g=>+g.toFixed(0))}),900); }
+}
+/* ── speed-lock: offered once, right when the trainee first reaches target
+   tempo — NOT another test. Free, continuous practice at the locked target
+   speed with zero pass/fail threat, so the tempo settles into real
+   confidence, not just a single successful pass. Entirely optional. ── */
+function offerSpeedLock(beatMin){
+  if(!document.getElementById('resultZone') || document.getElementById('resultZone').style.display==='none') return;
+  const html=`<div class="msg ok" id="speedLockOffer" style="margin-top:10px;border:1px solid rgba(230,184,92,.4);background:rgba(230,184,92,.06)">
+    <div class="head">✦ وصلت الهدف! ثبّته الآن؟</div>
+    وصلت سرعتك المستهدفة (${beatMin.toFixed(2)} ث) — تثبيتها بممارسة حرّة الآن يمنحك ثقة حقيقية بها، بلا أي اختبار جديد.
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="btnLockNow" style="flex:1;padding:10px;border-radius:100px;border:none;
+        background:linear-gradient(135deg,var(--live),#2a8f7c);color:#08081a;font-family:var(--f-head);
+        font-weight:700;font-size:.82rem;cursor:pointer">ثبّته الآن</button>
+      <button id="btnLockLater" style="flex:1;padding:10px;border-radius:100px;border:1px solid rgba(155,146,184,.3);
+        background:transparent;color:var(--bone);font-family:var(--f-head);font-weight:600;font-size:.82rem;cursor:pointer">أكمل لاحقًا</button>
+    </div>
+  </div>`;
+  $('resultZone').insertAdjacentHTML('beforeend', html);
+  document.getElementById('btnLockNow').addEventListener('click', ()=> openSpeedLockPicker(beatMin));
+  document.getElementById('btnLockLater').addEventListener('click', ()=>{ const el=document.getElementById('speedLockOffer'); if(el) el.remove(); });
+}
+function openSpeedLockPicker(beatMin){
+  _speedLockDay=curDay; _speedLockBeat=beatMin;
+  const opts=[{lbl:'٣٠ ثانية',sec:30},{lbl:'دقيقة',sec:60},{lbl:'دقيقتان',sec:120},{lbl:'بلا حدّ',sec:0}];
+  $('resultZone').innerHTML=`<div class="msg ok">
+    <div class="head">لكم من الوقت؟</div>
+    اختر مدّة الممارسة الحرّة — لا حكم، لا فشل، فقط تثبيت.
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px" id="lockDurBtns"></div>
+  </div>`;
+  const box=document.getElementById('lockDurBtns');
+  opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.textContent=o.lbl;
+    b.style.cssText='padding:11px;border-radius:12px;border:1px solid rgba(79,227,193,.3);background:rgba(79,227,193,.08);color:var(--live);font-family:var(--f-head);font-weight:700;font-size:.8rem;cursor:pointer';
+    b.addEventListener('click', ()=> startSpeedLock(o.sec));
+    box.appendChild(b);
+  });
+}
+let _speedLockDay=null, _speedLockBeat=1, _speedLockActive=false, _speedLockTimer=null;
+function startSpeedLock(durationSec){
+  _speedLockActive=true;
+  const beatSec=_speedLockBeat;
+  const startT=performance.now();
+  let lastBeatPlayed=-1, beatsHeard=0, beatsTotal=0, wasVoiced=false;
+  $('resultZone').innerHTML='';
+  $('btnRec').style.display='none'; // no attempt-recording here — this is free practice, not a scored attempt
+  setupCanvas();
+  onFrame=(p)=>{
+    if(!_speedLockActive) return;
+    const now=(performance.now()-startT)/1000;
+    const beatIdx=Math.floor(now/beatSec+0.001);
+    if(beatIdx!==lastBeatPlayed){ lastBeatPlayed=beatIdx; playTick(beatIdx%4===0?1300:1100); beatsTotal++; }
+    const voiced=!!(p.hz && p.clarity>=CLARITY);
+    if(voiced && !wasVoiced) beatsHeard++;
+    wasVoiced=voiced;
+    drawSpeedLock(now, durationSec, beatsTotal?Math.min(1,beatsHeard/Math.max(1,beatsTotal)):0);
+    if(durationSec>0 && now>=durationSec) endSpeedLock();
+  };
+  drawSpeedLock(0, durationSec, 0);
+}
+function drawSpeedLock(now, durationSec, continuity){
+  drawRhythmBg();
+  drawAirColumn(continuity, _threadStep++);
+  cx.textAlign='center'; cx.fillStyle='#F7DCA0'; cx.font="700 24px 'Aref Ruqaa',serif";
+  cx.fillText('✦ تثبيت السرعة', ORB.cx, 34);
+  cx.fillStyle='rgba(155,146,184,.65)'; cx.font="600 10px Cairo,sans-serif";
+  const timeTxt = durationSec>0 ? `${now.toFixed(0)} / ${durationSec} ث` : `${now.toFixed(0)} ث · بلا حدّ`;
+  cx.fillText(timeTxt, ORB.cx, 54);
+  cx.textAlign='start';
+  drawContextStrip(dayLabel(_speedLockDay.id)+' · ممارسة حرّة', `نبضة كل ${_speedLockBeat.toFixed(2)} ث · لا حكم هنا`, 'rgba(230,184,92,.75)');
+  // a single, unhurried stop control — replaces the normal attempt button entirely
+  if(!document.getElementById('btnEndLock')){
+    const b=document.createElement('button');
+    b.id='btnEndLock'; b.textContent='إنهاء التثبيت';
+    b.style.cssText='display:block;margin:14px auto 0;padding:12px 28px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--gold),#b8873a);color:#1a1408;font-family:var(--f-head);font-weight:700;font-size:.86rem;cursor:pointer';
+    b.addEventListener('click', endSpeedLock);
+    $('resultZone').appendChild(b);
+  }
+}
+function endSpeedLock(){
+  _speedLockActive=false; onFrame=null; clearTimeout(_speedLockTimer);
+  const btn=document.getElementById('btnEndLock'); if(btn) btn.remove();
+  $('btnRec').style.display='';
+  $('resultZone').innerHTML=`<div class="msg ok"><div class="head">✦ ثُبِّتت السرعة</div>
+    ممارسة حرّة حقيقية عند ${_speedLockBeat.toFixed(2)} ثانية — هذا الرقم الآن مألوف لأذنك وإصبعك، لا مجرّد رقم اجتزته مرّة.</div>`;
+  drawRhythmIdle();
 }
 function startRhythm(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
