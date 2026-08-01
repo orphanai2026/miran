@@ -404,6 +404,8 @@
   <div class="view" id="view-maqamprev">
     <button class="back" id="maqamPrevBack">← رجوع للرحلة</button>
     <div class="epigraph">لمحة عمّا ينتظرك — لا تمارين بعد</div>
+    <div class="lvl-heading">اختر مقامًا لرؤية تفاصيله</div>
+    <div class="lvl-rail-wrap"><div class="lvl-rail" id="maqamRail"></div></div>
     <div id="maqamCards"></div>
   </div>
 
@@ -642,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r8.0-maqamtable</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r8.1-maqamrail</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r8.0-maqamtable';
+const APP_VERSION='r8.1-maqamrail';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -937,12 +939,36 @@ function maqamReadiness(m){
   const known=m.semis.filter(s=>taughtSemis.has(s)).length;
   return {known, total:m.semis.length};
 }
+let selectedMaqam=null;
 function renderMaqamPreview(){
-  let html='';
-  MAQAMAT.forEach(m=>{
+  if(selectedMaqam==null && MAQAMAT.length) selectedMaqam=0;
+  // ── the chip rail: IDENTICAL markup/classes to the home screen's level
+  // rail, so the two screens read as one visual family, not two designs ──
+  const MQ_COLORS=['230,184,92','79,227,193','220,110,76','155,110,220','230,184,92','74,59,122'];
+  let railHtml='';
+  MAQAMAT.forEach((m,i)=>{
     const {known,total}=maqamReadiness(m);
     const pct=Math.round(known/total*100);
-    html+=`<div class="maqam-card">
+    const isSel=selectedMaqam===i;
+    railHtml+=`<div class="lvl-chip ${isSel?'sel':''}" style="--lc:${MQ_COLORS[i%MQ_COLORS.length]}" data-mq="${i}">
+      <div class="lvl-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="lvl-name">${m.name}</div>
+      <div class="lvl-bar"><div class="lvl-fill" style="width:${pct}%"></div></div>
+      <div class="lvl-frac">${known} / ${total}</div>
+    </div>`;
+  });
+  $('maqamRail').innerHTML=railHtml;
+  $('maqamRail').querySelectorAll('[data-mq]').forEach(c=>c.addEventListener('click',()=>{
+    selectedMaqam=+c.dataset.mq; renderMaqamPreview();
+  }));
+
+  // ── the single selected maqam's detail card ──
+  let html='';
+  const m=MAQAMAT[selectedMaqam];
+  if(m){
+    const {known,total}=maqamReadiness(m);
+    const pct=Math.round(known/total*100);
+    html=`<div class="maqam-card">
       <div class="maqam-name">${m.name}${m.quarterTone?' <span style="font-size:.6em;opacity:.6">(ربع صوت)</span>':''}</div>
       <p style="font-family:var(--f-body);font-size:.78rem;color:var(--muted);text-align:center;line-height:1.85;margin-bottom:12px">${m.mood}</p>
       <div class="maqam-notes">${m.notesText}</div>
@@ -959,8 +985,7 @@ function renderMaqamPreview(){
         <div class="txt">${m.audioKey?'مقطع تعريفي متاح':'مقطع صوتي تعريفي — سيُضاف لاحقًا'}</div>
       </div>
     </div>`;
-  });
-  if(!MAQAMAT.length) html='<p class="hint" style="margin-top:30px">لا مقامات مُضافة بعد.</p>';
+  } else html='<p class="hint" style="margin-top:30px">لا مقامات مُضافة بعد.</p>';
   $('maqamCards').innerHTML=html;
 }
 $('maqamPrevBack').addEventListener('click', ()=>{ show('home'); renderHome(); });
