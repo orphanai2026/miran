@@ -644,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r8.6-leadbeats</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r8.7-rhythmscale</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r8.6-leadbeats';
+const APP_VERSION='r8.7-rhythmscale';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -3435,8 +3435,14 @@ function scoreRhythm(d){
   const misses=d.hits.filter(h=>h===false).length;
   const missed=d.hits.filter(h=>h===undefined).length;
   const total=nBeats*subN+1;
-  const ok = hits>=total-1; // allow one miss/skip — new skill, some grace
-  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, hits, misses, missed_beats:missed, tol_ms:rhTolMs, latency_correction_ms:latencyCal?latencyCal.ms:0, ts:new Date().toISOString()});
+  // allowance scales with point count — a flat "1 miss max" is fair for simple
+  // rhythm (7 points) but disproportionately strict for subdivision (13-17
+  // points, roughly double or more) since there's simply more to get right.
+  const allowedMisses=Math.max(1, Math.ceil(total/8));
+  const ok = hits>=total-allowedMisses;
+  const missedPositions = d.hits.map((h,i)=>h!==true?i:null).filter(i=>i!==null);
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, hits, misses, missed_beats:missed,
+    missed_positions:missedPositions, allowed_misses:allowedMisses, tol_ms:rhTolMs, latency_correction_ms:latencyCal?latencyCal.ms:0, ts:new Date().toISOString()});
   registerAttemptResult(ok);
   let head,body,cls;
   if(!ok){
