@@ -644,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r8.5-upperjins</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r8.6-leadbeats</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r8.5-upperjins';
+const APP_VERSION='r8.6-leadbeats';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -2524,9 +2524,15 @@ function scoreTransition(d){
    exercise's own tempo (like a conductor's count-in) — so the player's internal pulse
    carries straight from the pickup into beat 0 at the real tempo, instead of jumping from
    an unrelated fixed pause into a possibly much faster/slower pattern. */
-const TR_EX_TAIL=0.6, EX_LEAD_BEATS=2;
+const TR_EX_TAIL=0.6;
+// exercises that start noticeably faster than the standard 1.0s baseline
+// (like consolidation/finale days revisiting an already-mastered pair) get
+// one extra pickup beat — real time to lock the ear onto the new, faster
+// tempo before scoring begins, instead of carrying over muscle memory from
+// the slower pace the pair was originally learned at.
+function exLeadBeats(day){ return (day && day.beatStart!=null && day.beatStart<0.9) ? 3 : 2; }
 function activeTargetCentsExchange(now0){
-  const lead=EX_LEAD_BEATS*TR.beatSec;
+  const lead=exLeadBeats(curDay)*TR.beatSec;
   const now=Math.max(0, now0-lead);
   const b=TR.beatSec, slide=Math.min(0.25*b,0.18), reps=TR.reps;
   let idx=Math.floor(now/b); if(idx>reps) idx=reps;
@@ -2539,7 +2545,7 @@ function activeTargetCentsExchange(now0){
 function startExchange(){
   recording=true; $('btnRecLabel').textContent='إلغاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
   recData={t0:performance.now(),pts:[],voiced:[]}; setupCanvas(); recData._lastBeat=-99; recData._goCued=false; recData._lastPickup=-1;
-  const b=TR.beatSec, reps=TR.reps, lead=EX_LEAD_BEATS*b, END=lead+reps*b+TR_EX_TAIL;
+  const b=TR.beatSec, reps=TR.reps, lead=exLeadBeats(curDay)*b, END=lead+reps*b+TR_EX_TAIL;
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000;
     // pickup beats: same tick, same tempo as the real pattern — sets the player's clock BEFORE beat 0
@@ -2562,7 +2568,7 @@ function startExchange(){
     } else { cx.fillStyle='rgba(155,146,184,.5)'; cx.beginPath(); cx.arc(ORB.cx,ay,7,0,7); cx.fill(); }
     drawMouthGauge(now.toFixed(1), now/END, 'ثانية');
     drawExitStreak(attempts||0, NEED||7);
-    const beatsLeft = Math.max(0, EX_LEAD_BEATS - Math.floor(now/b));
+    const beatsLeft = Math.max(0, exLeadBeats(curDay) - Math.floor(now/b));
     const hint = now<lead ? ('استعد على '+curDay.from.note+'… '+toAr(beatsLeft))
                           : ('النبضة '+toAr(Math.min(beatIdx+1,reps+1))+' / '+toAr(reps+1));
     drawContextStrip(dayLabel(curDay.id)+' · تبادل · '+TR.beatSec.toFixed(2)+' ث (الهدف '+curDay.beatMin.toFixed(2)+')',
@@ -2606,7 +2612,7 @@ function trackDrift(offsets){
   }
 }
 function scoreExchange(d){
-  const b=TR.beatSec, slide=Math.min(0.25*b,0.18), reps=TR.reps, lead=EX_LEAD_BEATS*b;
+  const b=TR.beatSec, slide=Math.min(0.25*b,0.18), reps=TR.reps, lead=exLeadBeats(curDay)*b;
   const noteAt=i=>(i%2===0?0:TR.span);
   const holds=[];
   for(let i=0;i<=reps;i++){
