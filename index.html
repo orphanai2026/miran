@@ -644,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r8.3-speedlock</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r8.4-rastjins</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r8.3-speedlock';
+const APP_VERSION='r8.4-rastjins';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -881,6 +881,10 @@ const CURRICULUM=[
   {"id": 43, "level": 3, "note": "لا⇄سي بيمول", "lat": "A⇄B♭", "kind": "exchange", "from": {"note": "لا", "lat": "A", "semis": 9}, "to": {"note": "سي بيمول", "lat": "B♭", "semis": 10}, "tol": 22, "need": 7, "beatSec": 1, "beatStart": 1, "beatMin": 0.55, "stepDown": 0.09, "stepUp": 0.13, "reps": 4, "title": "التبادل: لا⇄سي بيمول مع المترونوم", "blurb": "انتقل مع كل نبضة — لا، سي بيمول، لا، سي بيمول، لا."},
   {"id": 44, "level": 2, "note": "سي بيمول→دو", "lat": "B♭→C5", "kind": "transition", "from": {"note": "سي بيمول", "lat": "B♭", "semis": 10}, "to": {"note": "دو الجواب", "lat": "C5", "semis": 12}, "tol": 22, "need": 7, "tolLadder": [40, 32, 22], "gapLadder": [0.6, 0.5, 0.4], "holdFromLadder": [4, 3, 2.2], "holdToLadder": [4, 3.2, 2.4], "rungNeed": [2, 2, 7], "title": "الانتقال: سي بيمول ← دو الجواب", "blurb": "آخر خطوة قبل إتمام الأوكتاف الكامل."},
   {"id": 45, "level": 3, "note": "سي بيمول⇄دو", "lat": "B♭⇄C5", "kind": "exchange", "from": {"note": "سي بيمول", "lat": "B♭", "semis": 10}, "to": {"note": "دو الجواب", "lat": "C5", "semis": 12}, "phaseFinale": true, "tol": 22, "need": 7, "beatSec": 1, "beatStart": 1, "beatMin": 0.55, "stepDown": 0.09, "stepUp": 0.13, "reps": 4, "title": "التبادل: سي بيمول⇄دو الجواب — ختام امتداد المدى", "blurb": "إتقان هذا يعني أوكتافًا كاملًا تحت إصبعك — عجم ونهاوند وكرد صارت في متناولك."},
+  /* ═══ أول تمرين مقام حقيقي — جنس راست السفلي، نموذج واحد مبنيّ ومُختبَر
+     بالكامل قبل تكرار نفس المنهجية على بقية المقامات الستة ═══ */
+  {"id": 46, "level": 5, "kind": "jins", "notesSemis": [0,2,3.5,5,3.5,2,0], "holdSec": 1.1, "tol": 30, "need": 5,
+   "title": "جنس راست السفلي", "blurb": "دو - ري - مي نصف بيمول - فا، صعودًا ثم هبوطًا — أول جنس مقاميّ حقيقي تعزفه."},
 ];
 /* ── LEVELS: a browsing/overview grouping over the same CURRICULUM sequence.
    Purely a navigation convenience — it does NOT change unlock order at all;
@@ -894,7 +898,7 @@ const LEVELS=[
   {id:2, key:'pitch',  name:'دقّة النغمات', color:'230,184,92'},
   {id:3, key:'rhythm', name:'السرعة والإيقاع', color:'220,110,76'},
   {id:4, key:'tongue', name:'النقر', color:'155,110,220'},
-  {id:5, key:'maqam',  name:'المقامات الأساسية', color:'74,59,122', locked:true},
+  {id:5, key:'maqam',  name:'المقامات الأساسية', color:'74,59,122'},
   {id:6, key:'perf',   name:'الأداء والتقاسيم', color:'155,146,184', locked:true},
 ];
 function levelDays(levelId){ return CURRICULUM.filter(d=>d.level===levelId); }
