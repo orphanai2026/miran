@@ -644,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r8.7-rhythmscale</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r8.8-rhythmedges</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r8.7-rhythmscale';
+const APP_VERSION='r8.8-rhythmedges';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -3405,7 +3405,7 @@ function startRhythm(){
   const isSubPoint=i=>subN>1 && (i%subN!==0); // true for a mid-beat target, not the beat itself
   recData={t0:performance.now(), onsets:[], hits:new Array(nSteps+1).fill(undefined), wasVoiced:false, lastBeatPlayed:-1};
   setupCanvas();
-  const END=nBeats*beatSec+0.7;
+  const END=nBeats*beatSec+(subN>1?1.1:0.7); // subdivision needs a longer tail — more points means more room for the final onset to drift late and still register
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000;
     const beatIdx=Math.min(Math.floor(now/beatSec+0.5), nBeats); // tick sound stays on the REAL beat only, never sub-points
@@ -3417,7 +3417,12 @@ function startRhythm(){
       beatTimes.forEach((bt,i)=>{ if(recData.hits[i]===undefined){ const dd=Math.abs(now-bt); if(dd<bd){bd=dd;bi=i;} } });
       if(bi>=0 && bd<=stepSec/2){
         const offMs=(now-beatTimes[bi])*1000; const corrected=offMs-(latencyCal?latencyCal.ms:0);
-        const tol = isSubPoint(bi) ? rhTolMs*1.4 : rhTolMs; // mid-beat points get a wider margin — physically harder to place precisely
+        // position 0 starts from silence (the pickup beats aren't voiced) —
+        // every other point continues from an already-sounding note, so only
+        // the first genuinely needs breath-onset latency accounted for.
+        // Confirmed by real attempt data: position 0 failed disproportionately
+        // often until this matched the same leniency exchange's hold-0 got.
+        const tol = bi===0 ? rhTolMs*1.6 : (isSubPoint(bi) ? rhTolMs*1.4 : rhTolMs);
         recData.hits[bi] = Math.abs(corrected)<=tol;
       }
     }
