@@ -597,7 +597,7 @@
       <button class="dervish-call" id="btnDervish" title="استدعِ الدرويش"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">؟</span><img src="dervish.png" alt="الدرويش" style="position:relative" onerror="console.warn('[مِران] تعذّر تحميل صورة الدرويش من:', this.src, '— سيظهر الرمز الاحتياطي «؟» بدلًا منها.'); this.remove()"></button>
       <div class="attempts" id="pips"></div>
       <div class="bignote">
-        <span class="ar" id="sessGlyph">دو</span>
+        <span class="ar" id="sessGlyph">دو</span><span id="flagBadge" style="display:none;font-size:.9rem;color:var(--gold);vertical-align:super;margin-inline-start:2px" title="فينجرينغ هذه النغمة لم يُؤكَّد بعزفك بعد">؟</span>
         <span class="meta"><span class="lat" id="sessLat">C</span><br><span class="hz" id="targetHz">—</span></span>
       </div>
       <div class="stage-frame"><canvas id="orbit" width="524" height="300"></canvas></div>
@@ -644,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r9.1-bayatijins</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r9.2-flaggedmaqamat</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r9.1-bayatijins';
+const APP_VERSION='r9.2-flaggedmaqamat';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -790,23 +790,23 @@ function dervishCelebrate(phaseDone){
 const REGISTERS=[
  {key:'قرار', notes:[
   {ar:'دو',           lat:'C',    semis:0,    kind:'base',  front:[1,1,1,1,1,1],    thumb:1},
-  {ar:'دو دييز',       lat:'C♯',   semis:1,    kind:'sharp', front:[1,1,1,1,1,0.75], thumb:1},
+  {ar:'دو دييز',       lat:'C♯',   semis:1,    kind:'sharp', front:[1,1,1,1,1,0.75], thumb:1, flagged:true},
   {ar:'ري',           lat:'D',    semis:2,    kind:'base',  front:[1,1,1,1,1,0],    thumb:1},
   {ar:'مي بيمول',      lat:'E♭',   semis:3,    kind:'flat',  front:[1,1,1,1,0,0],    thumb:1},
   {ar:'مي نصف بيمول',  lat:'E½♭',  semis:3.5,  kind:'half',  front:[1,1,1,0,1,0],    thumb:1},
-  {ar:'مي',           lat:'E',    semis:4,    kind:'base',  front:[1,1,1,0.5,0,0],  thumb:1, hard:true},
+  {ar:'مي',           lat:'E',    semis:4,    kind:'base',  front:[1,1,1,0.5,0,0],  thumb:1, hard:true, flagged:true},
   {ar:'فا',           lat:'F',    semis:5,    kind:'base',  front:[1,1,0,0,0,0],    thumb:1},
   {ar:'فا دييز',       lat:'F♯',   semis:6,    kind:'sharp', front:[1,0,0,0,0,0],    thumb:1},
   {ar:'صول',          lat:'G',    semis:7,    kind:'base',  front:[0,0,0,0,0,0],    thumb:1, twin:'يساوي صول الجواب'}
  ]},
  {key:'جواب', notes:[
   {ar:'صول',          lat:'G',    semis:7,    kind:'base',  front:[1,1,1,1,1,1],    thumb:1, twin:'يساوي صول القرار'},
-  {ar:'لا بيمول',      lat:'A♭',   semis:8,    kind:'flat',  front:[1,1,1,1,1,0.75], thumb:1, hard:true},
+  {ar:'لا بيمول',      lat:'A♭',   semis:8,    kind:'flat',  front:[1,1,1,1,1,0.75], thumb:1, hard:true, flagged:true},
   {ar:'لا نصف بيمول',  lat:'A½♭',  semis:8.5,  kind:'half',  front:[1,1,1,1,1,0.5],  thumb:1},
   {ar:'لا',           lat:'A',    semis:9,    kind:'base',  front:[1,1,1,1,1,0],    thumb:1},
   {ar:'سي بيمول',      lat:'B♭',   semis:10,   kind:'flat',  front:[1,1,1,1,0,0],    thumb:1},
   {ar:'سي نصف بيمول',  lat:'B½♭',  semis:10.5, kind:'half',  front:[1,1,1,0,0,0],    thumb:1},
-  {ar:'سي',           lat:'B',    semis:11,   kind:'base',  front:[1,1,1,0.5,0,0],  thumb:1, hard:true},
+  {ar:'سي',           lat:'B',    semis:11,   kind:'base',  front:[1,1,1,0.5,0,0],  thumb:1, hard:true, flagged:true},
   {ar:'دو',           lat:'C',    semis:12,   kind:'base',  front:[1,1,0,0,0,0],    thumb:1, twin:'يساوي دو جواب الجواب'},
   {ar:'دو دييز',       lat:'C♯',   semis:13,   kind:'sharp', front:[1,0,0,0,0,0],    thumb:1},
   {ar:'ري',           lat:'D',    semis:14,   kind:'base',  front:[0,0,0,0,0,0],    thumb:1}
@@ -908,6 +908,59 @@ const CURRICULUM=[
    "title": "جنس بياتي السفلي", "blurb": "ري - مي نصف بيمول - فا - صول، صعودًا ثم هبوطًا — الجنس الأكثر شيوعًا في التراث العربي."},
   {"id": 54, "level": 5, "kind": "jins", "notesSemis": [7,9,10,12,10,9,7], "holdSec": 1.1, "tol": 26, "need": 5,
    "title": "جنس بياتي العلوي", "blurb": "صول - لا - سي بيمول - دو الجواب — طابع نهاوند علوي، يمنح بياتي عمقه المميَّز."},
+  /* ═══ أربع نغمات مُعلَّمة صراحة «؟ يحتاج تأكيدك بالعزف» — فينجرينغها من
+     الجدول الأصلي غير مؤكَّد معك عمليًّا بعد. تُبنى معزولة أولًا، وتحمل
+     العلامة المرئية تلقائيًّا في كل تمرين تظهر فيه ═══ */
+  {"id": 55, "level": 2, "note": "دو دييز", "lat": "C♯", "semis": 1, "kind": "longtone", "targetSec": 8, "tol": 24, "stabMax": 17, "need": 7,
+   "durLadder": [4,6,8], "stabMult": [1.6,1.25,1], "rungNeed": [2,2,7],
+   "title": "نغمة دو دييز ؟", "blurb": "فينجرينغها من الجدول الأصلي، غير مؤكَّدة معك عمليًّا بعد — راقب استجابتها وأخبرني إن شعرت بخطأ."},
+  {"id": 56, "note": "دو→دو دييز ؟", "lat": "C→C♯", "level": 2, "kind": "transition", "from": {"note":"دو","lat":"C","semis":0}, "to": {"note":"دو دييز","lat":"C♯","semis":1},
+   "tol": 24, "need": 7, "tolLadder": [40,32,24], "gapLadder": [0.6,0.5,0.4], "holdFromLadder": [4,3,2.2], "holdToLadder": [4,3.2,2.4], "rungNeed": [2,2,7],
+   "title": "الانتقال: دو ← دو دييز ؟", "blurb": "نصف صوت واحد — فينجرينغ غير مؤكَّد بعد."},
+  {"id": 57, "note": "دو⇄دو دييز ؟", "lat": "C⇄C♯", "level": 2, "kind": "exchange", "from": {"note":"دو","lat":"C","semis":0}, "to": {"note":"دو دييز","lat":"C♯","semis":1},
+   "tol": 24, "need": 7, "beatSec": 1.0, "beatStart": 1.0, "beatMin": 0.55, "stepDown": 0.09, "stepUp": 0.13, "reps": 4,
+   "title": "التبادل: دو⇄دو دييز ؟", "blurb": "فينجرينغ غير مؤكَّد بعد — راقب استجابتها."},
+  {"id": 58, "level": 2, "note": "مي", "lat": "E", "semis": 4, "kind": "longtone", "targetSec": 8, "tol": 24, "stabMax": 17, "need": 7,
+   "durLadder": [4,6,8], "stabMult": [1.6,1.25,1], "rungNeed": [2,2,7],
+   "title": "نغمة مي ؟", "blurb": "تحتاج تغطية نصفية حقيقية للثقب — فينجرينغها غير مؤكَّدة معك عمليًّا بعد."},
+  {"id": 59, "note": "فا→مي ؟", "lat": "F→E", "level": 2, "kind": "transition", "from": {"note":"فا","lat":"F","semis":5}, "to": {"note":"مي","lat":"E","semis":4},
+   "tol": 24, "need": 7, "tolLadder": [40,32,24], "gapLadder": [0.6,0.5,0.4], "holdFromLadder": [4,3,2.2], "holdToLadder": [4,3.2,2.4], "rungNeed": [2,2,7],
+   "title": "الانتقال: فا ← مي ؟", "blurb": "نصف صوت — تغطية نصفية للثقب، غير مؤكَّدة بعد."},
+  {"id": 60, "note": "فا⇄مي ؟", "lat": "F⇄E", "level": 2, "kind": "exchange", "from": {"note":"فا","lat":"F","semis":5}, "to": {"note":"مي","lat":"E","semis":4},
+   "tol": 24, "need": 7, "beatSec": 1.0, "beatStart": 1.0, "beatMin": 0.55, "stepDown": 0.09, "stepUp": 0.13, "reps": 4,
+   "title": "التبادل: فا⇄مي ؟", "blurb": "فينجرينغ غير مؤكَّد بعد — راقب استجابتها."},
+  {"id": 61, "level": 2, "note": "لا بيمول", "lat": "A♭", "semis": 8, "kind": "longtone", "targetSec": 8, "tol": 24, "stabMax": 17, "need": 7,
+   "durLadder": [4,6,8], "stabMult": [1.6,1.25,1], "rungNeed": [2,2,7],
+   "title": "نغمة لا بيمول ؟", "blurb": "فينجرينغها من الجدول الأصلي، غير مؤكَّدة معك عمليًّا بعد."},
+  {"id": 62, "note": "صول→لا بيمول ؟", "lat": "G→A♭", "level": 2, "kind": "transition", "from": {"note":"صول","lat":"G","semis":7}, "to": {"note":"لا بيمول","lat":"A♭","semis":8},
+   "tol": 24, "need": 7, "tolLadder": [40,32,24], "gapLadder": [0.6,0.5,0.4], "holdFromLadder": [4,3,2.2], "holdToLadder": [4,3.2,2.4], "rungNeed": [2,2,7],
+   "title": "الانتقال: صول ← لا بيمول ؟", "blurb": "نصف صوت — فينجرينغ غير مؤكَّد بعد."},
+  {"id": 63, "note": "صول⇄لا بيمول ؟", "lat": "G⇄A♭", "level": 2, "kind": "exchange", "from": {"note":"صول","lat":"G","semis":7}, "to": {"note":"لا بيمول","lat":"A♭","semis":8},
+   "tol": 24, "need": 7, "beatSec": 1.0, "beatStart": 1.0, "beatMin": 0.55, "stepDown": 0.09, "stepUp": 0.13, "reps": 4,
+   "title": "التبادل: صول⇄لا بيمول ؟", "blurb": "فينجرينغ غير مؤكَّد بعد — راقب استجابتها."},
+  {"id": 64, "level": 2, "note": "سي", "lat": "B", "semis": 11, "kind": "longtone", "targetSec": 8, "tol": 24, "stabMax": 17, "need": 7,
+   "durLadder": [4,6,8], "stabMult": [1.6,1.25,1], "rungNeed": [2,2,7],
+   "title": "نغمة سي ؟", "blurb": "تحتاج تغطية نصفية حقيقية للثقب — فينجرينغها غير مؤكَّدة معك عمليًّا بعد."},
+  {"id": 65, "note": "سي→دو الجواب ؟", "lat": "B→C5", "level": 2, "kind": "transition", "from": {"note":"سي","lat":"B","semis":11}, "to": {"note":"دو الجواب","lat":"C5","semis":12},
+   "tol": 24, "need": 7, "tolLadder": [40,32,24], "gapLadder": [0.6,0.5,0.4], "holdFromLadder": [4,3,2.2], "holdToLadder": [4,3.2,2.4], "rungNeed": [2,2,7],
+   "title": "الانتقال: سي ← دو الجواب ؟", "blurb": "نصف صوت — فينجرينغ غير مؤكَّد بعد."},
+  {"id": 66, "note": "سي⇄دو الجواب ؟", "lat": "B⇄C5", "level": 2, "kind": "exchange", "from": {"note":"سي","lat":"B","semis":11}, "to": {"note":"دو الجواب","lat":"C5","semis":12},
+   "tol": 24, "need": 7, "beatSec": 1.0, "beatStart": 1.0, "beatMin": 0.55, "stepDown": 0.09, "stepUp": 0.13, "reps": 4,
+   "title": "التبادل: سي⇄دو الجواب ؟", "blurb": "فينجرينغ غير مؤكَّد بعد — راقب استجابتها."},
+  /* ═══ أجناس عجم وكرد وحجاز — تُستخدَم فيها النغمات المُعلَّمة أعلاه، فتحمل
+     علامة التأكيد تلقائيًّا كذلك ═══ */
+  {"id": 67, "level": 5, "kind": "jins", "notesSemis": [0,2,4,5,4,2,0], "holdSec": 1.1, "tol": 28, "need": 5,
+   "title": "جنس عجم السفلي ؟", "blurb": "دو - ري - مي - فا، صعودًا ثم هبوطًا — يحتوي نغمة مي غير المؤكَّدة."},
+  {"id": 68, "level": 5, "kind": "jins", "notesSemis": [7,9,11,12,11,9,7], "holdSec": 1.1, "tol": 28, "need": 5,
+   "title": "جنس عجم العلوي ؟", "blurb": "صول - لا - سي - دو الجواب — يحتوي نغمة سي غير المؤكَّدة."},
+  {"id": 69, "level": 5, "kind": "jins", "notesSemis": [0,1,3,5,3,1,0], "holdSec": 1.1, "tol": 28, "need": 5,
+   "title": "جنس كرد السفلي ؟", "blurb": "دو - ري بيمول - مي بيمول - فا، صعودًا ثم هبوطًا — يحتوي دو دييز (ري بيمول) غير المؤكَّدة."},
+  {"id": 70, "level": 5, "kind": "jins", "notesSemis": [5,7,8,10,8,7,5], "holdSec": 1.1, "tol": 28, "need": 5,
+   "title": "جنس كرد العلوي ؟", "blurb": "فا - صول - لا بيمول - سي بيمول — يحتوي لا بيمول غير المؤكَّدة."},
+  {"id": 71, "level": 5, "kind": "jins", "notesSemis": [0,1,4,5,4,1,0], "holdSec": 1.1, "tol": 30, "need": 5,
+   "title": "جنس حجاز السفلي ؟", "blurb": "دو - ري بيمول - مي - فا — الثانية الزائدة المميِّزة لحجاز، يحتوي نغمتين غير مؤكَّدتين."},
+  {"id": 72, "level": 5, "kind": "jins", "notesSemis": [5,7,8,10,8,7,5], "holdSec": 1.1, "tol": 28, "need": 5,
+   "title": "جنس حجاز العلوي ؟", "blurb": "فا - صول - لا بيمول - سي بيمول — نفس الجنس العلوي المشترك مع كرد."},
 ];
 /* ── LEVELS: a browsing/overview grouping over the same CURRICULUM sequence.
    Purely a navigation convenience — it does NOT change unlock order at all;
@@ -1747,6 +1800,15 @@ function currentFingering(){
   if(curDay.from && curDay.from.semis!=null) return fingeringFor(curDay.from.semis);
   return null;
 }
+function dayHasFlaggedFingering(day){
+  if(!day) return false;
+  const semisList=[];
+  if(day.semis!=null) semisList.push(day.semis);
+  if(day.from && day.from.semis!=null) semisList.push(day.from.semis);
+  if(day.to && day.to.semis!=null) semisList.push(day.to.semis);
+  if(day.notesSemis) semisList.push(...day.notesSemis);
+  return semisList.some(s=>{ const f=fingeringFor(s); return f && f.note.flagged; });
+}
 function calmFromThread(){
   const pts=_thread.filter(p=>!p.mute).slice(-26);
   if(!pts.length) return 0;
@@ -1813,6 +1875,12 @@ function setGlyphText(text){
   // lines at full size — step the font down so they read as cleanly as short
   // single-word names like "دو" do, instead of looking like an afterthought.
   el.style.fontSize = text.length>14 ? '1.7rem' : text.length>9 ? '2.2rem' : '';
+  const flagged = dayHasFlaggedFingering(curDay);
+  $('flagBadge').style.display = flagged ? 'inline' : 'none';
+  if(flagged){
+    const eyeEl=$('sessEyebrow');
+    if(!eyeEl.textContent.includes('يحتاج تأكيدك')) eyeEl.textContent += ' · ؟ يحتاج تأكيدك بالعزف';
+  }
 }
 function startSession(id){
   curDay=CURRICULUM[id-1];
@@ -1866,7 +1934,7 @@ function startSession(id){
     attempts=restoreStreak(); _failPattern=[]; resetDrift();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythm', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent = curDay.tolLadder ? `${dayLabel(id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}` : `${dayLabel(id)} · إيقاع`;
-    $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
+    setGlyphText('♩'); $('sessLat').textContent='';
     $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
     $('sustainLabel').textContent='تقدّم الدورة';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
@@ -1878,7 +1946,7 @@ function startSession(id){
     rdRung=0; rdDrop=new Set(curDay.dropLadder[0]); NEED=curDay.rungNeed[0]; attempts=restoreStreak(); _failPattern=[]; resetDrift();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythmdrop', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent=`${dayLabel(id)} · إيقاع · حذف · الدرجة ${toAr(rdRung+1)}/${toAr(curDay.dropLadder.length)}`;
-    $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
+    setGlyphText('♩'); $('sessLat').textContent='';
     $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
     $('sustainLabel').textContent='تقدّم الدورة';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
@@ -1890,7 +1958,7 @@ function startSession(id){
     NEED=curDay.need||7; attempts=restoreStreak(); _failPattern=[]; resetDrift();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'sustainRhythm', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent=`${dayLabel(id)} · نغمة ممتدّة`;
-    $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
+    setGlyphText('♩'); $('sessLat').textContent='';
     $('targetHz').textContent=`${curDay.beats} نبضات متّصلة`;
     $('sustainLabel').textContent='استمرارية النغمة';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
@@ -1902,7 +1970,7 @@ function startSession(id){
     NEED=curDay.need||7; attempts=restoreStreak(); _failPattern=[]; resetDrift();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'jins', notesSemis:curDay.notesSemis, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent=`${dayLabel(id)} · جنس`;
-    $('sessGlyph').textContent='♫'; $('sessLat').textContent='';
+    setGlyphText('♫'); $('sessLat').textContent='';
     $('targetHz').textContent=`${toAr(curDay.notesSemis.length)} نغمات بالترتيب`;
     $('sustainLabel').textContent='تقدّم الجنس';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
@@ -1917,7 +1985,7 @@ function startSession(id){
     attempts=restoreStreak(); _failPattern=[]; resetDrift();
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'tongue', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent = curDay.tolLadder ? `${dayLabel(id)} · نقر · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}` : `${dayLabel(id)} · نقر`;
-    $('sessGlyph').textContent='♩'; $('sessLat').textContent='';
+    setGlyphText('♩'); $('sessLat').textContent='';
     $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
     $('sustainLabel').textContent='تقدّم الدورة';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
@@ -2756,7 +2824,7 @@ function openBreath(review){
   breathTarget=BREATH.rungs[breathRung];
   sessionLog={app:'miran', version:APP_VERSION, stage:'breath', review:_breathReview, rung:breathRung+1, target_sec:breathTarget, started:new Date().toISOString(), attempts:[]};
   $('sessEyebrow').textContent = review ? `مراجعة النفَس · ${breathTarget.toFixed(0)} ثوانٍ` : `مرحلة النفَس · الدرجة ${toAr(breathRung+1)}/${toAr(BREATH.rungs.length)}`;
-  $('sessGlyph').textContent='✦'; $('sessLat').textContent=''; $('targetHz').textContent='أيّ نغمة';
+  setGlyphText('✦'); $('sessLat').textContent=''; $('targetHz').textContent='أيّ نغمة';
   $('sustainLabel').textContent='مدة النفَس الثابت'; $('targetSec').textContent=breathTarget.toFixed(1);
   $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
   // pips reflect ladder rungs
@@ -2959,7 +3027,7 @@ function openDynamicControl(){
   curDay={kind:'dynamic', id:'dynamic', title:'التحكّم الديناميكي'};
   sessionLog={app:'miran', version:APP_VERSION, stage:'dynamic', started:new Date().toISOString(), attempts:[]};
   $('sessEyebrow').textContent='التحكّم الديناميكي · قبل النغمات';
-  $('sessGlyph').textContent='◐'; $('sessLat').textContent=''; $('targetHz').textContent='أيّ نغمة';
+  setGlyphText('◐'); $('sessLat').textContent=''; $('targetHz').textContent='أيّ نغمة';
   $('sustainLabel').textContent='ابدأ خافتًا وانتهِ بصوت أقوى'; $('targetSec').textContent=DYN_TARGET.toFixed(1);
   $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('sustainBar').style.width='0%';
   $('pips').innerHTML=''; for(let i=0;i<DYN_NEED;i++){const el=document.createElement('div');el.className='pip'+(i<dynAttempts?' done':'');$('pips').appendChild(el);}
