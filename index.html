@@ -619,6 +619,10 @@
         </div>
         <button class="btn-rec-round" id="btnRec"><span id="btnRecLabel">ابدأ</span></button>
         <div class="deck-item">
+          <button class="deck-side" id="btnSkipDebug" title="تجاوز مؤقّت للاختبار فقط" style="opacity:.55;font-size:.9rem">⏭</button>
+          <span class="deck-label" style="color:var(--muted);font-size:.6rem">تجاوز (اختبار)</span>
+        </div>
+        <div class="deck-item">
           <button class="deck-side" id="btnListen" title="استمع للمثال بتكرار"><span class="deck-icon">🔊</span></button>
           <span class="deck-label">استمع للمثال</span>
         </div>
@@ -644,13 +648,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r9.3-tickfix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r9.4-earliestmatch</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r9.3-tickfix';
+const APP_VERSION='r9.4-earliestmatch';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -3516,9 +3520,23 @@ function startRhythm(){
     const voiced = !!(p.hz && p.clarity>=CLARITY);
     if(voiced && !recData.wasVoiced){ // rising edge = onset
       recData.onsets.push(now);
-      let bi=-1,bd=Infinity;
-      beatTimes.forEach((bt,i)=>{ if(recData.hits[i]===undefined){ const dd=Math.abs(now-bt); if(dd<bd){bd=dd;bi=i;} } });
-      if(bi>=0 && bd<=stepSec/2){
+      // search radius must be at least as wide as the LOOSEST tolerance this
+      // onset could be judged against (up to 1.6x at position 0) — otherwise
+      // an onset that's genuinely within the stated tolerance never even gets
+      // assigned to a target, silently counted as missed regardless of how
+      // forgiving the tolerance ladder claims to be. Confirmed as the real
+      // root cause: search radius (300ms) was narrower than tolerance (up to 704ms).
+      const searchRadius = Math.max(stepSec/2, rhTolMs*1.6/1000);
+      // prefer the EARLIEST open target within radius, not the nearest one —
+      // picking "nearest" lets a late onset jump ahead and steal a future
+      // target that hasn't been played yet, leaving its real target unmatched
+      // and cascading the misalignment through every point after it. Earliest-
+      // open-first matches a late onset to the target it was actually aimed at.
+      let bi=-1;
+      for(let i=0;i<beatTimes.length;i++){
+        if(recData.hits[i]===undefined && Math.abs(now-beatTimes[i])<=searchRadius){ bi=i; break; }
+      }
+      if(bi>=0){
         const offMs=(now-beatTimes[bi])*1000; const corrected=offMs-(latencyCal?latencyCal.ms:0);
         // position 0 starts from silence (the pickup beats aren't voiced) —
         // every other point continues from an already-sounding note, so only
@@ -3673,6 +3691,16 @@ $('btnBackupExport').addEventListener('click', ()=>{
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`miran-backup-${new Date().toISOString().slice(0,10)}.json`;
   document.body.appendChild(a); a.click(); a.remove();
+});
+$('btnSkipDebug').addEventListener('click', ()=>{
+  if(!curDay) return;
+  const sure=confirm('تجاوز مؤقّت للاختبار فقط — سيُسجَّل هذا اليوم كمُتقَن بلا محاولة حقيقية. متابعة؟');
+  if(!sure) return;
+  stopAll();
+  prog.done[curDay.id]=Object.assign({ts:new Date().toISOString(), kind:curDay.kind, debugSkipped:true},{});
+  if(prog.inProgress) delete prog.inProgress[curDay.id];
+  saveProg();
+  renderHome(); show('home');
 });
 $('btnBackupImport').addEventListener('click', ()=> $('backupFileInput').click());
 $('backupFileInput').addEventListener('change', (e)=>{
