@@ -648,13 +648,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r9.5-noteshapes</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r9.6-rhythmtempo</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r9.5-noteshapes';
+const APP_VERSION='r9.6-rhythmtempo';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -849,7 +849,7 @@ const CURRICULUM=[
   {"id": 7, "level": 2, "note": "لا", "lat": "A", "semis": 9, "kind": "longtone", "targetSec": 10, "tol": 18, "stabMax": 15, "need": 7, "durLadder": [5, 7, 10], "stabMult": [1.6, 1.25, 1], "rungNeed": [2, 2, 7], "title": "نغمة لا الطويلة", "blurb": "أول نغمة خارج ما أتقنته — امتداد المدى يبدأ هنا."},
   {"id": 8, "level": 2, "note": "سي نصف بيمول", "lat": "B½♭", "semis": 10.5, "kind": "longtone", "targetSec": 9, "tol": 26, "stabMax": 18, "need": 7, "durLadder": [4, 6, 9], "stabMult": [1.6, 1.25, 1], "rungNeed": [2, 2, 7], "title": "نغمة سي نصف بيمول", "blurb": "ربع صوت آخر — مختلفة تمامًا عن سي بيمول الكاملة التي أتقنتها. استمع جيدًا للفرق."},
   {"id": 9, "level": 2, "note": "دو الجواب", "lat": "C5", "semis": 12, "kind": "longtone", "targetSec": 10, "tol": 18, "stabMax": 15, "need": 7, "durLadder": [5, 7, 10], "stabMult": [1.6, 1.25, 1], "rungNeed": [2, 2, 7], "title": "نغمة دو الجواب الطويلة", "blurb": "أوكتاف كامل فوق دو القرار — إغلاق المرحلة الأولى من امتداد المدى."},
-  {"id": 10, "level": 3, "note": "♩", "lat": "", "kind": "rhythm", "beats": 6, "beatSec": 1.1, "tolLadder": [420, 360, 300], "rungNeed": [2, 2, 7], "need": 7, "title": "الإيقاع الأساسي: تابع النبضة", "blurb": "قبل أن تُطلَب منك مزامنة نغمتين معًا، تعرّف على الشعور بالنبضة وحدها — أيّ صوت قصير يكفي، لا طبقة محدَّدة."},
+  {"id": 10, "level": 3, "note": "♩", "lat": "", "kind": "rhythm", "beats": 6, "beatSec": 1.1, "beatMin": 1.1, "beatStart": 1.7, "stepDownBeat": 0.3, "tolLadder": [420, 360, 300], "rungNeed": [2, 2, 7], "need": 7, "title": "الإيقاع الأساسي: تابع النبضة", "blurb": "قبل أن تُطلَب منك مزامنة نغمتين معًا، تعرّف على الشعور بالنبضة وحدها — أيّ صوت قصير يكفي، لا طبقة محدَّدة."},
   {"id": 11, "level": 2, "note": "دو→ري", "lat": "C→D", "kind": "transition", "from": {"note": "دو", "lat": "C", "semis": 0}, "to": {"note": "ري", "lat": "D", "semis": 2}, "tol": 25, "need": 7, "tolLadder": [45, 35, 25], "gapLadder": [0.7, 0.55, 0.45], "holdFromLadder": [4.5, 3.2, 2.2], "holdToLadder": [4.5, 3.4, 2.6], "rungNeed": [2, 2, 7], "title": "الانتقال: دو ← ري", "blurb": "ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى ري."},
   {"id": 12, "note": "ري→مي نصف بيمول", "lat": "D→E½♭", "level": 2, "kind": "transition", "from": {"note": "ري", "lat": "D", "semis": 2}, "to": {"note": "مي نصف بيمول", "lat": "E½♭", "semis": 3.5}, "tol": 28, "need": 7, "tolLadder": [46, 38, 28], "gapLadder": [0.6, 0.5, 0.4], "holdFromLadder": [4, 3, 2.2], "holdToLadder": [4, 3.2, 2.4], "rungNeed": [2, 2, 7], "title": "الانتقال: ري ← مي نصف بيمول", "blurb": "فاصلة ضيقة (ربع صوت فقط) — انتقال دقيق يحتاج أذنًا متيقّظة."},
   {"id": 13, "level": 2, "note": "مي نصف بيمول→فا", "lat": "E½♭→F", "kind": "transition", "from": {"note": "مي نصف بيمول", "lat": "E½♭", "semis": 3.5}, "to": {"note": "فا", "lat": "F", "semis": 5}, "tol": 26, "need": 7, "tolLadder": [44, 36, 26], "gapLadder": [0.6, 0.5, 0.4], "holdFromLadder": [4, 3, 2.2], "holdToLadder": [4, 3.2, 2.4], "rungNeed": [2, 2, 7], "title": "الانتقال: مي نصف بيمول ← فا", "blurb": "يُكمل التسلسل المتجاور — من ربع الصوت إلى فا مباشرة."},
@@ -868,16 +868,16 @@ const CURRICULUM=[
   {"id": 26, "level": 3, "note": "دو⇄ري", "lat": "C⇄D", "kind": "exchange", "from": {"note": "دو", "lat": "C", "semis": 0}, "to": {"note": "ري", "lat": "D", "semis": 2}, "tol": 25, "need": 7, "beatSec": 0.85, "beatStart": 0.85, "beatMin": 0.55, "stepDown": 0.07, "stepUp": 0.1, "reps": 4, "consolidate": true, "title": "يوم تثبيت: دو⇄ري", "blurb": "ثبّت ما أتقنته — بلا شرح جديد، تكرارٌ يرسّخ."},
   {"id": 27, "level": 2, "note": "دو→ري", "lat": "C→D", "kind": "transition", "from": {"note": "دو", "lat": "C", "semis": 0}, "to": {"note": "ري", "lat": "D", "semis": 2}, "tol": 25, "need": 1, "testMode": true, "title": "يوم اختبار: دو ← ري", "blurb": "محاولة واحدة، بلا تلميح افتتاحي. أرِني ما تتقنه فعلًا."},
   {"id": 28, "level": 3, "note": "دو⇄ري", "lat": "C⇄D", "kind": "exchange", "from": {"note": "دو", "lat": "C", "semis": 0}, "to": {"note": "ري", "lat": "D", "semis": 2}, "tol": 25, "need": 7, "beatSec": 0.85, "beatStart": 0.85, "beatMin": 0.5, "stepDown": 0.08, "stepUp": 0.1, "reps": 4, "phaseFinale": true, "title": "أداء تأسيسي", "blurb": "اختم مرحلة تأسيس الصوت بأداء واحد متصل."},
-  {"id": 29, "level": 3, "note": "♩", "lat": "", "kind": "rhythm", "beats": 8, "beatSec": 1, "tolLadder": [320, 260, 220], "rungNeed": [2, 2, 7], "need": 7, "phaseStart": true, "title": "الإيقاع: المتابعة مع النبضة", "blurb": "اعزف نغمة قصيرة مع كل نبضة — الدقة في التوقيت لا الطبقة."},
+  {"id": 29, "level": 3, "note": "♩", "lat": "", "kind": "rhythm", "beats": 8, "beatSec": 1, "beatMin": 1, "beatStart": 1.5, "stepDownBeat": 0.25, "tolLadder": [320, 260, 220], "rungNeed": [2, 2, 7], "need": 7, "phaseStart": true, "title": "الإيقاع: المتابعة مع النبضة", "blurb": "اعزف نغمة قصيرة مع كل نبضة — الدقة في التوقيت لا الطبقة."},
   {"id": 30, "level": 3, "note": "♩·", "lat": "", "kind": "rhythmdrop", "beats": 8, "beatSec": 1, "tolMs": 260, "dropLadder": [[4], [3, 6], [1, 3, 5, 7]], "rungNeed": [2, 2, 7], "need": 7, "title": "الإيقاع: حذف النبضات", "blurb": "استمرّ على النبضة حتى حين تختفي — ابنِ إيقاعك الداخلي لا اعتمادك على السمع."},
-  {"id": 31, "level": 3, "note": "♪♪", "lat": "", "kind": "rhythm", "beats": 6, "beatSec": 1.2, "sub": 2, "tolLadder": [440, 380, 320], "rungNeed": [2, 2, 7], "need": 7, "title": "تقسيم الضربة: نغمتان لكل نبضة", "blurb": "نغمة عند بداية كل نبضة، وأخرى عند منتصفها بالضبط — نفس نبضك المُتقَن، بدقّة مضاعفة."},
-  {"id": 32, "level": 3, "note": "♪♪·", "lat": "", "kind": "rhythm", "beats": 8, "beatSec": 1, "sub": 2, "tolLadder": [340, 280, 230], "rungNeed": [2, 2, 7], "need": 7, "title": "تقسيم الضربة: تثبيت", "blurb": "نفس التقسيم، بسرعة أقرب لسرعتك المعتادة — ثبّته حتى يصير بديهيًّا."},
+  {"id": 31, "level": 3, "note": "♪♪", "lat": "", "kind": "rhythm", "beats": 6, "beatSec": 1.2, "beatMin": 1.2, "beatStart": 1.9, "stepDownBeat": 0.35, "sub": 2, "tolLadder": [440, 380, 320], "rungNeed": [2, 2, 7], "need": 7, "title": "تقسيم الضربة: نغمتان لكل نبضة", "blurb": "نغمة عند بداية كل نبضة، وأخرى عند منتصفها بالضبط — نفس نبضك المُتقَن، بدقّة مضاعفة."},
+  {"id": 32, "level": 3, "note": "♪♪·", "lat": "", "kind": "rhythm", "beats": 8, "beatSec": 1, "beatMin": 1, "beatStart": 1.5, "stepDownBeat": 0.25, "sub": 2, "tolLadder": [340, 280, 230], "rungNeed": [2, 2, 7], "need": 7, "title": "تقسيم الضربة: تثبيت", "blurb": "نفس التقسيم، بسرعة أقرب لسرعتك المعتادة — ثبّته حتى يصير بديهيًّا."},
   {"id": 33, "level": 3, "kind": "sustainRhythm", "beats": 2, "beatSec": 1, "holdTolMs": 280, "need": 7, "title": "النغمة الممتدّة: تا-آه", "blurb": "ابدأ نفَسك مع النبضة الأولى، واستمرّ بلا انقطاع حتى نهاية الثانية بالضبط."},
   {"id": 34, "level": 3, "kind": "sustainRhythm", "beats": 4, "beatSec": 0.9, "holdTolMs": 320, "need": 7, "title": "النغمة الممتدّة: تا-آه-آه-آه", "blurb": "أربع نبضات كاملة بنفَس واحد متّصل، من البداية للنهاية بلا أي انقطاع."},
   {"id": 35, "level": 4, "kind": "tongue", "beats": 6, "beatSec": 1.1, "tolLadder": [420, 360, 300], "minGapMs": 35, "maxGapMs": 160, "rungNeed": [2, 2, 7], "need": 7, "title": "النقر: تقديم", "blurb": "نغمة واحدة، لكن انقرها بلسانك بدل نفخة واحدة ممتدّة — نفَس مستمرّ، ولسان يفصل."},
   {"id": 36, "level": 4, "kind": "tongue", "beats": 8, "beatSec": 0.85, "tolLadder": [340, 280, 230], "minGapMs": 30, "maxGapMs": 130, "rungNeed": [2, 2, 7], "need": 7, "title": "النقر: تثبيت", "blurb": "نفس النقر، أسرع وأدقّ — حتى يصير لمسة لسان طبيعية لا تفكيرًا واعيًا."},
-  {"id": 37, "level": 3, "note": "♬♬", "lat": "", "kind": "rhythm", "beats": 4, "beatSec": 1.4, "sub": 4, "tolLadder": [460, 400, 340], "rungNeed": [2, 2, 7], "need": 7, "title": "تقسيم الضربة: أربع نغمات (توكو-توكو)", "blurb": "أربع نغمات قصيرة متساوية في كل نبضة — توكو-توكو، توكو-توكو."},
-  {"id": 38, "level": 3, "note": "♬♬·", "lat": "", "kind": "rhythm", "beats": 6, "beatSec": 1.1, "sub": 4, "tolLadder": [360, 300, 250], "rungNeed": [2, 2, 7], "need": 7, "title": "تقسيم الضربة: أربع نغمات — تثبيت", "blurb": "نفس التقسيم الرباعي، بسرعة أقرب لسرعتك المعتادة."},
+  {"id": 37, "level": 3, "note": "♬♬", "lat": "", "kind": "rhythm", "beats": 4, "beatSec": 1.4, "beatMin": 1.4, "beatStart": 2.2, "stepDownBeat": 0.4, "sub": 4, "tolLadder": [460, 400, 340], "rungNeed": [2, 2, 7], "need": 7, "title": "تقسيم الضربة: أربع نغمات (توكو-توكو)", "blurb": "أربع نغمات قصيرة متساوية في كل نبضة — توكو-توكو، توكو-توكو."},
+  {"id": 38, "level": 3, "note": "♬♬·", "lat": "", "kind": "rhythm", "beats": 6, "beatSec": 1.1, "beatMin": 1.1, "beatStart": 1.8, "stepDownBeat": 0.35, "sub": 4, "tolLadder": [360, 300, 250], "rungNeed": [2, 2, 7], "need": 7, "title": "تقسيم الضربة: أربع نغمات — تثبيت", "blurb": "نفس التقسيم الرباعي، بسرعة أقرب لسرعتك المعتادة."},
   {"id": 39, "level": 2, "note": "ري→فا", "lat": "D→F", "kind": "transition", "from": {"note": "ري", "lat": "D", "semis": 2}, "to": {"note": "فا", "lat": "F", "semis": 5}, "tol": 25, "need": 7, "tolLadder": [45, 35, 25], "gapLadder": [0.7, 0.55, 0.45], "holdFromLadder": [4.5, 3.2, 2.2], "holdToLadder": [4.5, 3.4, 2.6], "rungNeed": [2, 2, 7], "title": "الانتقال: ري ← فا", "blurb": "ابدأ بهامش واسع يضيق تدريجيًا، حتى الانتقال النظيف الكامل إلى فا."},
   {"id": 40, "level": 3, "note": "ري⇄فا", "lat": "D⇄F", "kind": "exchange", "from": {"note": "ري", "lat": "D", "semis": 2}, "to": {"note": "فا", "lat": "F", "semis": 5}, "tol": 25, "need": 7, "beatSec": 1, "beatStart": 1, "beatMin": 0.55, "stepDown": 0.09, "stepUp": 0.13, "reps": 4, "title": "التبادل: ري⇄فا مع المترونوم", "blurb": "انتقل مع كل نبضة — ري، فا، ري، فا، ري."},
   {"id": 41, "level": 2, "note": "سي بيمول", "lat": "B♭", "semis": 10, "kind": "longtone", "targetSec": 10, "tol": 18, "stabMax": 15, "need": 7, "durLadder": [5, 7, 10], "stabMult": [1.6, 1.25, 1], "rungNeed": [2, 2, 7], "title": "نغمة سي بيمول الطويلة", "blurb": "أول بيمول تعزفه — يمهّد لمقامَي نهاوند وكرد لاحقًا."},
@@ -1936,10 +1936,15 @@ function startSession(id){
     rhTolMs = curDay.tolLadder ? curDay.tolLadder[0] : 250;
     NEED = curDay.tolLadder ? curDay.rungNeed[0] : curDay.need;
     attempts=restoreStreak(); _failPattern=[]; resetDrift();
+    // tempo ladder: start slow (beatStart) and speed up toward the target
+    // (beatMin) as the trainee masters each speed — same proven progressive
+    // design as the exchange exercises, now applied to rhythm/subdivision too.
+    rhBeatSec = curDay.beatStart!=null ? curDay.beatStart : curDay.beatSec;
+    rhHoldCount = 0;
     sessionLog={app:'miran', version:APP_VERSION, day:id, kind:'rhythm', beats:curDay.beats, beat_sec:curDay.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent = curDay.tolLadder ? `${dayLabel(id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}` : `${dayLabel(id)} · إيقاع`;
     setGlyphText('♩'); $('sessLat').textContent='';
-    $('targetHz').textContent=`نبضة كل ${curDay.beatSec.toFixed(2)} ث`;
+    $('targetHz').textContent=`نبضة كل ${rhBeatSec.toFixed(2)} ث`;
     $('sustainLabel').textContent='تقدّم الدورة';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
     renderPips(); syncListenBtn(); show('session'); setTimeout(()=>{setupCanvas();drawRhythmIdle();},40);
@@ -3109,6 +3114,7 @@ function scoreDynamic(d){
 
 /* ================= RHYTHM (Phase 2 pilot — onset timing, pitch-agnostic) ================= */
 let rhRung=-1, rhTolMs=250;
+let rhBeatSec=1.1, rhHoldCount=0; // current tempo in an active rhythm session, and successes held at it
 let rdRung=0, rdDrop=new Set();
 function drawRhythmBg(){ drawReedGround(); reedGeom(); drawCane(null); }
 function drawRhythmIdle(){
@@ -3120,7 +3126,7 @@ function drawRhythmIdle(){
   cx.fillStyle=C.muted; cx.font="500 12px Cairo,sans-serif";
   cx.fillText('اعزف نغمة قصيرة مع كل نبضة', ORB.cx, ORB.h-32); cx.textAlign='start';
   drawContextStrip(dayLabel(curDay.id)+' · إيقاع',
-    'نبضة كل '+curDay.beatSec.toFixed(2)+' ث'); }
+    'نبضة كل '+(curDay.kind==='rhythm'?rhBeatSec:curDay.beatSec).toFixed(2)+' ث'); }
 
 /* the beats travel ALONG the bore — time flows the way the air flows */
 function beatX(i,n){ const {x0,L}=REED; return x0 + (L*(i+0.5)/n); }
@@ -3198,7 +3204,7 @@ function renderRhythmBeats(beats, hits, curBeatIdx, subN){
   cx.fillText('من '+Math.ceil(beats.length/sub), ORB.cx, 56); cx.textAlign='start';
   drawExitStreak(attempts||0, NEED||7);
   drawContextStrip(dayLabel(curDay.id)+(sub>1?' · تقسيم الضربة':' · إيقاع'),
-    'هامش '+rhTolMs+' م.ث', 'rgba(79,227,193,.7)');
+    rhBeatSec.toFixed(2)+' ث · هامش '+rhTolMs+' م.ث', 'rgba(79,227,193,.7)');
 }
 function renderDropBeats(beats, hits, curBeatIdx, dropSet){
   drawRhythmBg();
@@ -3530,7 +3536,7 @@ function endSpeedLock(){
 }
 function startRhythm(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
-  const beatSec=curDay.beatSec, nBeats=curDay.beats, subN=curDay.sub||1;
+  const beatSec=rhBeatSec, nBeats=curDay.beats, subN=curDay.sub||1;
   const stepSec=beatSec/subN; // subdivision: same nearest-target matching logic, just a finer time grid
   const nSteps=nBeats*subN;
   const beatTimes=Array.from({length:nSteps+1},(_,i)=>i*stepSec);
@@ -3622,12 +3628,19 @@ function scoreRhythm(d){
     if(rhRung>=0 && rhRung<curDay.tolLadder.length-1){
       setTimeout(()=>{
         rhRung++; attempts=0; rhTolMs=curDay.tolLadder[rhRung]; NEED=curDay.rungNeed[rhRung];
+        // speed rises together with tolerance tightening — one ladder, not two
+        // separate progressions, so the trainee always practises at a tempo
+        // that matches how forgiving the timing margin currently is.
+        if(curDay.beatMin!=null && curDay.stepDownBeat){
+          rhBeatSec = Math.max(curDay.beatMin, +(rhBeatSec-curDay.stepDownBeat).toFixed(2));
+        }
         $('sessEyebrow').textContent=`${dayLabel(curDay.id)} · إيقاع · الدرجة ${toAr(rhRung+1)}/${toAr(curDay.tolLadder.length)}`;
-        $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>هامش التوقيت صار أضيق (±${rhTolMs} م.ث).</div>`;
+        $('targetHz').textContent=`نبضة كل ${rhBeatSec.toFixed(2)} ث`;
+        $('resultZone').innerHTML=`<div class="msg ok"><div class="head">رفعنا المستوى!</div>السرعة ارتفعت (نبضة كل ${rhBeatSec.toFixed(2)} ث) وهامش التوقيت صار أضيق (±${rhTolMs} م.ث).</div>`;
         renderPips();
       },900);
     } else {
-      setTimeout(()=>finishDay({bestHits:hits, bestTolMs:rhTolMs}),900);
+      setTimeout(()=>finishDay({bestHits:hits, bestTolMs:rhTolMs, bestBeatSec:rhBeatSec}),900);
     }
   }
 }
