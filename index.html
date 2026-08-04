@@ -644,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r8.9-textfit</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r9.0-nahawandjins</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r8.9-textfit';
+const APP_VERSION='r9.0-nahawandjins';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -887,6 +887,22 @@ const CURRICULUM=[
    "title": "جنس راست السفلي", "blurb": "دو - ري - مي نصف بيمول - فا، صعودًا ثم هبوطًا — أول جنس مقاميّ حقيقي تعزفه."},
   {"id": 47, "level": 5, "kind": "jins", "notesSemis": [7,9,10.5,12,10.5,9,7], "holdSec": 1.1, "tol": 30, "need": 5,
    "title": "جنس راست العلوي", "blurb": "صول - لا - سي نصف بيمول - دو الجواب، صعودًا ثم هبوطًا — نفس بنية الجنس السفلي، على درجة أعلى."},
+  /* ═══ مي بيمول — نغمة تأسيسية معزولة (ثقب كامل، لا تعقيد فينجرينغ) تُكمل
+     كل النغمات الثماني اللازمة لمقام نهاوند بالكامل ═══ */
+  {"id": 48, "level": 2, "note": "مي بيمول", "lat": "E♭", "semis": 3, "kind": "longtone", "targetSec": 9, "tol": 22, "stabMax": 16, "need": 7,
+   "durLadder": [4,6,9], "stabMult": [1.6,1.25,1], "rungNeed": [2,2,7],
+   "title": "نغمة مي بيمول", "blurb": "بيمول كامل، لا ربع صوت — أول نغمة تخدم مقام نهاوند مباشرة."},
+  {"id": 49, "level": 2, "note": "ري→مي بيمول", "lat": "D→E♭", "kind": "transition", "from": {"note":"ري","lat":"D","semis":2}, "to": {"note":"مي بيمول","lat":"E♭","semis":3},
+   "tol": 24, "need": 7, "tolLadder": [40,32,24], "gapLadder": [0.6,0.5,0.4], "holdFromLadder": [4,3,2.2], "holdToLadder": [4,3.2,2.4], "rungNeed": [2,2,7],
+   "title": "الانتقال: ري ← مي بيمول", "blurb": "نصف صوت واحد فقط — انتقال قصير ومباشر."},
+  {"id": 50, "level": 2, "note": "ري⇄مي بيمول", "lat": "D⇄E♭", "kind": "exchange", "from": {"note":"ري","lat":"D","semis":2}, "to": {"note":"مي بيمول","lat":"E♭","semis":3},
+   "tol": 24, "need": 7, "beatSec": 1.0, "beatStart": 1.0, "beatMin": 0.55, "stepDown": 0.09, "stepUp": 0.13, "reps": 4,
+   "title": "التبادل: ري⇄مي بيمول", "blurb": "انتقل مع كل نبضة — ري، مي بيمول، ري، مي بيمول."},
+  /* ═══ جنسا نهاوند — أول مقام يكتمل بأكمله فعليًّا (٨/٨ نغمات) بعد مي بيمول ═══ */
+  {"id": 51, "level": 5, "kind": "jins", "notesSemis": [0,2,3,5,3,2,0], "holdSec": 1.1, "tol": 26, "need": 5,
+   "title": "جنس نهاوند السفلي", "blurb": "دو - ري - مي بيمول - فا، صعودًا ثم هبوطًا."},
+  {"id": 52, "level": 5, "kind": "jins", "notesSemis": [7,9,10,12,10,9,7], "holdSec": 1.1, "tol": 26, "need": 5,
+   "title": "جنس نهاوند العلوي", "blurb": "صول - لا - سي بيمول - دو الجواب، صعودًا ثم هبوطًا."},
 ];
 /* ── LEVELS: a browsing/overview grouping over the same CURRICULUM sequence.
    Purely a navigation convenience — it does NOT change unlock order at all;
