@@ -644,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r9.2-flaggedmaqamat</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r9.3-tickfix</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r9.2-flaggedmaqamat';
+const APP_VERSION='r9.3-tickfix';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -2179,10 +2179,17 @@ let counting=false;
 /* playTick: the MANDATORY cue clicks (count-in, exchange beat pulse) — always
    audible + always flashes, independent of the optional practice-metronome mode above. */
 function playTick(freq){ if(!audioCtx)return; flashBeat();
+  // short, high click (not a sustained tone) — minimizes bleed into the mic's
+  // pitch-detection window right when the trainee's own onset is expected at
+  // that exact instant. Real attempt data showed main-beat positions (where
+  // the tick sounds) failing far more than sub-beat positions (silent) —
+  // this is the fix, not muting detection (which would blind the very
+  // onset we need to hear).
   const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.frequency.value=freq||1200; g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination);
-  const t=audioCtx.currentTime; o.start(t); g.gain.exponentialRampToValueAtTime(0.22,t+0.005);
-  g.gain.exponentialRampToValueAtTime(0.0001,t+0.1); o.stop(t+0.11); }
+  o.frequency.value=(freq&&freq>2000)?freq:(freq===1300?4200:3400); // well above the ney's fundamental+harmonic range
+  g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination);
+  const t=audioCtx.currentTime; o.start(t); g.gain.exponentialRampToValueAtTime(0.16,t+0.003);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+0.035); o.stop(t+0.04); }
 function drawCountdown(k){
   setupCanvas();
   const compact = curDay.kind==='longtone';
