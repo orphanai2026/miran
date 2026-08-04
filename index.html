@@ -644,13 +644,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r8.8-rhythmedges</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r8.9-textfit</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r8.8-rhythmedges';
+const APP_VERSION='r8.9-textfit';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -1786,6 +1786,13 @@ function restoreStreak(){
   for(let i=rec.attempts.length-1;i>=0;i--){ if(rec.attempts[i].success) c++; else break; }
   return Math.min(c, NEED);
 }
+function setGlyphText(text){
+  const el=$('sessGlyph'); el.textContent=text;
+  // long note-pair names (quarter-tone combinations especially) wrap to three
+  // lines at full size — step the font down so they read as cleanly as short
+  // single-word names like "دو" do, instead of looking like an afterthought.
+  el.style.fontSize = text.length>14 ? '1.7rem' : text.length>9 ? '2.2rem' : '';
+}
 function startSession(id){
   curDay=CURRICULUM[id-1];
   if(curDay.kind==='soon') return;
@@ -1803,7 +1810,7 @@ function startSession(id){
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent = curDay.tolLadder ? `${dayLabel(id)} · انتقال · الدرجة ${toAr(trRung+1)}/${toAr(curDay.tolLadder.length)}` : `${dayLabel(id)} · انتقال`;
-    $('sessGlyph').textContent=curDay.from.note+' → '+curDay.to.note; $('sessLat').textContent=curDay.lat;
+    setGlyphText(curDay.from.note+' → '+curDay.to.note); $('sessLat').textContent=curDay.lat;
     $('targetHz').textContent=`${TR.fromHz.toFixed(0)} → ${TR.toHz.toFixed(0)} Hz`;
     $('sustainLabel').textContent='تقدّم التمرين';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
@@ -1823,7 +1830,7 @@ function startSession(id){
       concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2),
       from_hz:+TR.fromHz.toFixed(2), to_hz:+TR.toHz.toFixed(2), beat_sec_start:TR.beatSec, started:new Date().toISOString(), attempts:[]};
     $('sessEyebrow').textContent=`${dayLabel(id)} · تبادل · ${TR.beatSec.toFixed(2)} ث (الهدف ${curDay.beatMin.toFixed(2)})`;
-    $('sessGlyph').textContent=curDay.from.note+' ⇄ '+curDay.to.note; $('sessLat').textContent=curDay.lat;
+    setGlyphText(curDay.from.note+' ⇄ '+curDay.to.note); $('sessLat').textContent=curDay.lat;
     $('targetHz').textContent=`${TR.fromHz.toFixed(0)} ⇄ ${TR.toHz.toFixed(0)} Hz`;
     $('sustainLabel').textContent='تقدّم التمرين';
     $('resultZone').innerHTML=''; $('sustainNum').textContent='0.0'; $('targetSec').textContent='—'; $('sustainBar').style.width='0%';
@@ -1911,7 +1918,7 @@ function startSession(id){
   sessionLog={app:'miran', version:APP_VERSION, day:id, note:curDay.lat, kind:curDay.kind,
     concert_A4:CONCERT_A4, qarar_hz:+calib.qararHz.toFixed(2), target_hz:+targetHz.toFixed(2), started:new Date().toISOString(), attempts:[]};
   $('sessEyebrow').textContent = curDay.durLadder ? `${dayLabel(id)} · نغمة طويلة · الدرجة ${toAr(ltRung+1)}/${toAr(curDay.durLadder.length)}` : `${dayLabel(id)} · نغمة طويلة`;
-  $('sessGlyph').textContent=curDay.note; $('sessLat').textContent=curDay.lat;
+  setGlyphText(curDay.note); $('sessLat').textContent=curDay.lat;
   $('targetHz').textContent=targetHz.toFixed(1)+' Hz'; $('targetSec').textContent=TARGET_SEC.toFixed(1);
   $('sustainLabel').textContent='ثبات النفَس على النغمة';
   $('resultZone').innerHTML='';
