@@ -501,6 +501,15 @@
       </div>
       <input type="file" id="backupFileInput" accept="application/json" style="display:none">
     </div>
+    <div class="backup-row" style="border-color:rgba(230,184,92,.3);background:rgba(230,184,92,.03)">
+      <p class="backup-note" style="color:var(--gold)">⚠ أداة إدارية مؤقّتة للاختبار — تُزال لاحقًا. تتجاوز الفتح التسلسلي.</p>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="adminJumpInput" placeholder="رقم اليوم" min="1"
+          style="flex:1;padding:9px 12px;border-radius:100px;border:1px solid rgba(230,184,92,.3);
+          background:rgba(255,255,255,.03);color:var(--bone);font-family:var(--f-data);text-align:center">
+        <button class="backup-btn" id="btnAdminJump">انتقل</button>
+      </div>
+    </div>
 
   </div>
 
@@ -663,13 +672,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r10.0-eartraining</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r10.1-adminjump</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r10.0-eartraining';
+const APP_VERSION='r10.1-adminjump';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -3898,6 +3907,18 @@ $('btnSkipDebug').addEventListener('click', ()=>{
   if(prog.inProgress) delete prog.inProgress[curDay.id];
   saveProg();
   renderHome(); show('home');
+});
+$('btnAdminJump').addEventListener('click', ()=>{
+  const id=+$('adminJumpInput').value;
+  if(!id || !CURRICULUM.find(d=>d.id===id)){ alert('رقم يوم غير صحيح.'); return; }
+  targetDayId=id;
+  const day=CURRICULUM.find(d=>d.id===id);
+  if(day.kind==='eartrain'){ openEarTrain(day); return; }
+  if(!calib){ show('calib'); return; }
+  if(day.kind==='rhythm'||day.kind==='rhythmdrop'||day.kind==='tongue'){
+    if(!latencyCal){ show('latcal'); return; }
+  }
+  startSession(id); // deliberately skips isUnlocked() — admin/testing only
 });
 $('btnBackupImport').addEventListener('click', ()=> $('backupFileInput').click());
 $('backupFileInput').addEventListener('change', (e)=>{
