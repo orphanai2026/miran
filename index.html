@@ -592,6 +592,20 @@
   </div>
 
   <!-- ============ SESSION ============ -->
+  <!-- ============ EAR TRAINING (no mic — listen & choose) ============ -->
+  <div class="view" id="view-eartrain">
+    <button class="back" id="earBack">← رجوع للرحلة</button>
+    <div class="card">
+      <div class="step-eyebrow" id="earEyebrow">أيّ مقام تسمع؟</div>
+      <div class="attempts" id="earPips"></div>
+      <p style="text-align:center;font-family:var(--f-body);font-size:.82rem;color:var(--muted);margin:14px 0 20px">استمع جيدًا، ثم اختر المقام الذي سمعته</p>
+      <button id="earPlayBtn" style="display:block;margin:0 auto 22px;width:84px;height:84px;border-radius:50%;
+        border:none;background:linear-gradient(135deg,var(--live),#2a8f7c);color:#08081a;font-size:1.8rem;cursor:pointer">🔊</button>
+      <div id="earOptions" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div id="earResult" style="margin-top:16px"></div>
+    </div>
+  </div>
+
   <div class="view" id="view-session">
     <div class="card">
       <div class="step-eyebrow" id="sessEyebrow">اليوم ١ · نغمة طويلة</div>
@@ -649,13 +663,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r9.9-pitchsubtabs</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r10.0-eartraining</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r9.9-pitchsubtabs';
+const APP_VERSION='r10.0-eartraining';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -973,6 +987,10 @@ const CURRICULUM=[
   {"id": 73, "subcat": "shapes", "level": 3, "kind": "rhythm", "beats": 6, "beatSec": 1.3, "pattern": [1,2,1,4,2,1],
    "tolLadder": [420, 420, 420], "rungNeed": [1, 1, 5], "need": 5,
    "title": "قراءة إيقاعية مُختلَطة", "blurb": "نوار، كروش، نوار، توكو-توكو، كروش، نوار — تسلسل جديد يجمع كل ما أتقنته منفردًا. هذا اختبار القراءة الحقيقي."},
+  /* ═══ أول تمرين تمييز سمعي — لا ميكروفون، لا كشف طبقة. المتدرّب يستمع
+     ويتعرّف، لا يعزف فقط — النصف الغائب من الموسيقية حتى الآن ═══ */
+  {"id": 74, "level": 5, "kind": "eartrain", "earOptions": ["rast","nahawand","bayati"], "need": 5,
+   "title": "أيّ مقام تسمع؟ — الأساسيات", "blurb": "راست، نهاوند، بياتي — استمع وميّز بأذنك، لا بإصبعك هذه المرّة."},
 ];
 /* ── LEVELS: a browsing/overview grouping over the same CURRICULUM sequence.
    Purely a navigation convenience — it does NOT change unlock order at all;
@@ -1480,8 +1498,9 @@ function openDay(id){
   if(id==='dynamic'){ openDynamicControl(); return; }
   if(!isUnlocked(id)) return;
   targetDayId=id;
-  if(!calib){ show('calib'); return; }
   const day=CURRICULUM.find(d=>d.id===id);
+  if(day && day.kind==='eartrain'){ openEarTrain(day); return; } // no mic needed — skip calibration entirely
+  if(!calib){ show('calib'); return; }
   if(day && (day.kind==='rhythm'||day.kind==='rhythmdrop'||day.kind==='tongue') && !latencyCal){ show('latcal'); return; }
   startSession(id);
 }
@@ -2129,6 +2148,19 @@ function playNoteRef(noteLat, fallbackFreq, fallbackDur, onDone){
 let _listenPlaying=false, _listenTimer=null, _listenGen=0;
 function scheduleListenCycle(gen){
   if(!_listenPlaying || gen!==_listenGen) return;   // this chain belongs to an earlier day/click — abandon it
+  // jins/maqam sequences: play the actual musical phrase — audiation before
+  // performance, not the other way around. Synthesized (no recording needed).
+  if(curDay.kind==='jins'){
+    const seq=curDay.notesSemis, noteDur=0.42, gap=0.06;
+    const base=audioCtx.currentTime+0.1;
+    seq.forEach((semis,i)=>{
+      const hz=calib.qararHz*Math.pow(2,semis/12);
+      tone(hz, base+i*(noteDur+gap), noteDur, 0.18);
+    });
+    const total=seq.length*(noteDur+gap)+0.9;
+    _listenTimer=setTimeout(()=>scheduleListenCycle(gen), total*1000);
+    return;
+  }
   // rhythm days: the example is the BEAT PATTERN, not a pitch
   if(curDay.kind==='rhythm'||curDay.kind==='rhythmdrop'){
     const n=curDay.beats, b=curDay.beatSec;
@@ -2176,6 +2208,7 @@ function stopListen(){ _listenPlaying=false; _listenGen++; clearTimeout(_listenT
 function listenAvailable(){
   if(!curDay) return false;
   if(curDay.kind==='breath') return false;                 // pitch-agnostic AND beat-free: nothing to demo
+  if(curDay.kind==='jins') return !!(curDay.notesSemis && curDay.notesSemis.length);
   if(curDay.kind==='rhythm'||curDay.kind==='rhythmdrop') return true;  // the beat pattern is the example
   if(curDay.kind==='transition'||curDay.kind==='exchange') return !!TR;
   return !!(curDay.kind==='longtone' ? dayTarget(curDay) : targetHz);
@@ -2186,8 +2219,8 @@ function syncListenBtn(){
   const on=listenAvailable(); wrap.style.display = on?'':'none';
   if(!on){ stopListen(); return; }
   const beat = curDay.kind==='rhythm'||curDay.kind==='rhythmdrop';
-  lbl.textContent = beat ? 'استمع للإيقاع' : 'استمع للمثال';
-  $('btnListen').title = beat ? 'استمع لنمط النبضات' : 'استمع للمثال بتكرار';
+  lbl.textContent = curDay.kind==='jins' ? 'استمع للمقام' : (beat ? 'استمع للإيقاع' : 'استمع للمثال');
+  $('btnListen').title = curDay.kind==='jins' ? 'استمع لجملة المقام قبل العزف' : (beat ? 'استمع لنمط النبضات' : 'استمع للمثال بتكرار');
 }
 
 /* ---- metronome: cycles both → sound-only → light-only → off ---- */
@@ -2488,6 +2521,10 @@ function finishDay(stats){
     curDay.kind==='rhythmdrop' ?
     `<div class="stat g"><div class="v">${stats.bestHits}</div><div class="k">نبضات مضبوطة</div></div>
      <div class="stat g"><div class="v">${stats.bestDropped}</div><div class="k">نبضات صامتة اجتزتها</div></div>
+     <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>` :
+    curDay.kind==='eartrain' ?
+    `<div class="stat g"><div class="v">${toAr(stats.earCorrect)}</div><div class="k">إجابات صحيحة متتالية</div></div>
+     <div class="stat g"><div class="v">✦</div><div class="k">تمييز سمعي</div></div>
      <div class="stat g"><div class="v">${toAr(Object.keys(prog.done).length)}</div><div class="k">أيام مُتقنة</div></div>` :
     `<div class="stat g"><div class="v">${stats.bestStab.toFixed(0)}</div><div class="k">أفضل ثبات (سنت)</div></div>
      <div class="stat g"><div class="v">${stats.bestSustainSec.toFixed(1)}</div><div class="k">ثانية ثابتة</div></div>
@@ -3369,6 +3406,68 @@ function jinsSegments(voiced, samp){
     return {start:seg.start, end:seg.end, hz: pts.length?pts[Math.floor(pts.length/2)]:null};
   });
 }
+/* ── ear training (أيّ مقام تسمع؟): the missing "listen and recognize" half
+   of musicianship — every other exercise in Miran is about PRODUCING a
+   sound correctly; this is the first that asks the trainee to RECOGNIZE
+   one instead. No microphone, no calibration — pure listening + choice. ── */
+let earCorrectKey=null, earAttempts=0, earNeed=5;
+function openEarTrain(day){
+  curDay=day; earNeed=day.need||5; earAttempts=restoreStreak();
+  sessionLog={app:'miran', version:APP_VERSION, day:day.id, kind:'eartrain', started:new Date().toISOString(), attempts:[]};
+  $('earEyebrow').textContent=`${dayLabel(day.id)} · أيّ مقام تسمع؟`;
+  renderEarPips();
+  show('eartrain');
+  nextEarRound();
+}
+function renderEarPips(){
+  $('earPips').innerHTML='';
+  for(let i=0;i<earNeed;i++){ const d=document.createElement('div'); d.className='pip'+(i<earAttempts?' done':''); $('earPips').appendChild(d); }
+}
+function nextEarRound(){
+  $('earResult').innerHTML='';
+  const keys=curDay.earOptions;
+  earCorrectKey=keys[Math.floor(Math.random()*keys.length)];
+  const shuffled=[...keys].sort(()=>Math.random()-0.5);
+  $('earOptions').innerHTML=shuffled.map(k=>{
+    const m=MAQAMAT.find(x=>x.key===k);
+    return `<button class="ear-opt" data-key="${k}" style="padding:14px;border-radius:14px;border:1px solid rgba(155,146,184,.3);
+      background:rgba(255,255,255,.03);color:var(--bone);font-family:var(--f-head);font-weight:700;font-size:.92rem;cursor:pointer">${m.name}</button>`;
+  }).join('');
+  $('earOptions').querySelectorAll('.ear-opt').forEach(b=>b.addEventListener('click',()=>checkEarAnswer(b.dataset.key)));
+  playEarPhrase();
+}
+function playEarPhrase(){
+  ensureOutput();
+  const m=MAQAMAT.find(x=>x.key===earCorrectKey);
+  const seq=m.semis; const noteDur=0.36, gap=0.05;
+  const base=audioCtx.currentTime+0.08;
+  seq.forEach((semis,i)=>{ const hz=calib?calib.qararHz:523.25; tone(hz*Math.pow(2,semis/12), base+i*(noteDur+gap), noteDur, 0.18); });
+}
+$('earPlayBtn').addEventListener('click', playEarPhrase);
+function checkEarAnswer(pickedKey){
+  const ok = pickedKey===earCorrectKey;
+  const correctName = MAQAMAT.find(x=>x.key===earCorrectKey).name;
+  sessionLog.attempts.push({n:sessionLog.attempts.length+1, success:ok, picked:pickedKey, correct:earCorrectKey, ts:new Date().toISOString()});
+  $('earOptions').querySelectorAll('.ear-opt').forEach(b=>{
+    if(b.dataset.key===earCorrectKey) b.style.borderColor='var(--live)';
+    if(b.dataset.key===pickedKey && !ok) b.style.borderColor='var(--breath)';
+    b.disabled=true;
+  });
+  if(ok){
+    earAttempts++; renderEarPips();
+    $('earResult').innerHTML=`<div class="msg ok"><div class="head">صحيح! (${toAr(earAttempts)}/${toAr(earNeed)})</div>هذا فعلًا مقام ${correctName}.</div>`;
+    if(earAttempts>=earNeed){
+      setTimeout(()=>finishDay({earCorrect:earAttempts}), 1100);
+    } else {
+      setTimeout(nextEarRound, 1300);
+    }
+  } else {
+    earAttempts=0; renderEarPips();
+    $('earResult').innerHTML=`<div class="msg retry"><div class="head">ليس تمامًا</div>كان هذا مقام ${correctName} — استمع مرّة أخرى وقارن.</div>`;
+    setTimeout(nextEarRound, 1800);
+  }
+}
+$('earBack').addEventListener('click', ()=>{ stopListen(); renderHome(); show('home'); });
 function startJins(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
   recData={t0:performance.now(), voiced:[], samp:[]}; setupCanvas();
