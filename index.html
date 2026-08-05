@@ -648,13 +648,13 @@
     <button class="btn-primary" id="doneNext" style="margin-top:18px">العودة إلى الرحلة</button>
   </div>
 
-  <footer>مِران · الإصدار <span class="v">r9.6-rhythmtempo</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
+  <footer>مِران · الإصدار <span class="v">r9.7-mixedreading</span> — يعمل في المتصفح، صوتك يبقى على جهازك<br>
     © 2026 محمد سعيد الزهراني · جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const APP_VERSION='r9.6-rhythmtempo';
+const APP_VERSION='r9.7-mixedreading';
 
 /* ================= الدرويش · voice-and-text companion ================= */
 /* Phrases carry full tashkeel (diacritics) — undiacritized Arabic makes
@@ -965,6 +965,13 @@ const CURRICULUM=[
    "title": "جنس حجاز السفلي ؟", "blurb": "دو - ري بيمول - مي - فا — الثانية الزائدة المميِّزة لحجاز، يحتوي نغمتين غير مؤكَّدتين."},
   {"id": 72, "level": 5, "kind": "jins", "notesSemis": [5,7,8,10,8,7,5], "holdSec": 1.1, "tol": 28, "need": 5,
    "title": "جنس حجاز العلوي ؟", "blurb": "فا - صول - لا بيمول - سي بيمول — نفس الجنس العلوي المشترك مع كرد."},
+  /* ═══ اختبار النقل الحقيقي — يجمع الأشكال الثلاثة (نوار، كروش، توكو-توكو)
+     في تسلسل جديد لم يُتدرَّب عليه تحديدًا من قبل، وفق تسلسل غوردون التعليمي
+     («قراءة أنماط غير مألوفة من النوتة» — المرحلة التي تُثبت الإتقان الحقيقي،
+     لا الحفظ العضلي لتمرين واحد مكرَّر) ═══ */
+  {"id": 73, "level": 3, "kind": "rhythm", "beats": 6, "beatSec": 1.3, "pattern": [1,2,1,4,2,1],
+   "tolLadder": [420, 420, 420], "rungNeed": [1, 1, 5], "need": 5,
+   "title": "قراءة إيقاعية مُختلَطة", "blurb": "نوار، كروش، نوار، توكو-توكو، كروش، نوار — تسلسل جديد يجمع كل ما أتقنته منفردًا. هذا اختبار القراءة الحقيقي."},
 ];
 /* ── LEVELS: a browsing/overview grouping over the same CURRICULUM sequence.
    Purely a navigation convenience — it does NOT change unlock order at all;
@@ -3534,16 +3541,35 @@ function endSpeedLock(){
     ممارسة حرّة حقيقية عند ${_speedLockBeat.toFixed(2)} ثانية — هذا الرقم الآن مألوف لأذنك وإصبعك، لا مجرّد رقم اجتزته مرّة.</div>`;
   drawRhythmIdle();
 }
+// builds the target-time grid for a MIXED pattern (curDay.pattern = per-beat
+// subdivision array, e.g. [1,1,2,4,1,1] = quarter,quarter,eighth-pair,
+// sixteenth-group,quarter,quarter) — falls back to the old uniform-sub
+// behaviour when no pattern is given, so nothing existing breaks.
+function buildPatternGrid(beatSec, nBeats, uniformSub, pattern){
+  const times=[0]; const meta=[{beatIdx:0, sub:pattern?pattern[0]:uniformSub, subIdx:0}];
+  const beats = pattern || Array.from({length:nBeats},()=>uniformSub);
+  for(let b=0;b<nBeats;b++){
+    const sub=beats[b]||1, step=beatSec/sub;
+    for(let k=1;k<=sub;k++){
+      times.push(b*beatSec + k*step);
+      meta.push({beatIdx:b+ (k===sub?1:0), sub, subIdx:k%sub});
+    }
+  }
+  return {times, meta};
+}
 function startRhythm(){
   recording=true; $('btnRecLabel').textContent='إنهاء'; $('btnRec').classList.add('recording'); $('resultZone').innerHTML='';
   const beatSec=rhBeatSec, nBeats=curDay.beats, subN=curDay.sub||1;
+  const pattern=curDay.pattern||null;
+  const grid = pattern ? buildPatternGrid(beatSec, nBeats, subN, pattern) : null;
   const stepSec=beatSec/subN; // subdivision: same nearest-target matching logic, just a finer time grid
-  const nSteps=nBeats*subN;
-  const beatTimes=Array.from({length:nSteps+1},(_,i)=>i*stepSec);
-  const isSubPoint=i=>subN>1 && (i%subN!==0); // true for a mid-beat target, not the beat itself
+  const nSteps=pattern ? grid.times.length-1 : nBeats*subN;
+  const beatTimes=pattern ? grid.times : Array.from({length:nSteps+1},(_,i)=>i*stepSec);
+  const pointSub=i=>pattern ? grid.meta[i].sub : subN; // this point's own subdivision level, for mixed patterns
+  const isSubPoint=i=>pattern ? (grid.meta[i].subIdx!==0) : (subN>1 && (i%subN!==0)); // true for a mid-beat target, not the beat itself
   recData={t0:performance.now(), onsets:[], hits:new Array(nSteps+1).fill(undefined), wasVoiced:false, lastBeatPlayed:-1};
   setupCanvas();
-  const END=nBeats*beatSec+(subN>1?1.1:0.7); // subdivision needs a longer tail — more points means more room for the final onset to drift late and still register
+  const END=nBeats*beatSec+(subN>1||pattern?1.1:0.7); // subdivision needs a longer tail — more points means more room for the final onset to drift late and still register
   onFrame=(p)=>{
     const now=(performance.now()-recData.t0)/1000;
     const beatIdx=Math.min(Math.floor(now/beatSec+0.5), nBeats); // tick sound stays on the REAL beat only, never sub-points
@@ -3579,8 +3605,8 @@ function startRhythm(){
       }
     }
     recData.wasVoiced=voiced;
-    const curIdx=Math.min(Math.floor(now/stepSec), nSteps);
-    renderRhythmBeats(beatTimes, recData.hits, curIdx, subN);
+    let curIdx=0; for(let i=0;i<beatTimes.length;i++){ if(beatTimes[i]<=now) curIdx=i; }
+    renderRhythmBeats(beatTimes, recData.hits, curIdx, pattern?1:subN);
     $('sustainNum').textContent=Math.min(now,END).toFixed(1);
     $('sustainBar').style.width=Math.min(100,(now/END)*100)+'%';
     if(now>=END) stopAttempt();
@@ -3591,7 +3617,7 @@ function scoreRhythm(d){
   const hits=d.hits.filter(h=>h===true).length;
   const misses=d.hits.filter(h=>h===false).length;
   const missed=d.hits.filter(h=>h===undefined).length;
-  const total=nBeats*subN+1;
+  const total = curDay.pattern ? curDay.pattern.reduce((a,b)=>a+b,0)+1 : nBeats*subN+1;
   // allowance scales with point count — a flat "1 miss max" is fair for simple
   // rhythm (7 points) but disproportionately strict for subdivision (13-17
   // points, roughly double or more) since there's simply more to get right.
